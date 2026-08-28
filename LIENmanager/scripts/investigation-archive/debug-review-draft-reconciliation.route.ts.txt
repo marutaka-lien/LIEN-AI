@@ -1,0 +1,126 @@
+import { chromium } from "playwright";
+import { NextResponse } from "next/server";
+
+import { checkPublicReplyStatus } from "@/server/integrations/rms-review/rms-review-public-reply-checker";
+import { prisma } from "@/server/db/prisma";
+
+// 調査専用の一時エンドポイント(本番機能ではない。dry-runのみ、DB書き込みなし)。
+//
+// 背景: 直前のタスクでReview.replyStatus="unreplied"だった88件の棚卸しを行い、83件を
+// "posted"に補正済み(review-reply-reconciliation.ts参照)。今回はreplyStatus="draft"の
+// レコード(80件)についても、同じcheckPublicReplyStatusロジックで楽天公開レビューページを
+// 確認し、「実は既に投稿済み」のものがどれだけあるか棚卸しする(2026-08-26、CEO委任)。
+//
+// 併せて、checkPublicReplyStatusにoptions.includeReplyBody(このタスクで追加)を渡し、
+// 返信本文そのものを取得できるかを技術検証する。ただし個人情報方針(許可リスト方式)に
+// より、本文そのものはこのレスポンスにもログにも一切出力しない。「取得できたか否か」の
+// 件数のみ集計する。
+//
+// 【重要】このエンドポイントはDBへの書き込みを一切行わない
+// (applyReconciliationUpdatesは呼び出さない)。読み取り専用。
+//
+// 使い方: dev サーバー起動中に GET http://localhost:3000/api/debug-review-draft-reconciliation
+// (任意) ?limit=200 で対象件数の上限を変更できる(既定200=事実上全件)。
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get("limit");
+  const limit = limitParam && Number.isFinite(Number(limitParam)) ? Number(limitParam) : 200;
+
+  const targets = await prisma.review.findMany({
+    where: { replyStatus: "draft" },
+    orderBy: { reviewedAt: "asc" },
+    take: limit,
+    select: { id: true, sourceUrl: true, reviewType: true },
+  });
+
+  const browser = await chromium.launch({ headless: true });
+
+  let repliedCount = 0;
+  let notRepliedCount = 0;
+  let undeterminedCount = 0;
+  let bodyExtractedCount = 0; // repliedCountのうち、本文テキストを実際に取得できた件数
+  let bodyExtractFailedCount = 0; // repliedCountのうち、判定はrepliedだが本文取得に失敗した件数
+  const undeterminedReasons: Record<string, number> = {}; // 理由の種類ごとの件数のみ(本文は含まない)
+
+  try {
+    for (const review of targets) {
+      // ページ単位で使い回すと(長時間の連続遷移により)レンダラーがcrashすることが
+      // あったため、1件ごとに新しいPageを生成・破棄する(安定性優先。件数が
+      // 80件程度なので性能上の問題はない)。
+      const page = await browser.newPage();
+      let result;
+      try {
+        result = await checkPublicReplyStatus(page, review.sourceUrl, {
+          includeReplyBody: true,
+        });
+        // "Page crashed"はレンダラー側の一時的な問題である可能性があるため、
+        // 新しいPageで1回だけ再試行する。
+        if (result.judgement === "undetermined" && result.reason?.includes("crashed")) {
+          await page.close().catch(() => {});
+          const retryPage = await browser.newPage();
+          try {
+            result = await checkPublicReplyStatus(retryPage, review.sourceUrl, {
+              includeReplyBody: true,
+            });
+          } finally {
+            await retryPage.close().catch(() => {});
+          }
+        } else {
+          await page.close().catch(() => {});
+        }
+      } catch (error) {
+        await page.close().catch(() => {});
+        throw error;
+      }
+
+      if (result.judgement === "replied") {
+        repliedCount++;
+        if (result.replyBodyText && result.replyBodyText.length > 0) {
+          bodyExtractedCount++;
+        } else {
+          bodyExtractFailedCount++;
+        }
+      } else if (result.judgement === "not_replied") {
+        notRepliedCount++;
+      } else {
+        undeterminedCount++;
+        const key = result.reason ?? "(理由不明)";
+        undeterminedReasons[key] = (undeterminedReasons[key] ?? 0) + 1;
+      }
+
+      // result.replyBodyTextはここで意図的に破棄する(参照を残さない)。
+      // 楽天サーバーへの連続アクセスを避けるための間隔。
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    }
+  } finally {
+    await browser.close();
+  }
+
+  // 参考情報: 前回補正済みのposted(replyText=null)の件数。ここでは実行せず件数のみ。
+  const postedNullReplyTextCount = await prisma.review.count({
+    where: { replyStatus: "posted", replyText: null },
+  });
+
+  return NextResponse.json({
+    dryRun: true,
+    note: "DBへの書き込みは行っていません(dry-run結果のみ)。本文そのものはレスポンスに含みません。",
+    draftSummary: {
+      totalDraft: targets.length,
+      repliedCount, // 実際には投稿済みと判定されたdraft
+      notRepliedCount, // 公開ページ上も未投稿(本当にdraftのまま)
+      undeterminedCount, // 判定不能
+      undeterminedReasons,
+    },
+    replyBodyExtraction: {
+      attemptedCount: repliedCount,
+      extractedCount: bodyExtractedCount,
+      failedCount: bodyExtractFailedCount,
+    },
+    referenceForFutureApply: {
+      postedWithNullReplyTextCount: postedNullReplyTextCount,
+      note:
+        "前回補正済み83件(posted・replyText=null)。今回のdraft側repliedCountと合わせて、" +
+        "本文反映を将来行う場合の対象見積もりに使う想定(今回は実行しない)。",
+    },
+  });
+}

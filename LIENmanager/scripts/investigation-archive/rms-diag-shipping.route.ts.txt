@@ -1,0 +1,57 @@
+import { NextResponse } from "next/server";
+
+import { RmsApiClient } from "@/server/integrations/rms/rms-api-client";
+import { loadRmsConfig } from "@/server/integrations/rms/rms-config";
+
+const ORDER_NUMBER = "333267-20260729-0070544420";
+
+function readState(raw: unknown) {
+  const obj = raw as {
+    OrderModelList?: Array<{
+      orderNumber: string;
+      orderProgress: number;
+      PackageModelList?: Array<{ ShippingModelList?: Array<Record<string, unknown>> }>;
+    }>;
+  };
+  const order = obj.OrderModelList?.find((o) => o.orderNumber === ORDER_NUMBER);
+  return {
+    found: Boolean(order),
+    orderProgress: order?.orderProgress ?? null,
+    shippingModelList: order?.PackageModelList?.[0]?.ShippingModelList ?? null,
+  };
+}
+
+// 一時的な診断用エンドポイント。shippingDateを明示的に指定してupdateOrderShippingを
+// 呼び出し、実際にorderProgress/shippingDateが変化するかを確認する
+// (ユーザー明示許可済み、実際に発送済みの実注文が対象)。
+export async function GET() {
+  const config = loadRmsConfig();
+  const apiClient = new RmsApiClient({ config });
+
+  const updateRaw = await apiClient.updateOrderShipping({
+    orderNumber: ORDER_NUMBER,
+    BasketidModelList: [
+      {
+        basketId: 4239205628,
+        ShippingModelList: [
+          {
+            shippingDetailId: 4209979950,
+            shippingNumber: "628719725723",
+            deliveryCompany: "1003",
+            shippingDate: "20260729",
+          },
+        ],
+      },
+    ],
+  });
+
+  const afterRaw = await apiClient.getOrder({
+    orderNumberList: [ORDER_NUMBER],
+    version: config.getOrderVersion,
+  });
+
+  return NextResponse.json({
+    updateResponse: updateRaw,
+    after: readState(afterRaw),
+  });
+}

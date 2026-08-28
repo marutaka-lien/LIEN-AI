@@ -1,0 +1,42 @@
+import { NextResponse } from "next/server";
+
+import { createDefaultClickPostService } from "@/server/integrations/clickpost/clickpost-service";
+import { orderRepository } from "@/server/order/order.repository";
+
+// 複数注文を1本のCSVで「まとめ申込」する、本来のClickPostバッチ登録経路。
+// Orchestrator(rms-clickpost)は現状1件ずつCSVをアップロードする実装のため、
+// 本当の複数行まとめ申込を検証するためにこのルートを用意する。
+export async function POST(request: Request) {
+  const raw = await request.json().catch(() => null);
+  const orderNumbers = Array.isArray(raw?.orderNumbers)
+    ? raw.orderNumbers.filter((value: unknown): value is string => typeof value === "string")
+    : undefined;
+  const execute = raw?.execute === true;
+
+  if (!orderNumbers || orderNumbers.length === 0) {
+    return NextResponse.json({ error: "orderNumbersは必須です" }, { status: 400 });
+  }
+
+  const orders = [];
+  const notFound: string[] = [];
+  for (const orderNumber of orderNumbers) {
+    const order = await orderRepository.findByChannelAndOrderNumber("rakuten", orderNumber);
+    if (!order) {
+      notFound.push(orderNumber);
+      continue;
+    }
+    orders.push(order);
+  }
+
+  if (notFound.length > 0) {
+    return NextResponse.json(
+      { error: "ローカルDBに見つからない注文があります", notFound },
+      { status: 404 }
+    );
+  }
+
+  const clickPostService = createDefaultClickPostService();
+  const results = await clickPostService.registerOrders(orders, { execute });
+
+  return NextResponse.json({ count: orders.length, results });
+}

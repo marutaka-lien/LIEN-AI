@@ -1,0 +1,174 @@
+// 発送管理Webアプリ DBスキーマ
+// Enum は SQLite 未サポートのため String + アプリ層のUnion型(src/types)で管理し、
+// 将来 PostgreSQL へ移行する際に本物の enum へ切り替える方針。
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// 注文マスタ(将来: 発送管理・商品管理・他モール連携からも参照される想定)
+model Order {
+  id             String    @id @default(cuid())
+  channel        String // "rakuten" (将来 "yahoo" | "amazon")
+  orderNumber    String
+  ordererName    String
+
+  // 発送管理拡張用(現時点では未使用のフィールドを含む、すべてnullable)
+  recipientName  String?
+  postalCode     String?
+  prefecture     String?
+  address1       String?
+  address2       String?
+  phoneNumber    String?
+  email          String?
+  shippingMethod String?
+  orderStatus    String?
+  orderedAt      DateTime?
+
+  // 注文情報(RMS SettlementModel/PriceModel由来。カード番号・カード名義等の詳細は
+  // 保持しない、支払方法の種別のみ)
+  totalPrice    Int? // 合計金額(税込、RMSのtotalPriceそのまま)
+  paymentMethod String? // 支払方法(RMSのSettlementModel.settlementMethodそのまま)
+
+  // 発送情報(ClickPostから取得した追跡番号)。RMSへの反映(rpay.order.updateOrderShipping、
+  // 未実装)が完了するまでrmsShippingReflectedAtはnullのままとし、
+  // UI側は「未入力」と表示する(RMS側の実際の状態と一致させるため)。
+  trackingNumber         String?
+  rmsShippingReflectedAt DateTime?
+
+  // ClickPostへの「まとめ申込〜支払手続き画面到達」が成功した日時。nullの間は
+  // 未登録として扱う。Orchestratorの処理対象判定(状態ベース: orderStatus=300 かつ
+  // これがnull)、および注文一覧UIでの登録済み表示の両方に使う一次ソース。
+  // 2026-08-25経営判断によりOrchestrator側のClickPost自動登録機能自体は凍結(未使用)
+  // だが、判定ロジック・コードは将来の再開に備えて残す。今後どちらのタイミングでも
+  // 誰にも更新されなくなる想定(csvExportedAtとは別概念、混同しないこと)。
+  clickPostRegisteredAt DateTime?
+
+  // 「注文者CSVを作成」ボタンでCSVに含めて出力した日時。nullの間は未出力として扱う。
+  // CSV出力の対象判定(状態ベース: orderStatus=300 かつ これがnull)、および注文一覧
+  // UIでの出力済み表示の両方に使う一次ソース。選択実行(orderNumbers指定)時は、この値に
+  // 関わらず常に対象に含める=ユーザーが一覧から選び直すことが、そのまま
+  // 「明示的な再出力(リセット)」の手段になる(2026-08-25経営判断)。
+  csvExportedAt DateTime?
+
+  rawPayload String? // RMS APIレスポンス生データ(JSON文字列)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  jobItems AutomationJobItem[]
+
+  @@unique([channel, orderNumber])
+}
+
+// 自動化の実行単位(開始ボタン1回 = 1Job)
+model AutomationJob {
+  id                 String    @id @default(cuid())
+  moduleKey          String // AutomationModuleKey
+  status             String // JobStatus
+  totalCount         Int       @default(0)
+  successCount       Int       @default(0)
+  failureCount       Int       @default(0)
+  progressPercentage Int       @default(0) // 0-100
+  stopRequested      Boolean   @default(false)
+  currentLabel       String?
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  steps AutomationStep[]
+  items AutomationJobItem[]
+
+  @@index([moduleKey, createdAt])
+}
+
+// Job内の処理対象=注文1件ごとの処理記録(一覧画面の表示元)
+model AutomationJobItem {
+  id     String        @id @default(cuid())
+  jobId  String
+  job    AutomationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  orderId String
+  order  Order         @relation(fields: [orderId], references: [id])
+
+  carrier        String // CarrierType
+  carrierMeta    Json? // 配送会社固有情報(将来の配送会社追加に対応)
+  status         String // JobItemStatus
+  trackingNumber String?
+  labelPdfPath   String?
+  errorMessage   String?
+  processedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  steps AutomationStep[]
+
+  @@index([jobId, status])
+  @@index([orderId])
+}
+
+// 楽天レビュー(商品レビュー・ショップレビュー)の取り込み結果。
+// RMSの「レビューチェックツール」(review.rms.rakuten.co.jp)からCSVダウンロードで取得する。
+// sourceUrl(レビュー詳細URL)がRMS側で一意なため、これを重複検知キーとして使う。
+model Review {
+  id          String   @id @default(cuid())
+  channel     String // "rakuten"
+  reviewType  String // "product" | "shop"
+  sourceUrl   String // レビュー詳細URL(RMS CSVの「レビュー詳細URL」列。一意)
+  productName String?
+  title       String?
+  body        String
+  rating      Int
+  orderNumber String? // ハイフン区切りの楽天注文番号。Orderへの外部キーは張らない(下記理由)。
+  reviewedAt  DateTime
+
+  // CSV1行分の生データ(JSON文字列)。列追加時の再解析や、まだ型として持たない
+  // フラグ・未対応フラグ等の値を後から参照できるようにするため保持する。
+  rawPayload String
+
+  // 返信文自動生成・投稿の状態。"unreplied" | "draft" | "posted" | "failed"。
+  // AutomationJobItemはOrder前提の構造(orderId必須)のため流用せず、この行自体を
+  // 返信ワークフローの状態の一次ソースとする(レビュー一覧がそのまま一元管理画面になる)。
+  replyStatus     String    @default("unreplied")
+  replyText       String?
+  replyGeneratedAt DateTime?
+  repliedAt       DateTime?
+  replyError      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([channel, sourceUrl])
+  @@index([reviewType, reviewedAt])
+  @@index([rating])
+  @@index([orderNumber])
+  @@index([replyStatus])
+}
+
+// 各処理ステップの実行記録
+// jobItemId が null = Job全体に紐づくステップ(例: RMS注文取得)
+// jobItemId が値あり = 注文単位のステップ(例: 注文確認, クリックポスト登録 等)
+model AutomationStep {
+  id        String             @id @default(cuid())
+  jobId     String
+  job       AutomationJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobItemId String?
+  jobItem   AutomationJobItem? @relation(fields: [jobItemId], references: [id], onDelete: Cascade)
+
+  stepKey      String // StepType
+  status       String // StepStatus
+  retryCount   Int       @default(0)
+  logPath      String? // 実行ログ・失敗時スクリーンショットのパス
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([jobId, stepKey])
+  @@index([jobItemId, stepKey])
+}

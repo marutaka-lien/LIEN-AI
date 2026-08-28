@@ -1,0 +1,48 @@
+import { NextResponse } from "next/server";
+
+import { getClickPostBrowserContext } from "@/server/integrations/clickpost/clickpost-browser-context";
+import { loadClickPostBrowserConfig } from "@/server/integrations/clickpost/clickpost-config";
+
+// 調査専用の一時エンドポイント(GoQSystem連携の画面調査用)。本番機能ではない。
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const target = url.searchParams.get("url");
+  const config = loadClickPostBrowserConfig();
+  const context = await getClickPostBrowserContext(config);
+  const pages = context.pages();
+  const page = pages[pages.length - 1] ?? (await context.newPage());
+
+  if (target) {
+    await page.goto(target, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+  }
+
+  const html = await page.content();
+  const bodyText = await page.evaluate(() => document.body.innerText);
+  const links = await page.evaluate(() =>
+    Array.from(
+      document.querySelectorAll("a, button, input[type=submit], input[type=button], input[type=image], form")
+    ).map(
+      (el) => ({
+        tag: el.tagName,
+        text: (el as HTMLElement).textContent?.trim().slice(0, 40) || (el as HTMLInputElement).value || "",
+        href: el.getAttribute("href"),
+        id: el.id || null,
+        name: el.getAttribute("name"),
+        onclick: el.getAttribute("onclick"),
+        formAction: el.getAttribute("formaction"),
+        imgAlt: el.querySelector("img")?.getAttribute("alt") ?? null,
+        outerHtmlSnippet: el.outerHTML.slice(0, 200),
+      })
+    )
+  );
+  const screenshot = await page.screenshot({ fullPage: true });
+
+  return NextResponse.json({
+    url: page.url(),
+    htmlLength: html.length,
+    bodyText,
+    links,
+    screenshotBase64: screenshot.toString("base64"),
+  });
+}

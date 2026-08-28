@@ -1,0 +1,68 @@
+import { chromium } from "playwright";
+import { NextResponse } from "next/server";
+
+import { checkPublicReplyStatus } from "@/server/integrations/rms-review/rms-review-public-reply-checker";
+import { reviewRepository } from "@/server/review/review.repository";
+import {
+  buildReconciliationReport,
+  applyReconciliationUpdates,
+} from "@/server/review/review-reply-reconciliation";
+
+// 調査専用の一時エンドポイント(本番機能ではない)。
+//
+// 背景: Review.replyStatus="unreplied"のレコードのうち、実際には(自社アプリを経由
+// しない手動対応等で)既に返信済みのものが存在することが判明した(2026-08-26、
+// CEO側でClaude in Chromeにより目視確認済み)。楽天の公開レビューページ
+// (review.rakuten.co.jp、ログイン不要)の「ショップからのコメント」ブロックの有無で
+// 実際の返信状況を確認し、集計レポートを返す。
+//
+// RMSのPersistent Context(RMS_BROWSER_PROFILE_DIR)は使わない。対象は認証不要の
+// 公開ページであり、RMSログインセッションと無関係のため、ここでは独立した匿名の
+// Chromiumインスタンスを起動する(既存の調査専用エンドポイントと異なり、認証済み
+// セッションを外部に晒すリスクはない)。
+//
+// 使い方: dev サーバー起動中に GET http://localhost:3000/api/debug-review-reply-reconciliation
+// (任意) ?limit=200 で対象件数の上限を変更できる(既定1000=事実上全件)。
+//
+// 【DB更新の実行(2026-08-26、経営承認済み)】
+// dry-run棚卸しの結果(88件中83件が実際には返信済み)を経営側に提示し、明示的な
+// 実行承認を得たため、applyReconciliationUpdatesをapply:trueで呼び出す。
+// 環境変数REVIEW_RECONCILIATION_APPLY_EXECUTE=trueが.envに設定されていない限り、
+// review-reply-reconciliation.ts側の二重ガードによりエラーになる(誤実行防止)。
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get("limit");
+  const limit = limitParam && Number.isFinite(Number(limitParam)) ? Number(limitParam) : 1000;
+
+  const targets = await reviewRepository.findUnreplied(limit);
+
+  const browser = await chromium.launch({ headless: true });
+  let summary;
+  try {
+    const page = await browser.newPage();
+    summary = await buildReconciliationReport(
+      targets.map((review) => ({
+        id: review.id,
+        sourceUrl: review.sourceUrl,
+        reviewType: review.reviewType,
+      })),
+      (sourceUrl) => checkPublicReplyStatus(page, sourceUrl),
+      { delayMs: 400 } // 楽天サーバーへの連続アクセスを避けるための間隔
+    );
+  } finally {
+    await browser.close();
+  }
+
+  const applyResult = await applyReconciliationUpdates(summary.rows, reviewRepository, {
+    apply: true,
+  });
+
+  return NextResponse.json({
+    dryRun: applyResult.dryRun,
+    note: applyResult.dryRun
+      ? "DBへの書き込みは行っていません(dry-run結果のみ)。"
+      : "DBへの書き込みを実行しました。",
+    summary,
+    applyResult,
+  });
+}

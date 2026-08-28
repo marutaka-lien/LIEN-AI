@@ -1,0 +1,97 @@
+# ─────────────────────────────────────────────────────────────────
+# LIEN AI workspace — consolidated ignore rules
+#   root:        README.md, CEO/, Gram/  (docs only)
+#   LIENmanager/ : Next.js 16 + Prisma app (rules ported from its
+#                  former standalone .gitignore, re-anchored)
+# ─────────────────────────────────────────────────────────────────
+
+# ─── Secrets / local env — defence in depth, any directory ───────
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ─── OS / editor junk ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ─── Node — any package dir in the workspace ────────────────────
+node_modules/
+.pnp
+.pnp.*
+
+# ─── TypeScript build info — any directory ──────────────────────
+*.tsbuildinfo
+
+# ─── Claude Code local settings (personal, per-machine) ─────────
+.claude/settings.local.json
+
+# ═════════════════════════════════════════════════════════════════
+# LIENmanager/  (Next.js app — former repo-root rules, re-anchored)
+# ═════════════════════════════════════════════════════════════════
+
+# dependencies
+/LIENmanager/node_modules
+/LIENmanager/.pnp
+/LIENmanager/.pnp.*
+/LIENmanager/.yarn/*
+!/LIENmanager/.yarn/patches
+!/LIENmanager/.yarn/plugins
+!/LIENmanager/.yarn/releases
+!/LIENmanager/.yarn/versions
+
+# testing
+/LIENmanager/coverage
+
+# next.js
+/LIENmanager/.next/
+/LIENmanager/out/
+
+# production
+/LIENmanager/build
+
+# debug
+/LIENmanager/npm-debug.log*
+/LIENmanager/yarn-debug.log*
+/LIENmanager/yarn-error.log*
+/LIENmanager/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+/LIENmanager/.env*
+!/LIENmanager/.env.example
+
+# vercel
+/LIENmanager/.vercel
+
+# typescript
+/LIENmanager/*.tsbuildinfo
+/LIENmanager/next-env.d.ts
+
+# generated prisma client
+/LIENmanager/src/generated/prisma
+
+# Playwright persistent browser profile(RMS/ClickPostログインCookie等の秘匿情報を含む)
+/LIENmanager/playwright/.auth/
+/LIENmanager/playwright-report/
+/LIENmanager/test-results/
+
+# Claude Code local settings(個人用の権限設定など)
+/LIENmanager/.claude/settings.local.json
+
+# レビュー全履歴アーカイブ(顧客のレビュー内容を含むため、Git管理対象外とする)
+/LIENmanager/data/
+
+# ローカル開発DB(実顧客の個人情報を含むため、Git管理対象外とする)
+/LIENmanager/dev.db
+/LIENmanager/dev.db-journal
+/LIENmanager/dev.db-wal
+/LIENmanager/dev.db-shm
+
+# 実行時ログ(注文番号等の個人情報が混入し得るため、Git管理対象外とする)
+/LIENmanager/logs/

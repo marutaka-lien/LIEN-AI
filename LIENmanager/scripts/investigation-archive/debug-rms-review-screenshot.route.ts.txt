@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+
+import { getRmsBrowserContext } from "@/server/integrations/rms/rms-browser-context";
+import { loadRmsBrowserConfig } from "@/server/integrations/rms/rms-browser-config";
+
+// 調査専用の一時エンドポイント(レビューチェックツールのCSVダウンロード失敗調査用)。本番機能ではない。
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const target = url.searchParams.get("url");
+  const config = loadRmsBrowserConfig();
+  const context = await getRmsBrowserContext(config);
+  const pages = context.pages();
+  const page = pages[pages.length - 1] ?? (await context.newPage());
+
+  const redirectChain: string[] = [];
+  const onResponse = (response: { url: () => string; status: () => number }) => {
+    redirectChain.push(`${response.status()} ${response.url()}`);
+  };
+
+  let navError: string | null = null;
+  if (target) {
+    page.on("response", onResponse);
+    try {
+      await page.goto(target, { waitUntil: "domcontentloaded", timeout: 15000 });
+      await page.waitForTimeout(1000);
+    } catch (error) {
+      navError = error instanceof Error ? error.message : String(error);
+    } finally {
+      page.off("response", onResponse);
+    }
+  }
+
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? "").catch(() => "");
+  const screenshot = await page.screenshot({ fullPage: true }).catch(() => null);
+  const cookies = await context.cookies();
+  const reviewCookies = cookies.filter((c) => c.domain.includes("review.rms.rakuten.co.jp"));
+  const rakutenCookies = cookies.filter(
+    (c) => c.domain.includes("rakuten.co.jp") && !c.domain.includes("review.rms")
+  );
+
+  return NextResponse.json({
+    url: page.url(),
+    navError,
+    redirectChain,
+    bodyText: bodyText.slice(0, 2000),
+    screenshotBase64: screenshot ? screenshot.toString("base64") : null,
+    reviewCookies: reviewCookies.map((c) => ({
+      name: c.name,
+      domain: c.domain,
+      path: c.path,
+      expires: c.expires,
+    })),
+    rakutenCookieDomains: [...new Set(rakutenCookies.map((c) => c.domain))],
+  });
+}
