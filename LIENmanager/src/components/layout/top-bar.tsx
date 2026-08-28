@@ -9,6 +9,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/automation": "発送エントリー",
   "/orders": "注文一覧",
+  "/reviews": "レビュー管理",
 };
 
 function resolvePageTitle(pathname: string): string {
@@ -36,8 +37,11 @@ export function TopBar() {
   const time = useCurrentTime();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-6">
-      <h1 className="text-sm font-semibold tracking-tight">{title}</h1>
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-4 backdrop-blur-xl sm:px-6">
+      <div className="flex items-center gap-3">
+        <div className="flex size-8 items-center justify-center rounded-lg border border-primary-border bg-primary-subtle text-primary md:hidden"><span className="text-xs font-bold">L</span></div>
+        <div><p className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">Operations</p><h1 className="text-sm font-semibold tracking-tight">{title}</h1></div>
+      </div>
 
       <div className="flex items-center gap-4">
         {runningJobCount > 0 && (
@@ -59,7 +63,7 @@ export function TopBar() {
           className="font-mono text-xs tabular-nums text-muted-foreground"
           suppressHydrationWarning
         >
-          {time}
+          <span className="hidden sm:inline">JST&nbsp;&nbsp;</span>{time}
         </span>
       </div>
     </header>

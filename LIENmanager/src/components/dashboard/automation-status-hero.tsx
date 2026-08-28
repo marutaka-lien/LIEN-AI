@@ -57,16 +57,16 @@ export function AutomationStatusHero({ summary }: { summary: DashboardSummaryDTO
   const job = summary.latestJob;
 
   return (
-    <div className={cn("flex flex-col gap-4 rounded-lg border p-6", meta.containerClassName)}>
-      <div className="flex items-center gap-3">
-        <Icon className={cn("size-6", meta.iconClassName)} aria-hidden />
-        <span className="text-lg font-semibold" role="status">
+    <div className={cn("relative flex min-h-44 flex-col justify-between gap-5 overflow-hidden rounded-2xl border p-6 sm:p-7", meta.containerClassName)}>
+      <div className="relative z-10 flex items-start gap-4">
+        <div className="flex size-11 items-center justify-center rounded-xl border border-current/10 bg-background/30"><Icon className={cn("size-5", meta.iconClassName)} aria-hidden /></div>
+        <div><p className="mb-1 text-[0.65rem] font-semibold tracking-[0.16em] text-muted-foreground">AUTOMATION STATUS</p><span className="text-xl font-semibold tracking-tight" role="status">
           {meta.label}
-        </span>
+        </span></div>
       </div>
 
       {state === "running" && job && (
-        <div className="flex flex-col gap-2">
+        <div className="relative z-10 flex flex-col gap-2">
           <span className="text-sm text-muted-foreground">{job.currentLabel ?? "処理中..."}</span>
           <Progress value={job.progressPercentage}>
             <div className="flex w-full items-center justify-end">
@@ -79,7 +79,7 @@ export function AutomationStatusHero({ summary }: { summary: DashboardSummaryDTO
       )}
 
       {state === "failed" && job && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           <span className="text-sm text-muted-foreground">
             直近の実行で{job.totalCount}件中{job.failureCount}件が失敗しました
           </span>
@@ -100,6 +100,7 @@ export function AutomationStatusHero({ summary }: { summary: DashboardSummaryDTO
           前回の実行は正常に完了しました({new Date(job.createdAt).toLocaleString("ja-JP")})
         </span>
       )}
+      <div className="absolute -right-20 -top-20 size-56 rounded-full border-[32px] border-current opacity-[0.035]" />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Sidebar } from "@/components/layout/sidebar";
@@ -7,16 +6,6 @@ import { TopBar } from "@/components/layout/top-bar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "発送管理コンソール",
@@ -32,7 +21,7 @@ export default function RootLayout({
     <html
       lang="ja"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <body className="min-h-full">
         <ThemeProvider
@@ -42,11 +31,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <div className="flex h-screen overflow-hidden bg-background text-foreground">
+            <div className="app-shell flex min-h-dvh bg-background text-foreground">
               <Sidebar />
-              <div className="flex flex-1 flex-col overflow-y-auto">
+              <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
                 <TopBar />
-                {children}
+                <main className="min-w-0 flex-1">{children}</main>
               </div>
             </div>
           </TooltipProvider>

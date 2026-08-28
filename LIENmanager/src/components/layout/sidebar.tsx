@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListOrdered, MessageSquare, Workflow, Package } from "lucide-react";
+import { LayoutDashboard, ListOrdered, MessageSquare, Workflow, Package, Sparkles } from "lucide-react";
 
 import { useRunningJobCount } from "@/features/automation/hooks/useRunningJobCount";
 import { cn } from "@/lib/utils";
@@ -35,20 +35,23 @@ export function Sidebar() {
   const runningJobCount = useRunningJobCount();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2 px-5 py-5">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary-subtle text-primary">
-          <Package className="size-4" />
+    <>
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-xl md:flex">
+      <div className="flex items-center gap-3 px-5 py-6">
+        <div className="relative flex size-10 items-center justify-center rounded-xl border border-primary-border bg-primary-subtle text-primary shadow-[0_0_28px_oklch(0.78_0.13_205/0.12)]">
+          <Package className="size-5" />
+          <Sparkles className="absolute -right-1 -top-1 size-3.5" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold">発送管理コンソール</span>
-          <span className="text-[0.65rem] font-mono tracking-widest text-muted-foreground">
-            SHIPPING OPS
+          <span className="text-sm font-semibold tracking-wide">LIEN Manager</span>
+          <span className="text-[0.6rem] font-mono tracking-[0.22em] text-primary/80">
+            COMMERCE OPERATIONS
           </span>
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
+      <nav className="flex flex-1 flex-col gap-1.5 px-3 py-3" aria-label="メインナビゲーション">
+        <p className="px-3 pb-2 text-[0.62rem] font-semibold tracking-[0.18em] text-muted-foreground/70">WORKSPACE</p>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
@@ -57,35 +60,35 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200",
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                isActive && "bg-primary-subtle text-foreground shadow-[inset_0_0_0_1px_oklch(0.78_0.13_205/0.12)]"
               )}
             >
               <Icon
                 className={cn(
-                  "size-4 text-muted-foreground transition-colors group-hover:text-foreground",
+                  "size-[1.1rem] text-muted-foreground transition-colors group-hover:text-foreground",
                   isActive && "text-primary"
                 )}
               />
               {item.label}
               {isActive && (
-                <span className="ml-auto size-1.5 rounded-full bg-primary" />
+                <span className="absolute left-0 h-5 w-0.5 rounded-r-full bg-primary" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="flex items-center gap-2 border-t border-sidebar-border px-5 py-3">
+      <div className="mx-3 mb-3 flex items-center gap-3 rounded-xl border border-sidebar-border bg-surface/50 px-3 py-3">
         <span
           className={cn(
-            "size-1.5 rounded-full",
-            runningJobCount > 0 ? "bg-primary" : "bg-muted-foreground/40"
+            "size-2 rounded-full",
+            runningJobCount > 0 ? "bg-primary shadow-[0_0_10px_currentColor]" : "bg-success-foreground"
           )}
         />
         <span className="text-[0.7rem] text-muted-foreground">
-          {runningJobCount > 0 ? `稼働中のジョブ ${runningJobCount}件` : "待機中"}
+          {runningJobCount > 0 ? `自動化を実行中 · ${runningJobCount}件` : "システム正常 · 待機中"}
         </span>
       </div>
 
@@ -96,5 +99,13 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 rounded-2xl border border-sidebar-border bg-sidebar/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="モバイルナビゲーション">
+      {NAV_ITEMS.map((item) => {
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const Icon = item.icon;
+        return <Link key={item.href} href={item.href} className={cn("flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[0.62rem] font-medium text-muted-foreground", isActive && "bg-primary-subtle text-primary")}><Icon className="size-5"/><span>{item.label.replace("ダッシュボード", "ホーム").replace("発送エントリー", "発送")}</span></Link>;
+      })}
+    </nav>
+    </>
   );
 }
