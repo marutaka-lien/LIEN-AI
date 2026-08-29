@@ -28,7 +28,7 @@
 | `C:\lien_AI_manage\CEO\` | フライデーの作業場。`CLAUDE.md`(役割・ルール)、`承認待ち.md`、`運用ルーチン.md`、経営構想PDF |
 | `C:\lien_AI_manage\CMO\` | マイクの作業場。`AGENTS.md`(役割・ルール)、販売状況、提案一覧、運用ルーチン |
 | `C:\lien_AI_manage\Gram\` | グラムのプロフィール(`PROFILE.md`) |
-| `C:\lien_AI_manage\Shared\` | マスター、フライデー、マイク、グラムが共有する優先事項・承認・決定・数字の定義 |
+| `C:\lien_AI_manage\Shared\` | 全員が共有する優先事項・承認・決定・数字の定義・グランドマスターへの質問・`経営方針・企画ボード.md`(方針/企画/アイデア/会議メモの一覧) |
 | `C:\lien_AI_manage\BusinessData\` | 個人情報を除いた販売実績・公開レビューなど、過去と比較するための元データ |
 | `C:\lien_AI_manage\LIENmanager\` | 発送・レビュー対応を自動化する自社Webアプリ(Next.js)。大規模なのでCEO作業場とは分離 |
 
