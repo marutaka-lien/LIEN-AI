@@ -25,10 +25,12 @@
 
 | パス | 中身 |
 |---|---|
+| `C:\lien_AI_manage\Master\` | マスター(高橋幸大)の管制塔。`プロジェクト一覧.md`＝全プロジェクトの状態・進捗・積みタスク・将来像・進め方 |
+| `C:\lien_AI_manage\GrandMaster\` | 経営責任者(高橋大樹)向け。`経営の方向性.md`・`確認事項.md`(聞きたいことQ番号)・`会議メモ.md` |
 | `C:\lien_AI_manage\CEO\` | フライデーの作業場。`CLAUDE.md`(役割・ルール)、`承認待ち.md`、`運用ルーチン.md`、経営構想PDF |
 | `C:\lien_AI_manage\CMO\` | マイクの作業場。`AGENTS.md`(役割・ルール)、販売状況、提案一覧、運用ルーチン |
-| `C:\lien_AI_manage\Gram\` | グラムのプロフィール(`PROFILE.md`) |
-| `C:\lien_AI_manage\Shared\` | 全員が共有する優先事項・承認・決定・数字の定義・グランドマスターへの質問・`経営方針・企画ボード.md`(方針/企画/アイデア/会議メモの一覧) |
+| `C:\lien_AI_manage\Gram\` | グラムのプロフィール(`PROFILE.md`)と課題メモ |
+| `C:\lien_AI_manage\Shared\` | 全員が共有する優先事項・承認・決定・数字の定義 |
 | `C:\lien_AI_manage\BusinessData\` | 個人情報を除いた販売実績・公開レビューなど、過去と比較するための元データ |
 | `C:\lien_AI_manage\LIENmanager\` | 発送・レビュー対応を自動化する自社Webアプリ(Next.js)。大規模なのでCEO作業場とは分離 |
 
@@ -58,6 +60,8 @@
 | 内容 | 保存先 |
 |---|---|
 | 今週何をするか、承認、全員が守る決定 | `Shared\` |
+| 全プロジェクトの状態・進捗・積みタスク・将来像 | `Master\プロジェクト一覧.md` |
+| 経営責任者に聞くこと、会議で決まったこと、事業の向き | `GrandMaster\` |
 | 販売の分析、提案、現在の確認表 | `CMO\` |
 | 過去の販売数字、公開レビューなどの元データ | `BusinessData\` |
 | アプリ本体と開発資料 | `LIENmanager\` |
