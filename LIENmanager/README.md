@@ -23,5 +23,6 @@ Start-ScheduledTask -TaskName "LIENmanager-DevServer"
 
 ## その他
 
+- CodexによるUI/UX改善内容と今後の提案: [`docs/CODEX_UI_UX_REPORT.md`](docs/CODEX_UI_UX_REPORT.md)
 - `scripts/investigation-archive/` — 過去の調査専用エンドポイントのアーカイブ(本番では無効化済み)
 - テスト: `npm test` / Lint: `npm run lint`
