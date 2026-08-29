@@ -4,10 +4,13 @@ import path from "node:path";
 
 import type { Order } from "@/generated/prisma/client";
 
+import type { ClickPostCsvUnmappableOrder } from "@/types/clickpost-csv";
+
 import {
   createDefaultClickPostBrowserClient,
   type ClickPostBrowserClient,
 } from "./clickpost-browser-client";
+import { findUnmappableCp932Chars } from "./clickpost-charset";
 import { loadClickPostBrowserConfig } from "./clickpost-config";
 import { buildClickPostCsvBuffer } from "./clickpost-csv";
 import { ClickPostConfigError, ClickPostIntegrationError } from "./clickpost-errors";
@@ -22,6 +25,9 @@ export interface ClickPostDryRunResult {
   // そのまま出力しないこと(必要なのは件数・成功可否のみ)。
   rows: ClickPostCsvRow[];
   errors: Array<{ orderNumber: string; reason: string }>;
+  // 正規化してもCP932(Shift_JIS)で表現できない文字が残った注文。これらの注文も
+  // rows(=CSV)には含まれる。発送を止めないための「除外しない」通知用データ。
+  unrepresentableCharOrders: ClickPostCsvUnmappableOrder[];
 }
 
 export interface ClickPostRegisterResult {
@@ -65,10 +71,17 @@ export function createClickPostService(deps: ClickPostServiceDeps = {}): ClickPo
   function dryRunMapOrders(orders: Order[]): ClickPostDryRunResult {
     const rows: ClickPostCsvRow[] = [];
     const errors: Array<{ orderNumber: string; reason: string }> = [];
+    const unrepresentableCharOrders: ClickPostCsvUnmappableOrder[] = [];
 
     for (const order of orders) {
       try {
-        rows.push(ClickPostMapper.toCsvRow(order));
+        const row = ClickPostMapper.toCsvRow(order);
+        rows.push(row);
+
+        const issues = findUnmappableCp932Chars(row);
+        if (issues.length > 0) {
+          unrepresentableCharOrders.push({ orderNumber: order.orderNumber, issues });
+        }
       } catch (error) {
         errors.push({
           orderNumber: order.orderNumber,
@@ -83,6 +96,7 @@ export function createClickPostService(deps: ClickPostServiceDeps = {}): ClickPo
       unmappableCount: errors.length,
       rows,
       errors,
+      unrepresentableCharOrders,
     };
   }
 

@@ -61,6 +61,7 @@ describe("ClickPostService.dryRunMapOrders", () => {
     expect(result.unmappableCount).toBe(0);
     expect(result.errors).toHaveLength(0);
     expect(result.rows).toHaveLength(2);
+    expect(result.unrepresentableCharOrders).toHaveLength(0);
   });
 
   it("マッピングに失敗した注文はerrorsに記録され、他の注文の処理は継続する", () => {
@@ -75,6 +76,23 @@ describe("ClickPostService.dryRunMapOrders", () => {
     expect(result.mappableCount).toBe(2);
     expect(result.unmappableCount).toBe(1);
     expect(result.errors).toEqual([{ orderNumber: "bad-1", reason: expect.stringContaining("郵便番号") }]);
+  });
+
+  it("正規化してもCP932で表現できない文字が残る注文はrowsに含めつつunrepresentableCharOrdersにも記録する", () => {
+    const service = createClickPostService();
+    const result = service.dryRunMapOrders([
+      buildOrder({ orderNumber: "ok-1" }),
+      buildOrder({ orderNumber: "emoji-1", recipientName: "山田 太郎\u{1F600}" }),
+    ]);
+
+    expect(result.mappableCount).toBe(2);
+    expect(result.rows).toHaveLength(2);
+    expect(result.unrepresentableCharOrders).toEqual([
+      {
+        orderNumber: "emoji-1",
+        issues: [{ field: "recipientName", chars: [{ char: "\u{1F600}", codePoint: "U+1F600" }] }],
+      },
+    ]);
   });
 });
 

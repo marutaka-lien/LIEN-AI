@@ -1,6 +1,6 @@
 "use client";
 
-import { FileDown, PauseCircle } from "lucide-react";
+import { AlertTriangle, FileDown, PauseCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,10 @@ import { OrderListTable } from "@/components/orders/order-list-table";
 import { useCsvExportSummary } from "@/features/orders/hooks/useCsvExportSummary";
 import { useOrderList } from "@/features/orders/hooks/useOrderList";
 import type { AutomationModuleMeta } from "@/types/automation";
+import {
+  CLICKPOST_CSV_FIELD_LABELS,
+  type ClickPostCsvUnmappableReport,
+} from "@/types/clickpost-csv";
 import { JobHistoryToggle } from "./job-history-toggle";
 
 function formatJstTime(iso: string): string {
@@ -30,6 +34,10 @@ function formatJstTime(iso: string): string {
 // コードは残すが、このページでは凍結中であることを示す表示に置き換えて表示しない。
 export function ShippingEntryWorkspace({ modules }: { modules: AutomationModuleMeta[] }) {
   const [selectedOrderNumbers, setSelectedOrderNumbers] = useState<Set<string>>(new Set());
+
+  // 直近の「CSVを作成」で、正規化してもShift_JISで表現できない文字が残った注文。
+  // サーバーには保存しないため、画面を再読み込みすると消える(再度CSV作成で再表示)。
+  const [unmappableReport, setUnmappableReport] = useState<ClickPostCsvUnmappableReport>([]);
 
   // CSV出力対象件数の表示用。一覧テーブル自体もこの条件(pendingOnly)で取得しているが、
   // テーブルは自前でデータを持つ設計のため、件数表示はここで独立して同じ条件を取得する。
@@ -92,7 +100,7 @@ export function ShippingEntryWorkspace({ modules }: { modules: AutomationModuleM
               {csvTargetCount ?? "—"}
               <span className="ml-1 text-sm font-normal text-muted-foreground">件</span>
             </span>
-            <CreateCsvButton />
+            <CreateCsvButton onUnmappableReport={setUnmappableReport} />
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -134,6 +142,54 @@ export function ShippingEntryWorkspace({ modules }: { modules: AutomationModuleM
 
       <JobHistoryToggle />
 
+      {unmappableReport.length > 0 && (
+        <div
+          role="alert"
+          className="flex flex-col gap-3 rounded-lg border border-l-4 border-warning-border bg-warning-subtle p-5"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle
+                className="mt-0.5 size-5 shrink-0 text-warning-foreground"
+                aria-hidden
+              />
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-warning-foreground">
+                  CSVに変換できない文字が残った注文が{unmappableReport.length}件あります
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  これらの注文もCSVには含まれています。発送は止まりません。楽天RMSの注文データで下記の項目の文字を直してから、CSVを作り直してください。
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setUnmappableReport([])}
+              className="shrink-0 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              閉じる
+            </button>
+          </div>
+          <ul className="flex flex-col gap-2 pl-8">
+            {unmappableReport.map((order) => (
+              <li key={order.orderNumber} className="flex flex-col gap-0.5 text-xs">
+                <span className="font-mono font-semibold">{order.orderNumber}</span>
+                <ul className="flex flex-col gap-0.5 pl-3 text-muted-foreground">
+                  {order.issues.map((issue) => (
+                    <li key={issue.field}>
+                      {CLICKPOST_CSV_FIELD_LABELS[issue.field]}:{" "}
+                      {issue.chars
+                        .map((entry) => `「${entry.char}」(${entry.codePoint})`)
+                        .join("、")}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -148,7 +204,10 @@ export function ShippingEntryWorkspace({ modules }: { modules: AutomationModuleM
             <p className="text-sm text-muted-foreground">
               チェックボックスで選ぶと、選んだ注文者だけでCSVを作成できます(CSV出力済みの注文を選び直すと再出力できます)。
             </p>
-            <CreateCsvButton selectedOrderNumbers={selectedOrderNumbers} />
+            <CreateCsvButton
+              selectedOrderNumbers={selectedOrderNumbers}
+              onUnmappableReport={setUnmappableReport}
+            />
           </div>
         </div>
         <OrderListTable

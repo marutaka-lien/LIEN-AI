@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { CLICKPOST_CSV_UNMAPPABLE_HEADER } from "@/types/clickpost-csv";
 import { buildClickPostCsvBuffer, buildClickPostCsvFilename } from "@/server/integrations/clickpost/clickpost-csv";
 import { createClickPostService } from "@/server/integrations/clickpost/clickpost-service";
 import { CLICKPOST_MAX_ITEMS_PER_BATCH } from "@/server/integrations/clickpost/clickpost-types";
@@ -82,13 +83,23 @@ export async function GET(request: Request) {
     .map((order) => order.id);
   await orderRepository.markCsvExported(exportedOrderIds, new Date());
 
-  return new NextResponse(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": "text/csv; charset=Shift_JIS",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "X-Order-Count": String(dryRun.mappableCount),
-      "X-Skipped-Count": String(dryRun.unmappableCount),
-      "X-Exceeds-Upload-Limit": String(exceedsUploadLimit),
-    },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": "text/csv; charset=Shift_JIS",
+    "Content-Disposition": `attachment; filename="${filename}"`,
+    "X-Order-Count": String(dryRun.mappableCount),
+    "X-Skipped-Count": String(dryRun.unmappableCount),
+    "X-Exceeds-Upload-Limit": String(exceedsUploadLimit),
+  };
+
+  // 正規化してもShift_JISで表現できない文字が残った注文があれば、画面通知用に
+  // ヘッダーへ載せる。CSV本体からは除外しない(発送を止めないため)。
+  // ヘッダーはlatin1しか載らないため、JSONをencodeURIComponentしてから渡す。
+  // ヘッダーサイズが膨らみ過ぎないよう、載せる件数はClickPostの1回のアップロード
+  // 上限と同数までに抑える(それを超える規模なら分割アップロードが前提のため)。
+  if (dryRun.unrepresentableCharOrders.length > 0) {
+    const reported = dryRun.unrepresentableCharOrders.slice(0, CLICKPOST_MAX_ITEMS_PER_BATCH);
+    headers[CLICKPOST_CSV_UNMAPPABLE_HEADER] = encodeURIComponent(JSON.stringify(reported));
+  }
+
+  return new NextResponse(new Uint8Array(buffer), { headers });
 }

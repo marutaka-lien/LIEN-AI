@@ -1,5 +1,6 @@
 import type { Order } from "@/generated/prisma/client";
 
+import { normalizeForClickPostCsv } from "./clickpost-charset";
 import { ClickPostMappingError } from "./clickpost-errors";
 import {
   CLICKPOST_ADDRESS_LINE_COUNT,
@@ -13,11 +14,14 @@ import {
 export const ClickPostMapper = {
   toCsvRow(order: Order): ClickPostCsvRow {
     const postalCode = normalizePostalCode(order.postalCode, order.orderNumber);
-    const recipientName = order.recipientName ?? order.ordererName;
+    const recipientNameRaw = order.recipientName ?? order.ordererName;
 
-    if (!recipientName || recipientName.trim().length === 0) {
+    if (!recipientNameRaw || recipientNameRaw.trim().length === 0) {
       throw new ClickPostMappingError("お届け先氏名が取得できません", order.orderNumber);
     }
+
+    // Shift_JIS(CP932)で"?"化・別グリフ化するダッシュ類をここで正規化しておく。
+    const recipientName = normalizeForClickPostCsv(recipientNameRaw);
 
     const addressLines = buildAddressLines(order, order.orderNumber);
 
@@ -54,9 +58,11 @@ function normalizePostalCode(postalCode: string | null, orderNumber: string): st
 // 全角/半角の厳密な幅計算は未確認のため、文字数ベースの近似で分割する。
 // 実画面(まとめ申込フォーム)で正確な文字数制限を確認できた際に見直すこと。
 function buildAddressLines(order: Order, orderNumber: string): string[] {
-  const combined = [order.prefecture, order.address1, order.address2]
-    .filter((part): part is string => Boolean(part && part.trim().length > 0))
-    .join("");
+  const combined = normalizeForClickPostCsv(
+    [order.prefecture, order.address1, order.address2]
+      .filter((part): part is string => Boolean(part && part.trim().length > 0))
+      .join("")
+  );
 
   if (combined.length === 0) {
     throw new ClickPostMappingError("住所が取得できません", orderNumber);

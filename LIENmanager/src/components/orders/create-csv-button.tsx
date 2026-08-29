@@ -5,17 +5,49 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  CLICKPOST_CSV_UNMAPPABLE_HEADER,
+  type ClickPostCsvUnmappableReport,
+} from "@/types/clickpost-csv";
 
 // ClickPostの「まとめ申込」画面へそのままドラッグ&ドロップできるCSV(Shift_JIS)を
 // 生成してダウンロードするだけのボタン。まとめ申込〜支払手続きまで自動で行う
 // 自動化(AutomationCard)とは独立した、開発途中の暫定的な手作業補助。
 export function CreateCsvButton({
   selectedOrderNumbers,
+  onUnmappableReport,
 }: {
   // 未指定・空の場合は現在発送待ちの注文者全員(上限40件)が対象になる。
   selectedOrderNumbers?: ReadonlySet<string>;
+  // CSV作成のたびに呼ばれる。表現できない文字が残った注文の一覧(無ければ空配列)。
+  // 呼び出し側で画面上部のバナー表示・クリアに使う。
+  onUnmappableReport?: (report: ClickPostCsvUnmappableReport) => void;
 } = {}) {
   const [isCreating, setIsCreating] = useState(false);
+
+  // レスポンスヘッダーから「表現できない文字が残った注文」を取り出して親へ渡す。
+  // ヘッダーが無ければ空配列を渡し、前回のバナーをクリアさせる。
+  function reportUnmappable(response: Response) {
+    if (!onUnmappableReport) return;
+
+    const raw = response.headers.get(CLICKPOST_CSV_UNMAPPABLE_HEADER);
+    if (!raw) {
+      onUnmappableReport([]);
+      return;
+    }
+
+    try {
+      const report = JSON.parse(decodeURIComponent(raw)) as ClickPostCsvUnmappableReport;
+      onUnmappableReport(report);
+      if (report.length > 0) {
+        toast.warning(
+          `${report.length}件の注文に、CSVで表現できない文字が残っています。画面上部の案内をご確認ください`
+        );
+      }
+    } catch {
+      // ヘッダーが壊れていてもCSV本体は正常にダウンロード済みなので、通知だけ諦める。
+    }
+  }
 
   async function handleCreateCsv() {
     setIsCreating(true);
@@ -46,6 +78,8 @@ export function CreateCsvButton({
       link.download = filename;
       link.click();
       URL.revokeObjectURL(url);
+
+      reportUnmappable(response);
 
       toast.success(`CSVを作成しました(${orderCount}件)`, { description: filename });
       if (skippedCount > 0) {

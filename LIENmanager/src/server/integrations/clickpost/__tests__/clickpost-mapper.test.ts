@@ -51,6 +51,24 @@ describe("ClickPostMapper.toCsvRow", () => {
     expect(row.recipientName).toBe("山田 太郎");
   });
 
+  it("お届け先氏名内のダッシュ類(EN DASH等)を半角ハイフンへ正規化する", () => {
+    const row = ClickPostMapper.toCsvRow(
+      buildOrder({ recipientName: `山田${String.fromCodePoint(0x2212)}太郎` })
+    );
+    expect(row.recipientName).toBe("山田-太郎");
+  });
+
+  it("住所内のダッシュ類(EN DASH等)を半角ハイフンへ正規化する", () => {
+    const row = ClickPostMapper.toCsvRow(
+      buildOrder({
+        prefecture: "東京都",
+        address1: `渋谷区神宮前1${String.fromCodePoint(0x2013)}2${String.fromCodePoint(0x2014)}3`,
+        address2: null,
+      })
+    );
+    expect(row.addressLine1).toBe("東京都渋谷区神宮前1-2-3");
+  });
+
   it("郵便番号が無い場合はClickPostMappingErrorを投げる", () => {
     expect(() => ClickPostMapper.toCsvRow(buildOrder({ postalCode: null }))).toThrow(
       ClickPostMappingError
