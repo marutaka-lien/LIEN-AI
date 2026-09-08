@@ -27,6 +27,7 @@ function buildOrder(overrides: Partial<Order> = {}): Order {
     rmsShippingReflectedAt: null,
     clickPostRegisteredAt: null,
     csvExportedAt: null,
+    shippingReportedAt: null,
     rawPayload: null,
     createdAt: new Date("2026-07-22T00:00:00Z"),
     updatedAt: new Date("2026-07-22T00:00:00Z"),

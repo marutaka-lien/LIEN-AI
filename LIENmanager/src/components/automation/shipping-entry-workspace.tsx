@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CreateCsvButton } from "@/components/orders/create-csv-button";
 import { OrderListTable } from "@/components/orders/order-list-table";
+import { ShippingReportPanel } from "@/components/orders/shipping-report-panel";
 import { useCsvExportSummary } from "@/features/orders/hooks/useCsvExportSummary";
 import { useOrderList } from "@/features/orders/hooks/useOrderList";
 import type { AutomationModuleMeta } from "@/types/automation";
@@ -119,6 +120,8 @@ export function ShippingEntryWorkspace({ modules }: { modules: AutomationModuleM
           )}
         </p>
       </div>
+
+      <ShippingReportPanel />
 
       {modules.map((module) => (
         <div

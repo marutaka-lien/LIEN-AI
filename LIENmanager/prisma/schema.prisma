@@ -56,6 +56,13 @@ model Order {
   // 「明示的な再出力(リセット)」の手段になる(2026-08-25経営判断)。
   csvExportedAt DateTime?
 
+  // 「発送完了報告CSVを作る」(クリックポスト追跡番号 → RMS発送完了報告データCSVへの変換)で
+  // 出力に含めた日時。nullの間はこの仕組みで未出力として扱う。変換対象の判定(状態ベース:
+  // orderStatus=300 かつ これがnull)と、二度流し(RMSへID空でアップした際の複数個口の
+  // 二重登録)防止の両方に使う一次ソース。trackingNumber/rmsShippingReflectedAt(前回の
+  // RMS書き戻しAPI用。GoQ運用では未設定のまま)とは別概念なので混同しないこと。
+  shippingReportedAt DateTime?
+
   rawPayload String? // RMS APIレスポンス生データ(JSON文字列)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

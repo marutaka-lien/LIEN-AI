@@ -138,6 +138,46 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
       ]);
       return { count, lastExportedAt: latest?.csvExportedAt ?? null };
     },
+
+    // 「発送完了報告CSVを作る」(クリックポスト追跡番号 → RMS発送完了報告データCSV)の
+    // 変換対象判定。findCsvExportTargetOrders と同じ「状態ベース」の方針:
+    // 対象 = orderStatus=300(発送待ち) かつ shippingReportedAt が未設定。受注日には依存しない
+    // (日付判定は変換側で「注文日から180日以内」を別途行う)。古い注文から順(orderedAt昇順)。
+    findShippingReportTargetOrders() {
+      return prismaClient.order.findMany({
+        where: { orderStatus: "300", shippingReportedAt: null },
+        orderBy: { orderedAt: "asc" },
+      });
+    },
+
+    // 発送完了報告CSVへ実際に含めた注文だけへ、出力日時を一括記録する。
+    // 二度流し(RMSへID空でアップした際の複数個口の二重登録)防止の一次ソース。
+    // markCsvExported と同型。再出力(プレビューで明示的に選び直し)の場合もここで
+    // 最新の日時へ更新される。
+    async markShippingReported(ids: string[], reportedAt: Date) {
+      if (ids.length === 0) return { count: 0 };
+      return prismaClient.order.updateMany({
+        where: { id: { in: ids } },
+        data: { shippingReportedAt: reportedAt },
+      });
+    },
+
+    // 発送完了報告CSVの「本日の実績」表示用。getTodayCsvExportSummary と同じ考え方で、
+    // 今日(JST)shippingReportedAt が設定された注文の件数と最新日時を返す。
+    async getTodayShippingReportSummary(): Promise<{ count: number; lastReportedAt: Date | null }> {
+      const { start, end } = getJstDayRange();
+      const [count, latest] = await Promise.all([
+        prismaClient.order.count({
+          where: { shippingReportedAt: { gte: start, lt: end } },
+        }),
+        prismaClient.order.findFirst({
+          where: { shippingReportedAt: { gte: start, lt: end } },
+          orderBy: { shippingReportedAt: "desc" },
+          select: { shippingReportedAt: true },
+        }),
+      ]);
+      return { count, lastReportedAt: latest?.shippingReportedAt ?? null };
+    },
   };
 }
 
