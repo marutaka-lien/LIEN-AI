@@ -14,10 +14,14 @@
 *.key
 *.p12
 *.pfx
-# 平文の鍵・認証情報の受け渡しファイル（使ったら削除する運用）
-new_license_key.txt
-*license*key*.txt
-*_secret.txt
+# 平文の鍵・認証情報の受け渡しファイル（作らない運用。作ったら使い終わり次第すぐ削除）
+# 拡張子を問わず弾く（.txt / .md など何で来ても）
+new_license_key*
+*license*key*
+*service*secret*
+*_secret.*
+secret*.txt
+secret*.md
 
 # ─── Local data drops for one-off processing (may contain PII) ───
 /clickpostReport*.csv
