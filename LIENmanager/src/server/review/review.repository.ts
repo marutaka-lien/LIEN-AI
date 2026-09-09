@@ -64,6 +64,11 @@ export function createReviewRepository(prismaClient: PrismaClient = defaultPrism
       });
     },
 
+    // ダッシュボード表示用: 未返信レビューの件数だけを返す。
+    countUnreplied() {
+      return prismaClient.review.count({ where: { replyStatus: "unreplied" } });
+    },
+
     // AI生成・下書き編集・RMS投稿のいずれの結果もこれ1つで反映する。
     updateReply(id: string, input: ReviewReplyUpdateInput) {
       return prismaClient.review.update({

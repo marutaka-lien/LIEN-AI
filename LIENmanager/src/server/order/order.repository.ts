@@ -178,6 +178,52 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
       ]);
       return { count, lastReportedAt: latest?.shippingReportedAt ?? null };
     },
+
+    // ダッシュボード「今日のオペレーション」の現在値・出荷パイプライン用。
+    // すべて状態ベース(受注日には依存しない。findCsvExportTargetOrders 等と同じ方針):
+    //   awaitingConfirm  = 注文確認待ち(100)
+    //   pendingShip      = 発送待ち(300) かつ ClickPost 未登録
+    //   csvUnexported    = 発送待ち(300) かつ CSV 未出力
+    //   csvExported      = 発送待ち(300) かつ CSV 出力済み
+    async countOperationsOverview(): Promise<{
+      awaitingConfirm: number;
+      pendingShip: number;
+      csvUnexported: number;
+      csvExported: number;
+    }> {
+      const [awaitingConfirm, pendingShip, csvUnexported, csvExported] = await Promise.all([
+        prismaClient.order.count({ where: { orderStatus: "100" } }),
+        prismaClient.order.count({ where: { orderStatus: "300", clickPostRegisteredAt: null } }),
+        prismaClient.order.count({ where: { orderStatus: "300", csvExportedAt: null } }),
+        prismaClient.order.count({ where: { orderStatus: "300", csvExportedAt: { not: null } } }),
+      ]);
+      return { awaitingConfirm, pendingShip, csvUnexported, csvExported };
+    },
+
+    // ダッシュボード「本日の処理推移」用。今日(JST)の受注時刻・発送完了報告時刻の一覧だけを返す
+    // (氏名・住所などの詳細は含めない)。時間帯別の累計集計は UI 側の純粋関数で行う
+    // (2026-09-09 マスター決定: 既存データの範囲で作る／集計テーブルは追加しない)。
+    async getTodayOrderTimeline(): Promise<{ orderedAt: Date[]; shippedAt: Date[] }> {
+      const { start, end } = getJstDayRange();
+      const [ordered, shipped] = await Promise.all([
+        prismaClient.order.findMany({
+          where: { orderedAt: { gte: start, lt: end } },
+          select: { orderedAt: true },
+        }),
+        prismaClient.order.findMany({
+          where: { shippingReportedAt: { gte: start, lt: end } },
+          select: { shippingReportedAt: true },
+        }),
+      ]);
+      return {
+        orderedAt: ordered
+          .map((row) => row.orderedAt)
+          .filter((value): value is Date => value != null),
+        shippedAt: shipped
+          .map((row) => row.shippingReportedAt)
+          .filter((value): value is Date => value != null),
+      };
+    },
   };
 }
 
