@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ダッシュボードC案プレビュー ― 今日のオペレーション</title>
+<!--
+  これは Claude Design 出力「今日のオペレーション.dc.html」を、外部ランタイム無しで
+  そのまま開けるようにした静的プレビューです（Codex 評価用）。
+  ・レイアウト/配色/文言/SVG は .dc.html と同一。<sc-if> を data-when + 素の JS に置換しただけ。
+  ・右上のコントロールで normal / loading / empty / error / 成功表示 を切り替えて各状態を確認できます。
+  ・実装の視覚仕様は .dc.html が正。差分は README.md 参照。ここでは _ds(nocturne) も support.js も使いません。
+-->
+<style>
+  html,body { margin:0; background:#0b0f17; }
+  body { display:flex; justify-content:center; padding:24px 24px 64px; }
+  a { color:#2fc7d4; text-decoration:none; }
+  a:hover { color:#7fe0e8; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+  @keyframes noct-pulse { 0%,100% { opacity:.35 } 50% { opacity:.7 } }
+  @keyframes noct-dot { 0%,100% { opacity:.4 } 50% { opacity:1 } }
+  #dc-controls {
+    position:fixed; top:12px; right:12px; z-index:50;
+    font:12px/1.4 Inter,'Noto Sans JP',system-ui,sans-serif; color:#f4f4f4;
+    background:#151b25; border:1px solid rgba(255,255,255,0.14); border-radius:10px;
+    padding:10px 12px; display:flex; flex-direction:column; gap:7px; box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  #dc-controls strong { font-size:11px; letter-spacing:.06em; color:#c4c4c4; font-weight:600; }
+  #dc-controls label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+  #dc-controls select { font:inherit; background:#0b0f17; color:#f4f4f4; border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:3px 6px; }
+</style>
+</head>
+<body>
+<div id="dc-controls">
+  <strong>状態プレビュー</strong>
+  <label>mode
+    <select id="dc-mode">
+      <option value="normal">normal</option>
+      <option value="loading">loading</option>
+      <option value="empty">empty（発送完了）</option>
+      <option value="error">error</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="dc-alerts" checked> 要対応アラートあり</label>
+  <label><input type="checkbox" id="dc-csv" checked> CSV出力対象あり</label>
+  <label><input type="checkbox" id="dc-success"> CSV作成の成功表示</label>
+</div>
+<div style="width:1440px; min-height:960px; box-sizing:border-box; font-family:Inter, 'Noto Sans JP', system-ui, sans-serif; color:#f4f4f4; font-size:13px; line-height:1.5; background:radial-gradient(620px 420px at 100% 0%, rgba(47,199,212,0.10), transparent 62%), radial-gradient(560px 440px at 0% 100%, rgba(139,124,217,0.07), transparent 62%), #0b0f17;">
+
+  <div style="height:56px; box-sizing:border-box; padding:0 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.06);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2fc7d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2 5 4-12 2 7h6"></path></svg>
+      <h1 style="margin:0; font-size:16px; font-weight:600; letter-spacing:.01em;">今日のオペレーション</h1>
+      <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:10px; letter-spacing:.08em; color:#c4c4c4; border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:2px 7px;">MOCK（架空データ）</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:12px; color:#c4c4c4;">
+      <span style="color:#f4f4f4; font-size:14px;">14:32</span>
+      <span>2026-09-08(火)</span>
+      <span style="display:flex; align-items:center; gap:6px;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#2fce8a; animation:noct-dot 2.4s ease-in-out infinite;"></span>
+        <span style="font-family:Inter,'Noto Sans JP',sans-serif;">稼働中</span>
+      </span>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:stretch; min-height:904px;">
+
+    <!-- LEFT / 作業 -->
+    <div style="width:58%; box-sizing:border-box; padding:20px 24px 24px; border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:baseline; gap:10px;">
+        <h2 style="margin:0; font-size:13px; font-weight:600; letter-spacing:.02em;">実行キュー</h2>
+        <span style="font-size:11px; color:#5f5f5f;">EXECUTION</span>
+      </div>
+
+      <div data-when="isLoading" class="dc-branch">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="height:132px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s ease-in-out infinite;"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="height:104px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s ease-in-out infinite;"></div>
+            <div style="height:104px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s .2s ease-in-out infinite;"></div>
+            <div style="height:104px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s .1s ease-in-out infinite;"></div>
+            <div style="height:104px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s .3s ease-in-out infinite;"></div>
+          </div>
+          <div style="height:150px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s ease-in-out infinite;"></div>
+          <div style="margin-top:auto; height:120px; border-radius:12px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s ease-in-out infinite;"></div>
+        </div>
+      </div>
+
+      <div data-when="isError" class="dc-branch">
+        <div style="background:#151b25; border:1px solid rgba(240,96,63,0.35); border-radius:10px; padding:20px; display:flex; gap:12px; align-items:flex-start;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0603f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-top:1px; flex:none;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+          <div>
+            <div style="font-size:14px; font-weight:600; margin-bottom:4px;">読み込めませんでした</div>
+            <div style="color:#c4c4c4; margin-bottom:12px;">RMS への接続がタイムアウトしました（14:31）。数分後に再試行するか、GoQ 側の同期状況を確認してください。</div>
+            <button type="button" style="font:inherit; font-size:13px; color:#0b0f17; background:#2fc7d4; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b0f17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 4v5h-5"></path></svg>
+              再試行する
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div data-when="isReady" class="dc-branch">
+      <div style="display:flex; flex-direction:column; gap:16px; flex:1;">
+
+        <!-- 1. 要確認事項 -->
+        <div data-when="hasAlerts" class="dc-branch">
+        <section style="background:rgba(217,154,43,0.07); border:1px solid rgba(217,154,43,0.18); border-left:3px solid #d99a2b; border-radius:10px; padding:14px 16px;">
+          <h3 style="margin:0 0 10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; color:#f4f4f4;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d99a2b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            要対応アラート
+            <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#d99a2b;">4件</span>
+          </h3>
+          <div style="display:flex; flex-direction:column; gap:1px;">
+            <div style="display:grid; grid-template-columns:1fr 56px 108px 96px; align-items:center; gap:8px; padding:9px 2px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span>CSV文字化けの可能性</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#f4f4f4;">1件</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#c4c4c4;">…2075</span>
+              <a href="#" style="text-align:right; font-size:12px;">確認する →</a>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 56px 108px 96px; align-items:center; gap:8px; padding:9px 2px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span>住所不備で保留</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#f4f4f4;">2件</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#c4c4c4;">…1180</span>
+              <a href="#" style="text-align:right; font-size:12px;">確認する →</a>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 56px 108px 96px; align-items:center; gap:8px; padding:9px 2px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span>支払い未確認</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#f4f4f4;">1件</span>
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; text-align:right; color:#c4c4c4;">…0942</span>
+              <a href="#" style="text-align:right; font-size:12px;">確認する →</a>
+            </div>
+          </div>
+        </section>
+        </div>
+
+        <div data-when="noAlerts" class="dc-branch">
+        <section style="background:rgba(47,206,138,0.06); border:1px solid rgba(47,206,138,0.18); border-left:3px solid #2fce8a; border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2fce8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12.2 2.4 2.4 4.6-4.9"></path></svg>
+          <div>
+            <div style="font-size:13px; font-weight:600;">確認事項なし</div>
+            <div style="color:#c4c4c4; font-size:12px;">14:32 時点で保留・警告はありません。</div>
+          </div>
+        </section>
+        </div>
+
+        <!-- 2. 現在値タイル -->
+        <section>
+          <h3 style="margin:0 0 10px; font-size:12px; font-weight:600; color:#c4c4c4; letter-spacing:.04em;">主要指標（現在値）</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+            <div style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                <span style="width:7px; height:7px; border-radius:50%; background:#d99a2b; flex:none;"></span>
+                <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; letter-spacing:.06em; color:#c4c4c4;">発送待ち</span>
+              </div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:28px; letter-spacing:-0.01em; line-height:1; font-weight:600;">18<span style="font-size:13px; color:#8f8f8f; margin-left:4px;">件</span></div>
+              <div style="color:#c4c4c4; font-size:12px; margin:8px 0 10px;">うち12件がCSV未出力</div>
+              <a href="#" style="font-size:12px;">一覧を見る →</a>
+            </div>
+
+            <div style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                <span style="width:7px; height:7px; border-radius:50%; background:#2fc7d4; flex:none;"></span>
+                <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; letter-spacing:.06em; color:#c4c4c4;">CSV未出力</span>
+              </div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:28px; letter-spacing:-0.01em; line-height:1; font-weight:600;">12<span style="font-size:13px; color:#8f8f8f; margin-left:4px;">件</span></div>
+              <div style="color:#c4c4c4; font-size:12px; margin:8px 0 10px;">本日分の出力対象</div>
+              <a href="#" style="font-size:12px;">対象を確認 →</a>
+            </div>
+
+            <div style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                <span style="width:7px; height:7px; border-radius:50%; background:#2fce8a; flex:none;"></span>
+                <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; letter-spacing:.06em; color:#c4c4c4;">本日発送済み</span>
+              </div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:28px; letter-spacing:-0.01em; line-height:1; font-weight:600;">34<span style="font-size:13px; color:#8f8f8f; margin-left:4px;">件</span></div>
+              <div style="color:#c4c4c4; font-size:12px; margin:8px 0 10px;">9:00以降の累計</div>
+              <a href="#" style="font-size:12px;">履歴を見る →</a>
+            </div>
+
+            <div style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px;">
+              <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                <span style="width:7px; height:7px; border-radius:50%; background:#8f8f8f; flex:none;"></span>
+                <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; letter-spacing:.06em; color:#c4c4c4;">レビュー未返信</span>
+              </div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:28px; letter-spacing:-0.01em; line-height:1; font-weight:600;">5<span style="font-size:13px; color:#8f8f8f; margin-left:4px;">件</span></div>
+              <div style="color:#c4c4c4; font-size:12px; margin:8px 0 10px;">最古は3日前</div>
+              <a href="#" style="font-size:12px;">返信する →</a>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 3. パイプライン -->
+        <section style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px 12px;">
+          <h3 style="margin:0 0 12px; font-size:12px; font-weight:600; color:#c4c4c4; letter-spacing:.04em;">出荷パイプライン</h3>
+          <div style="display:grid; grid-template-columns:1fr 20px 1fr 20px 1fr 20px 1fr; align-items:stretch; gap:0;">
+
+            <div style="border:1px solid rgba(255,255,255,0.06); border-radius:8px; background:#1c2431; padding:12px;">
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; color:#c4c4c4; letter-spacing:.04em; margin-bottom:8px;">受注確認</div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:26px; font-weight:600; line-height:1;">6</div>
+              <div style="height:4px; border-radius:2px; background:#3fb4cf; opacity:.5; margin-top:10px;"></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; color:#5f5f5f;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5f5f5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+            </div>
+
+            <div style="border:1px solid rgba(217,154,43,0.45); border-radius:8px; background:rgba(217,154,43,0.09); padding:12px;">
+              <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; color:#e2b45f; letter-spacing:.04em;">発送待ち</span>
+                <span style="display:inline-flex; align-items:center; gap:3px; font-size:10px; color:#0b0f17; background:#d99a2b; border-radius:8px; padding:1px 6px; font-weight:600;">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#0b0f17" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                  滞留
+                </span>
+              </div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:26px; font-weight:600; line-height:1; color:#f4f4f4;">18</div>
+              <div style="height:4px; border-radius:2px; background:#d99a2b; margin-top:10px;"></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; color:#5f5f5f;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5f5f5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+            </div>
+
+            <div style="border:1px solid rgba(255,255,255,0.06); border-radius:8px; background:#1c2431; padding:12px;">
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; color:#c4c4c4; letter-spacing:.04em; margin-bottom:8px;">CSV出力済</div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:26px; font-weight:600; line-height:1;">12</div>
+              <div style="height:4px; border-radius:2px; background:#2fc7d4; opacity:.7; margin-top:10px;"></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; color:#5f5f5f;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5f5f5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+            </div>
+
+            <div style="border:1px solid rgba(255,255,255,0.06); border-radius:8px; background:#1c2431; padding:12px;">
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:11px; color:#c4c4c4; letter-spacing:.04em; margin-bottom:8px;">発送完了</div>
+              <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; font-size:26px; font-weight:600; line-height:1;">34</div>
+              <div style="height:4px; border-radius:2px; background:#2fce8a; opacity:.75; margin-top:10px;"></div>
+            </div>
+
+          </div>
+          <p style="margin:12px 0 0; font-size:11px; color:#8f8f8f;">同じ幅で比較。滞留＝発送待ち</p>
+        </section>
+
+        <!-- 4. ネクストアクション -->
+        <section style="margin-top:auto; background:linear-gradient(180deg, rgba(47,199,212,0.10), rgba(47,199,212,0.03)), #1c2431; border:1px solid rgba(47,199,212,0.30); border-radius:12px; padding:16px 18px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2fc7d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"></path></svg>
+            <h3 style="margin:0; font-size:12px; font-weight:600; color:#2fc7d4; letter-spacing:.04em;">ネクストアクション</h3>
+          </div>
+          <p style="margin:0 0 14px; font-size:14px; line-height:1.6; max-width:620px; text-wrap:pretty;">発送待ち<span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums;">18</span>件のうち<span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums;">12</span>件がCSV未出力。「対象者CSVを作成」を実行して GoQ へ。</p>
+          <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap;">
+            <div data-when="ctaEnabled" class="dc-branch">
+            <button type="button" style="font:inherit; font-size:14px; font-weight:600; color:#0b0f17; background:#2fc7d4; border:none; border-radius:8px; padding:11px 18px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0f17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5"></path><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"></path></svg>
+              対象者CSVを作成（<span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums;">12</span>件）
+            </button>
+            </div>
+            <div data-when="ctaDisabled" class="dc-branch">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button type="button" disabled style="font:inherit; font-size:14px; font-weight:600; color:#0b0f17; background:#2fc7d4; border:none; border-radius:8px; padding:11px 18px; opacity:.45; cursor:not-allowed; display:inline-flex; align-items:center; gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0f17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5"></path></svg>
+                対象者CSVを作成（0件）
+              </button>
+              <span style="font-size:12px; color:#8f8f8f;">対象が0件のため実行できません</span>
+            </div>
+            </div>
+            <a href="#" style="font-size:13px;">発送待ち一覧を開く →</a>
+            <a href="#" style="font-size:13px;">前回のCSVを再表示 →</a>
+          </div>
+          <div data-when="showSuccess" class="dc-branch">
+          <div style="margin-top:14px; display:flex; align-items:center; gap:8px; background:rgba(47,206,138,0.09); border:1px solid rgba(47,206,138,0.22); border-radius:8px; padding:9px 12px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2fce8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12.2 2.4 2.4 4.6-4.9"></path></svg>
+            <span style="font-size:12px; color:#f4f4f4;">対象者CSVを作成しました（12件）。GoQ へ引き渡せます。</span>
+            <a href="#" style="font-size:12px; margin-left:auto;">ダウンロード →</a>
+          </div>
+          </div>
+        </section>
+
+      </div>
+      </div>
+    </div>
+
+    <!-- RIGHT / 把握 -->
+    <div style="width:42%; box-sizing:border-box; padding:20px 24px 24px; background:rgba(255,255,255,0.022); display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:baseline; gap:10px;">
+        <h2 style="margin:0; font-size:13px; font-weight:600; letter-spacing:.02em;">実績モニタリング</h2>
+        <span style="font-size:11px; color:#5f5f5f;">MONITORING</span>
+      </div>
+
+      <div data-when="isLoading" class="dc-branch">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="height:300px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s ease-in-out infinite;"></div>
+          <div style="height:230px; border-radius:10px; background:rgba(255,255,255,0.05); animation:noct-pulse 1.6s .2s ease-in-out infinite;"></div>
+        </div>
+      </div>
+
+      <div data-when="isError" class="dc-branch">
+        <div style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:20px; display:flex; gap:12px; align-items:flex-start;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0603f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-top:1px; flex:none;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+          <div>
+            <div style="font-size:14px; font-weight:600; margin-bottom:4px;">読み込めませんでした</div>
+            <div style="color:#c4c4c4;">推移データを取得できませんでした。最終取得は 13:58 です。</div>
+            <a href="#" style="display:inline-block; margin-top:10px; font-size:13px;">再試行する →</a>
+          </div>
+        </div>
+      </div>
+
+      <div data-when="isReady" class="dc-branch">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+
+        <!-- 推移 -->
+        <section style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px 12px;">
+          <h3 style="margin:0 0 2px; font-size:13px; font-weight:600;">本日の処理推移</h3>
+          <div style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-size:10px; letter-spacing:.05em; color:#8f8f8f; margin-bottom:12px;">累計 / 9:00–16:00 / 件数 / MOCK</div>
+
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:8px; font-size:11px; color:#c4c4c4;">
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#2fce8a" stroke-width="2"></line></svg>発送完了（累計）</span>
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#3fb4cf" stroke-width="2" stroke-dasharray="4 3"></line></svg>受注（累計）</span>
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg width="18" height="8"><line x1="1" y1="4" x2="17" y2="4" stroke="#d99a2b" stroke-width="1.5" stroke-dasharray="3 3"></line></svg>締切目安</span>
+          </div>
+
+          <svg viewBox="0 0 560 210" width="100%" height="210" role="img" aria-label="本日の処理推移（累計）9時から16時">
+            <line x1="40" y1="36.7" x2="530" y2="36.7" stroke="rgba(255,255,255,0.06)"></line>
+            <line x1="40" y1="81.1" x2="530" y2="81.1" stroke="rgba(255,255,255,0.06)"></line>
+            <line x1="40" y1="125.6" x2="530" y2="125.6" stroke="rgba(255,255,255,0.06)"></line>
+            <line x1="40" y1="170" x2="530" y2="170" stroke="rgba(255,255,255,0.14)"></line>
+            <text x="32" y="40" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">30</text>
+            <text x="32" y="84.5" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">20</text>
+            <text x="32" y="129" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">10</text>
+            <text x="32" y="173.5" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">0</text>
+
+            <line x1="314.3" y1="14" x2="314.3" y2="170" stroke="#d99a2b" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.55"></line>
+            <text x="310" y="12" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#d99a2b">締切目安 13:00</text>
+
+            <path d="M40 170 L108.6 147.8 L177.1 121.1 L245.7 98.9 L314.3 76.7 L382.9 54.4 L451.4 36.7 L520 18.9 L520 170 Z" fill="#2fce8a" opacity="0.10"></path>
+            <path d="M40 152.2 L108.6 130 L177.1 112.2 L245.7 94.4 L314.3 72.2 L382.9 50 L451.4 36.7 L520 23.3" fill="none" stroke="#3fb4cf" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M40 170 L108.6 147.8 L177.1 121.1 L245.7 98.9 L314.3 76.7 L382.9 54.4 L451.4 36.7 L520 18.9" fill="none" stroke="#2fce8a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+
+            <circle cx="520" cy="18.9" r="3.2" fill="#2fce8a"></circle>
+            <circle cx="520" cy="23.3" r="3" fill="#3fb4cf"></circle>
+            <text x="528" y="16" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="11" fill="#2fce8a">発送34</text>
+            <text x="528" y="34" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="11" fill="#3fb4cf">受注33</text>
+
+            <path d="M314.3 62 l6 10 h-12 Z" fill="#f0603f"></path>
+
+            <text x="40" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">9</text>
+            <text x="108.6" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">10</text>
+            <text x="177.1" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">11</text>
+            <text x="245.7" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">12</text>
+            <text x="314.3" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#c4c4c4">13</text>
+            <text x="382.9" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">14</text>
+            <text x="451.4" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">15</text>
+            <text x="520" y="190" text-anchor="middle" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="10" fill="#8f8f8f">16</text>
+            <text x="530" y="206" text-anchor="end" font-family="Inter, 'Noto Sans JP', system-ui, sans-serif" style="font-variant-numeric:tabular-nums" font-size="9" fill="#5f5f5f">時（単位：件）</text>
+          </svg>
+
+          <div style="display:flex; align-items:center; gap:7px; margin-top:6px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:12px; color:#c4c4c4;">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 10 H1 Z" fill="#f0603f"></path></svg>
+            <span><span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif;">13:00</span> CSV文字化け 1件（…2075）</span>
+          </div>
+        </section>
+
+        <!-- アクティビティ -->
+        <section style="background:#151b25; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px;">
+          <h3 style="margin:0 0 10px; font-size:13px; font-weight:600;">オペレーションログ</h3>
+          <div style="display:flex; flex-direction:column;">
+            <div style="display:flex; gap:12px; padding:9px 0; border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#8f8f8f; flex:none;">14:28</span>
+              <span>発送完了報告CSVを作成（8件）</span>
+            </div>
+            <div style="display:flex; gap:12px; padding:9px 0; border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#8f8f8f; flex:none;">13:52</span>
+              <span>RMSと同期（発送待ち +3）</span>
+            </div>
+            <div style="display:flex; gap:12px; padding:9px 0; border-top:1px solid rgba(255,255,255,0.06); color:#d99a2b;">
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#d99a2b; flex:none;">13:41</span>
+              <span style="display:flex; align-items:center; gap:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d99a2b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                CSV文字化けの警告 1件（…2075）
+              </span>
+            </div>
+            <div style="display:flex; gap:12px; padding:9px 0; border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#8f8f8f; flex:none;">11:15</span>
+              <span>対象者CSVを作成（12件）→ GoQ引き渡し</span>
+            </div>
+            <div style="display:flex; gap:12px; padding:9px 0; border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-family:Inter,'Noto Sans JP',system-ui,sans-serif; font-variant-numeric:tabular-nums; color:#8f8f8f; flex:none;">09:40</span>
+              <span>注文確認（3件）</span>
+            </div>
+          </div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);">
+            <a href="#" style="font-size:12px;">すべて表示 →</a>
+          </div>
+        </section>
+
+        <div data-when="shipDone" class="dc-branch">
+        <section style="background:rgba(47,206,138,0.06); border:1px solid rgba(47,206,138,0.18); border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2fce8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="1.6"></circle><circle cx="17.5" cy="18" r="1.6"></circle></svg>
+          <div>
+            <div style="font-size:13px; font-weight:600;">本日の発送は完了</div>
+            <div style="color:#c4c4c4; font-size:12px;">発送待ち 0件。次の受注は翌営業日に反映されます。</div>
+          </div>
+        </section>
+        </div>
+
+        <p style="margin:4px 0 0; font-size:11px; color:#5f5f5f;">MOCK（架空データ）／最終同期 14:31</p>
+      </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  var mode = document.getElementById('dc-mode');
+  var alertsOn = document.getElementById('dc-alerts');
+  var csvOn = document.getElementById('dc-csv');
+  var successOn = document.getElementById('dc-success');
+  function apply() {
+    var m = mode.value;
+    var v = {
+      isLoading: m === 'loading',
+      isError:   m === 'error',
+      isReady:   m === 'normal' || m === 'empty',
+      hasAlerts: m !== 'empty' && alertsOn.checked,
+      noAlerts:  m === 'empty' || !alertsOn.checked,
+      shipDone:  m === 'empty',
+      ctaEnabled:  m !== 'empty' && csvOn.checked,
+      ctaDisabled: m === 'empty' || !csvOn.checked,
+      showSuccess: successOn.checked && m === 'normal'
+    };
+    var nodes = document.querySelectorAll('[data-when]');
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].style.display = v[nodes[i].getAttribute('data-when')] ? '' : 'none';
+    }
+  }
+  [mode, alertsOn, csvOn, successOn].forEach(function (el) {
+    el.addEventListener('change', apply);
+  });
+  apply();
+</script>
+</body>
+</html>

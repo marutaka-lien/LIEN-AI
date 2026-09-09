@@ -9,7 +9,8 @@
 `src/app/dashboard/page.tsx`（現「今日のオペレーション」）を、決定済みのC案（ハイブリッド型）へ作り直す。プロジェクトF Phase 2。
 
 - 参照（すべてリポジトリ内）:
-  - 視覚仕様: `docs/design/dashboard-c-2026-09-08/今日のオペレーション.dc.html` ＋ 同フォルダ `README.md`
+  - **まず開く（表示確認用）**: `docs/design/dashboard-c-2026-09-08/preview.html` ― `.dc.html` を外部ランタイム無しでブラウザ表示できる形にした静的版。右上のコントロールで normal / loading / empty / error / 成功 を切り替え可。
+  - 視覚仕様（正）: `docs/design/dashboard-c-2026-09-08/今日のオペレーション.dc.html` ＋ 同フォルダ `README.md`
   - 設計ブリーフ: `docs/DASHBOARD_C_DESIGN_BRIEF_2026-09-08.md`
   - UX方針: `docs/CODEX_UI_UX_REPORT.md`（§4 目指すUX、§5 第2段階、§8 Phase 2、§9 デザインルール）
   - 方向性モック3案（架空データ）: <https://claude.ai/code/artifact/369dd3bf-f1d9-4c29-bdde-4b972f1a38fd>
