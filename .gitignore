@@ -14,6 +14,14 @@
 *.key
 *.p12
 *.pfx
+# 平文の鍵・認証情報の受け渡しファイル（使ったら削除する運用）
+new_license_key.txt
+*license*key*.txt
+*_secret.txt
+
+# ─── Local data drops for one-off processing (may contain PII) ───
+/clickpostReport*.csv
+/clickpost*.csv
 
 # ─── OS / editor junk ───────────────────────────────────────────
 .DS_Store
