@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>発送ページ集約モック（2026-09-10）</title>
+<style>
+  /* --- src/app/globals.css の .dark トークン（抜粋・実値で埋め込み） --- */
+  :root{
+    --background: oklch(0.115 0.018 255);
+    --foreground: oklch(0.97 0 0);
+    --card: oklch(0.175 0.018 255);
+    --primary: oklch(0.78 0.13 205);
+    --primary-foreground: oklch(0.13 0.02 255);
+    --primary-hover: oklch(0.83 0.13 205);
+    --primary-subtle: oklch(0.78 0.13 205 / 12%);
+    --primary-border: oklch(0.78 0.13 205 / 30%);
+    --muted-foreground: oklch(0.62 0 0);
+    --sidebar: oklch(0.135 0.023 255 / 96%);
+    --topbar: oklch(0.13 0.02 255 / 82%);
+    --surface: oklch(0.175 0.018 255);
+    --surface-elevated: oklch(0.215 0.022 255);
+    --surface-hover: oklch(0.235 0.025 255);
+    --border-subtle: oklch(1 0 0 / 6%);
+    --border-strong: oklch(1 0 0 / 18%);
+    --text-secondary: oklch(0.80 0 0);
+    --text-disabled: oklch(0.42 0 0);
+    --accent-cyan: oklch(0.74 0.11 220);
+    --success-foreground: oklch(0.78 0.16 155);
+    --success-subtle: oklch(0.78 0.16 155 / 12%);
+    --success-border: oklch(0.78 0.16 155 / 26%);
+    --warning-foreground: oklch(0.80 0.15 80);
+    --warning-subtle: oklch(0.80 0.15 80 / 14%);
+    --warning-border: oklch(0.80 0.15 80 / 30%);
+    --error-foreground: oklch(0.72 0.19 25);
+    --error-subtle: oklch(0.72 0.19 25 / 16%);
+    --error-border: oklch(0.72 0.19 25 / 40%);
+    --radius: 0.5rem;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--background);color:var(--foreground);
+    font-family:"Inter","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;
+    font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .app{display:flex;min-height:100vh}
+
+  /* sidebar */
+  .sidebar{width:256px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border-subtle);
+    backdrop-filter:blur(16px);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:12px;padding:24px 20px}
+  .brand .logo{width:40px;height:40px;border-radius:12px;border:1px solid var(--primary-border);
+    background:var(--primary-subtle);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .brand .name{font-weight:600;letter-spacing:.02em}
+  .brand .sub{font:11px/1.2 var(--font-mono,monospace);letter-spacing:.22em;color:oklch(0.78 0.13 205 / 0.8)}
+  .nav{display:flex;flex-direction:column;gap:6px;padding:12px}
+  .nav .label{padding:0 12px 8px;font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--muted-foreground)}
+  .nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--muted-foreground);
+    text-decoration:none;font-weight:500}
+  .nav a:hover{background:var(--surface-hover);color:var(--foreground)}
+  .nav a.active{background:var(--primary-subtle);color:var(--foreground);box-shadow:inset 0 0 0 1px var(--primary-border)}
+  .nav a.active .ico{color:var(--primary)}
+  .ico{width:18px;text-align:center;opacity:.9}
+  .sidebar .status{margin:12px;padding:12px;border:1px solid var(--border-subtle);border-radius:12px;
+    background:oklch(0.175 0.018 255 / .5);font-size:11px;color:var(--muted-foreground);display:flex;align-items:center;gap:10px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--success-foreground)}
+
+  /* main */
+  .main{flex:1;min-width:0}
+  .topbar{position:sticky;top:0;z-index:20;background:var(--topbar);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-subtle);padding:18px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+  .topbar h1{font-size:17px;font-weight:600}
+  .topbar p{font-size:12.5px;color:var(--muted-foreground);max-width:720px;margin-top:4px}
+  .statecontrols{display:flex;gap:6px;flex-shrink:0}
+  .statecontrols button{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text-secondary);cursor:pointer}
+  .statecontrols button.on{background:var(--primary);color:var(--primary-foreground);border-color:transparent;font-weight:600}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;padding:16px 32px 0;border-bottom:1px solid var(--border-subtle)}
+  .tab{padding:10px 18px;font-weight:600;font-size:13.5px;color:var(--muted-foreground);cursor:pointer;
+    border:1px solid transparent;border-bottom:none;border-radius:10px 10px 0 0}
+  .tab:hover{color:var(--foreground)}
+  .tab.active{color:var(--foreground);background:var(--surface);border-color:var(--border-subtle);
+    box-shadow:0 -2px 0 var(--primary) inset}
+
+  .wrap{padding:24px 32px 80px;max-width:1180px}
+  .flowcol{display:flex;flex-direction:column;gap:18px}
+
+  /* generic block */
+  .block{background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius);overflow:hidden}
+  .block > .head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid var(--border-subtle)}
+  .block > .head.plain{border-bottom:none}
+  .block .title{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600}
+  .badge{font:12px/1 var(--font-mono,monospace);padding:4px 9px;border-radius:999px;background:var(--surface-elevated);
+    color:var(--text-secondary);border:1px solid var(--border-subtle)}
+  .badge.n{background:var(--primary-subtle);color:var(--primary);border-color:var(--primary-border)}
+  .body{padding:16px 18px}
+  .muted{color:var(--muted-foreground);font-size:12.5px}
+  .sub{color:var(--text-secondary);font-size:12.5px}
+
+  /* step label */
+  .step{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--primary);text-transform:uppercase}
+  .step .num{width:20px;height:20px;border-radius:50%;background:var(--primary-subtle);border:1px solid var(--primary-border);
+    display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  /* buttons */
+  .btn{font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;border:1px solid var(--border-strong);
+    background:var(--surface-elevated);color:var(--foreground);cursor:pointer}
+  .btn:hover{background:var(--surface-hover)}
+  .btn.primary{background:var(--primary);color:var(--primary-foreground);border-color:transparent}
+  .btn.primary:hover{background:var(--primary-hover)}
+  .btn.primary[disabled]{background:var(--surface-disabled);color:var(--text-disabled);cursor:not-allowed}
+  .btn.sm{font-size:12px;padding:6px 11px}
+  .btn.ghost{background:transparent;border-color:var(--border-subtle);color:var(--text-secondary)}
+  .btn.link{background:transparent;border:none;color:var(--muted-foreground);text-decoration:underline;
+    text-underline-offset:2px;padding:4px 2px;font-size:12px;cursor:pointer}
+  .btn.link:hover{color:var(--foreground)}
+
+  /* notice */
+  .notice{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius);
+    background:var(--warning-subtle);border:1px solid var(--warning-border);color:var(--warning-foreground);font-size:12.5px;font-weight:500}
+  .notice.info{background:var(--primary-subtle);border-color:var(--primary-border);color:var(--foreground)}
+  .notice .i{width:18px;text-align:center}
+
+  /* big count row */
+  .bulkrow{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .bigcount{font:600 30px/1 var(--font-mono,monospace);font-variant-numeric:tabular-nums}
+  .bigcount small{font-size:13px;font-weight:400;color:var(--muted-foreground);margin-left:4px}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+  th{font-size:11px;letter-spacing:.06em;color:var(--muted-foreground);font-weight:600;background:oklch(0.215 0.022 255 / .4)}
+  tbody tr:hover{background:var(--surface-hover)}
+  tbody tr.target{box-shadow:inset 3px 0 0 var(--primary);background:var(--primary-subtle)}
+  td .rowacts{display:flex;gap:6px;justify-content:flex-end}
+  .chk{width:15px;height:15px;accent-color:var(--primary)}
+  .tablescroll{overflow-x:auto;border:1px solid var(--border-subtle);border-radius:var(--radius)}
+  .selbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;
+    background:var(--primary-subtle);border:1px solid var(--primary-border);border-radius:var(--radius);margin-bottom:10px;font-size:12.5px}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:999px;
+    border:1px solid var(--border-subtle);background:var(--surface-elevated);color:var(--text-secondary)}
+  .pill.wait{color:var(--warning-foreground);border-color:var(--warning-border);background:var(--warning-subtle)}
+  .pill.ship{color:var(--primary);border-color:var(--primary-border);background:var(--primary-subtle)}
+  .pill.done{color:var(--success-foreground);border-color:var(--success-border);background:var(--success-subtle)}
+  .pill.cancel{color:var(--muted-foreground)}
+
+  /* divider (external step) */
+  .extstep{display:flex;align-items:center;gap:14px;padding:10px 4px;color:var(--muted-foreground);font-size:12.5px}
+  .extstep .line{flex:1;height:1px;background:var(--border-subtle)}
+
+  /* preview grid for shipping report */
+  .pv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .pv div{background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:8px;padding:10px 12px}
+  .pv .k{font-size:11px;color:var(--muted-foreground)}
+  .pv .v{font:600 18px/1.2 var(--font-mono,monospace);margin-top:3px}
+  .field{display:flex;flex-direction:column;gap:4px;font-size:12px}
+  .field input{background:var(--surface-elevated);border:1px solid var(--border-strong);border-radius:8px;
+    padding:8px 10px;color:var(--foreground);font-size:13px;width:180px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+
+  /* toast */
+  .toast{position:fixed;right:28px;bottom:28px;z-index:60;display:flex;align-items:center;gap:10px;
+    padding:12px 16px;border-radius:10px;background:var(--success-subtle);border:1px solid var(--success-border);
+    color:var(--success-foreground);font-size:13px;font-weight:600;box-shadow:0 12px 40px oklch(0 0 0 / .4)}
+
+  .skeleton{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--surface-elevated),var(--surface-hover),var(--surface-elevated));
+    background-size:200% 100%;animation:sk 1.3s ease-in-out infinite}
+  @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .emptybox{padding:28px;text-align:center;color:var(--muted-foreground);font-size:12.5px}
+
+  [hidden]{display:none!important}
+  .search{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .search input,.search select{background:var(--surface-elevated);border:1px solid var(--border-strong);
+    border-radius:8px;padding:8px 10px;color:var(--foreground);font-size:13px}
+  .search input{min-width:220px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">◆</div>
+      <div>
+        <div class="name">LIEN Manager</div>
+        <div class="sub">COMMERCE OPERATIONS</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="label">WORKSPACE</div>
+      <a href="#"><span class="ico">▦</span>ダッシュボード</a>
+      <a href="#" class="active"><span class="ico">⇢</span>発送エントリー</a>
+      <a href="#"><span class="ico">▤</span>レビュー</a>
+    </nav>
+    <div style="flex:1"></div>
+    <div class="status"><span class="dot"></span>システム正常 · 待機中</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>発送エントリー</h1>
+        <p>発送に使う画面をここに集約しました。<b>作業メニュー</b>を上から順になぞると発送が終わります。過去分の確認は<b>注文者情報一覧</b>タブから。</p>
+      </div>
+      <div class="statecontrols" id="sc">
+        <button data-mode="normal" class="on">通常</button>
+        <button data-mode="loading">loading</button>
+        <button data-mode="empty">empty</button>
+        <button data-mode="error">error</button>
+        <button data-mode="success">成功表示</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="menu">作業メニュー</div>
+      <div class="tab" data-tab="orders">注文者情報一覧</div>
+    </div>
+
+    <!-- ================= TAB 1: 作業メニュー ================= -->
+    <div class="wrap" id="tab-menu">
+      <div class="flowcol">
+
+        <!-- (0) 確認待ち通知 -->
+        <div class="notice info" id="confirmNotice">
+          <span class="i">ℹ</span>
+          <span>確認待ち <b>2件</b> — 自動確認のあと「未処理」に入ります</span>
+        </div>
+
+        <!-- (1)+(2) 未処理 → 対象者CSV作成 -->
+        <div class="block">
+          <div class="head">
+            <div class="title"><span class="step"><span class="num">1</span>未処理を処理する</span></div>
+            <span class="badge n" data-count="unprocessed">8件</span>
+          </div>
+          <div class="body">
+            <div class="bulkrow">
+              <div>
+                <div class="bigcount" data-count="unprocessed-big">8<small>件が処理待ち</small></div>
+                <div class="muted" style="margin-top:4px">発送待ち・CSV未出力の注文（一時保存にした注文は除く）。</div>
+              </div>
+              <button class="btn primary" id="bulkBtn">未処理をまとめて処理（対象者CSVを作成）</button>
+            </div>
+            <p class="sub" style="margin-top:12px">
+              このCSVを GoQSystem へ読み込ませ、一括申込・一括決済・一括印刷を行ってください。
+              <br>本日のCSV出力: <b style="color:var(--success-foreground)">12件</b>（最終 14:03・GoQ引き渡し済み）
+            </p>
+
+            <div class="selbar" id="selbarUnproc" hidden>
+              <span><b id="selCnt">2</b>件を選択中</span>
+              <button class="btn sm primary">選択した行でCSVを作成</button>
+            </div>
+
+            <div class="tablescroll" style="margin-top:12px" data-list="unprocessed">
+              <table>
+                <thead><tr>
+                  <th style="width:34px"><input type="checkbox" class="chk"></th>
+                  <th>注文番号</th><th>注文者</th><th>郵便番号</th><th>お届け先</th><th>注文日</th><th></th>
+                </tr></thead>
+                <tbody>
+                  <tr class="target"><td><input type="checkbox" class="chk" checked></td><td>A2026-0091</td><td>サンプル 花子</td><td>150-0001</td><td>東京都渋谷区◯◯1-2-3</td><td>09/10 09:14</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                  <tr class="target"><td><input type="checkbox" class="chk" checked></td><td>A2026-0092</td><td>サンプル 太郎</td><td>530-0001</td><td>大阪府大阪市北区△△4-5</td><td>09/10 09:40</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                  <tr class="target"><td><input type="checkbox" class="chk"></td><td>A2026-0093</td><td>見本 みどり</td><td>460-0008</td><td>愛知県名古屋市中区□□6-7-8</td><td>09/10 10:02</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0094</td><td>試作 あおい</td><td>060-0001</td><td>北海道札幌市中央区◇◇9-1</td><td>09/10 10:31</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="emptybox" data-empty="unprocessed" hidden>未処理の注文はありません。</div>
+            <div data-skeleton hidden style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <div class="skeleton" style="width:100%"></div><div class="skeleton" style="width:92%"></div><div class="skeleton" style="width:96%"></div>
+            </div>
+            <div class="notice" data-error hidden style="margin-top:12px">
+              <span class="i">⚠</span><span>RMSと通信できません（APIキー期限切れの可能性）。管理者に連絡してください。「対象0件」とは別の状態です。</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- (3) 外部: GoQ -->
+        <div class="extstep">
+          <span class="line"></span>
+          <span>GoQSystem で 申込・決済・印刷 → 追跡番号入りCSVを書き出す</span>
+          <span class="line"></span>
+        </div>
+
+        <!-- (4) 発送完了報告CSV -->
+        <div class="block">
+          <div class="head">
+            <div class="title"><span class="step"><span class="num">2</span>発送完了報告CSVを作成（追跡番号のRMS反映）</span></div>
+          </div>
+          <div class="body">
+            <div class="toolbar">
+              <button class="btn sm">最新化</button>
+              <div class="field"><label>追跡番号入りCSV</label><button class="btn sm ghost">ファイルを選ぶ…</button></div>
+              <div class="field"><label>発送日</label><input type="text" value="2026-09-10"></div>
+            </div>
+            <div class="pv">
+              <div><div class="k">自動マッチ</div><div class="v" style="color:var(--success-foreground)">6</div></div>
+              <div><div class="k">代表1件（同一宛先）</div><div class="v">2</div></div>
+              <div><div class="k">要確認</div><div class="v" style="color:var(--warning-foreground)">3</div></div>
+              <div><div class="k">未マッチ</div><div class="v" style="color:var(--muted-foreground)">1</div></div>
+            </div>
+            <p class="muted">手入力済みの注文があればプレビューでチェックを外してください。この変換を使う日は、同じ注文をRMSで手打ちしないでください。</p>
+            <div style="margin-top:12px"><button class="btn primary">発送完了報告CSV（6列・Shift-JIS）をダウンロード</button></div>
+          </div>
+        </div>
+
+        <!-- (5) 作業中 -->
+        <div class="block">
+          <div class="head">
+            <div class="title"><span class="step"><span class="num">3</span>作業中</span><span class="sub">CSVは出したが、追跡番号の反映がまだ</span></div>
+            <span class="badge" data-count="inprogress">5件・直近7日</span>
+          </div>
+          <div class="body">
+            <div class="tablescroll" data-list="inprogress">
+              <table>
+                <thead><tr><th style="width:34px"><input type="checkbox" class="chk"></th><th>注文番号</th><th>注文者</th><th>お届け先</th><th>CSV出力</th><th>追跡番号</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0081</td><td>サンプル 一郎</td><td>東京都新宿区◯◯</td><td>09/10 11:20</td><td class="muted">未反映</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">CSVを再作成</button></div></td></tr>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0083</td><td>見本 二郎</td><td>福岡県福岡市博多区△△</td><td>09/10 11:20</td><td class="muted">未反映</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">CSVを再作成</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="emptybox" data-empty="inprogress" hidden>作業中の注文はありません。</div>
+          </div>
+        </div>
+
+        <!-- (6) 処理済み -->
+        <div class="block">
+          <div class="head">
+            <div class="title"><span class="step"><span class="num">4</span>処理済み</span><span class="sub">発送完了報告まで完了</span></div>
+            <span class="badge" data-count="done">34件・直近7日</span>
+          </div>
+          <div class="body">
+            <div class="selbar" id="selbarDone" hidden>
+              <span><b>1</b>件を選択中</span><button class="btn sm primary">選択した行でCSVを再作成</button>
+            </div>
+            <div class="tablescroll" data-list="done">
+              <table>
+                <thead><tr><th style="width:34px"><input type="checkbox" class="chk"></th><th>注文番号</th><th>注文者</th><th>お届け先</th><th>追跡番号</th><th>発送完了報告</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0075</td><td>サンプル 三郎</td><td>京都府京都市中京区◯◯</td><td>4901-2233-4455</td><td>09/09 16:40</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">CSVを再作成</button></div></td></tr>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0076</td><td>見本 四郎</td><td>宮城県仙台市青葉区△△</td><td>4901-2233-4460</td><td>09/09 16:40</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">CSVを再作成</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="emptybox" data-empty="done" hidden>直近7日の処理済みはありません。</div>
+          </div>
+        </div>
+
+        <!-- (7) 一時保存 -->
+        <div class="block">
+          <div class="head">
+            <div class="title"><span class="step"><span class="num">＊</span>一時保存</span><span class="sub">今は処理しない注文。全件表示</span></div>
+            <span class="badge" data-count="held">3件</span>
+          </div>
+          <div class="body">
+            <div class="tablescroll" data-list="held">
+              <table>
+                <thead><tr><th style="width:34px"><input type="checkbox" class="chk"></th><th>注文番号</th><th>注文者</th><th>お届け先</th><th>注文日</th><th>退避日</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0061</td><td>サンプル 五郎</td><td>沖縄県那覇市◯◯（住所要確認）</td><td>09/07</td><td>09/08</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">未処理へ戻す</button><button class="btn sm link">一時保存から外す</button></div></td></tr>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0064</td><td>見本 六子</td><td>東京都港区△△（同一宛先の重複）</td><td>09/08</td><td>09/08</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">未処理へ戻す</button><button class="btn sm link">一時保存から外す</button></div></td></tr>
+                  <tr><td><input type="checkbox" class="chk"></td><td>A2026-0069</td><td>試作 七海</td><td>神奈川県横浜市西区□□（支払い未確認）</td><td>09/09</td><td>09/09</td>
+                    <td><div class="rowacts"><button class="btn sm ghost">未処理へ戻す</button><button class="btn sm link">一時保存から外す</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="emptybox" data-empty="held" hidden>一時保存中の注文はありません。</div>
+            <p class="muted" style="margin-top:10px">「一時保存から外す」＝目印を消すだけ。注文データは残り、注文者情報一覧では引き続き見えます。</p>
+          </div>
+        </div>
+
+        <!-- 全体 empty -->
+        <div class="block" data-empty="all" hidden>
+          <div class="emptybox" style="padding:48px">本日の発送作業は完了しています。</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= TAB 2: 注文者情報一覧 ================= -->
+    <div class="wrap" id="tab-orders" hidden>
+      <div class="block">
+        <div class="head"><div class="title">注文者情報一覧</div><span class="muted">全ステータス／RMSとの相違確認・過去分の検索</span></div>
+        <div class="body">
+          <div class="search">
+            <input type="text" placeholder="注文番号・氏名で検索">
+            <select><option>すべてのステータス</option><option>確認待ち</option><option>発送待ち</option><option>発送済</option><option>キャンセル</option></select>
+            <button class="btn sm ghost">絞り込み</button>
+          </div>
+          <div class="selbar" id="selbarOrders" hidden>
+            <span><b>1</b>件を選択中</span>
+            <div style="display:flex;gap:8px"><button class="btn sm">一時保存にする</button><button class="btn sm primary">選択した行でCSVを作成</button></div>
+          </div>
+          <div class="tablescroll">
+            <table>
+              <thead><tr>
+                <th style="width:34px"><input type="checkbox" class="chk"></th>
+                <th>ステータス</th><th>注文番号</th><th>注文者</th><th>郵便番号</th><th>お届け先</th><th>合計金額</th><th>支払方法</th><th>CSV出力</th><th>追跡番号</th><th>注文日</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr><td><input type="checkbox" class="chk"></td><td><span class="pill wait">確認待ち</span></td><td>A2026-0095</td><td>サンプル 八重</td><td>231-0001</td><td>神奈川県横浜市中区◯◯</td><td>¥4,180</td><td>クレジット</td><td class="muted">未出力</td><td class="muted">—</td><td>09/10 10:55</td>
+                  <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                <tr class="target"><td><input type="checkbox" class="chk"></td><td><span class="pill ship">発送待ち</span></td><td>A2026-0091</td><td>サンプル 花子</td><td>150-0001</td><td>東京都渋谷区◯◯1-2-3</td><td>¥3,960</td><td>代引き</td><td class="muted">未出力</td><td class="muted">—</td><td>09/10 09:14</td>
+                  <td><div class="rowacts"><button class="btn sm ghost">一時保存にする</button></div></td></tr>
+                <tr><td><input type="checkbox" class="chk"></td><td><span class="pill done">発送済</span></td><td>A2026-0075</td><td>サンプル 三郎</td><td>604-8001</td><td>京都府京都市中京区◯◯</td><td>¥7,920</td><td>クレジット</td><td>09/09 12:00</td><td>4901-2233-4455</td><td>09/08 18:22</td>
+                  <td><div class="rowacts"><button class="btn sm ghost" disabled>—</button></div></td></tr>
+                <tr><td><input type="checkbox" class="chk"></td><td><span class="pill cancel">キャンセル</span></td><td>A2026-0070</td><td>見本 九郎</td><td>810-0001</td><td>福岡県福岡市中央区△△</td><td>¥3,960</td><td>クレジット</td><td class="muted">未出力</td><td class="muted">—</td><td>09/07 14:10</td>
+                  <td><div class="rowacts"><button class="btn sm ghost" disabled>—</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="muted" style="margin-top:12px">1–25件 / 1,204件　<button class="btn link">次のページ →</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span>✓</span><span id="toastMsg">8件をCSVに出力しました</span></div>
+
+<script>
+  // タブ切り替え
+  var tabs = document.getElementById('tabs');
+  tabs.addEventListener('click', function(e){
+    var t = e.target.closest('.tab'); if(!t) return;
+    tabs.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x===t)});
+    document.getElementById('tab-menu').hidden = t.dataset.tab!=='menu';
+    document.getElementById('tab-orders').hidden = t.dataset.tab!=='orders';
+  });
+
+  // 状態切り替え（モック確認用）
+  var sc = document.getElementById('sc');
+  function setMode(mode){
+    sc.querySelectorAll('button').forEach(function(b){b.classList.toggle('on', b.dataset.mode===mode)});
+    var loading = mode==='loading', error = mode==='error', empty = mode==='empty';
+
+    // 未処理ブロックの中身出し分け
+    document.querySelector('[data-list="unprocessed"]').hidden = loading || error || empty;
+    document.querySelector('[data-empty="unprocessed"]').hidden = !empty;
+    document.querySelector('[data-skeleton]').hidden = !loading;
+    document.querySelector('[data-error]').hidden = !error;
+
+    // 各リスト empty
+    ['inprogress','done','held'].forEach(function(k){
+      document.querySelector('[data-list="'+k+'"]').hidden = empty || loading;
+      document.querySelector('[data-empty="'+k+'"]').hidden = !empty;
+    });
+    document.querySelector('[data-empty="all"]').hidden = !empty;
+    document.getElementById('confirmNotice').hidden = empty;
+
+    // 一括ボタン：empty のとき無効＋理由
+    var bulk = document.getElementById('bulkBtn');
+    if(empty){ bulk.disabled = true; bulk.textContent = '対象がありません'; }
+    else { bulk.disabled = false; bulk.textContent = '未処理をまとめて処理（対象者CSVを作成）'; }
+
+    // 成功トースト
+    var showSuccess = mode==='success';
+    document.getElementById('toast').hidden = !showSuccess;
+    if(showSuccess){ document.getElementById('toastMsg').textContent = '8件をCSVに出力しました'; }
+  }
+  sc.addEventListener('click', function(e){ var b=e.target.closest('button'); if(b) setMode(b.dataset.mode); });
+
+  // 選択バーのデモ表示
+  document.querySelector('[data-list="unprocessed"]').addEventListener('change', function(){
+    var n = this.querySelectorAll('tbody .chk:checked').length;
+    var bar = document.getElementById('selbarUnproc');
+    bar.hidden = n===0; if(n) document.getElementById('selCnt').textContent = n;
+  });
+
+  setMode('normal');
+</script>
+</body>
+</html>
