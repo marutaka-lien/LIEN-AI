@@ -63,6 +63,13 @@ model Order {
   // RMS書き戻しAPI用。GoQ運用では未設定のまま)とは別概念なので混同しないこと。
   shippingReportedAt DateTime?
 
+  // 「一時保存」= 人が手動で退避した注文の目印(2026-09-10 発送ページ集約)。
+  // ON = 「一時保存にする」を押した時刻。OFF(null) = 「未処理へ戻す」または「一時保存から外す」。
+  // 手動でのみ ON/OFF し、RMS同期では一切触れない(自動で戻したり消したりしない)。
+  // 発送エントリー「作業メニュー」の未処理セグメント・全件CSV作成(まとめて処理)から
+  // heldAt あり の注文を除外するために使う。注文データ自体は消さず、注文者情報一覧には残る。
+  heldAt DateTime?
+
   rawPayload String? // RMS APIレスポンス生データ(JSON文字列)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

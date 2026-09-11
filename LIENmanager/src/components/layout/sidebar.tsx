@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListOrdered, MessageSquare, Workflow, Package, Sparkles } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Workflow, Package, Sparkles } from "lucide-react";
 
 import { useRunningJobCount } from "@/features/automation/hooks/useRunningJobCount";
 import { cn } from "@/lib/utils";
@@ -17,11 +17,6 @@ const NAV_ITEMS = [
     href: "/automation",
     label: "発送エントリー",
     icon: Workflow,
-  },
-  {
-    href: "/orders",
-    label: "注文一覧",
-    icon: ListOrdered,
   },
   {
     href: "/reviews",
@@ -99,7 +94,7 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
-    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 rounded-2xl border border-sidebar-border bg-sidebar/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="モバイルナビゲーション">
+    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-3 rounded-2xl border border-sidebar-border bg-sidebar/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="モバイルナビゲーション">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;

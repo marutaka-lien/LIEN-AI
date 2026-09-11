@@ -8,7 +8,6 @@ import { useRunningJobCount } from "@/features/automation/hooks/useRunningJobCou
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/automation": "発送エントリー",
-  "/orders": "注文一覧",
   "/reviews": "レビュー管理",
 };
 
