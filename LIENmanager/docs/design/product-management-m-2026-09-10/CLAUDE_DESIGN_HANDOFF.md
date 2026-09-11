@@ -6,9 +6,10 @@
 ## 最初に見るもの
 
 1. `reference-b-theme.png` — B案として採用する色、余白、文字、カードの雰囲気
-2. `reference-c-schedule.png` — C案として採用する予約状況の情報構成
-3. `preview-v2.html` — 今回決めた操作を確認できるHTMLモック
-4. `README.md` — 決定事項と確認項目
+2. `B_THEME_REQUIREMENTS.md` — 参考画像を見ながら決めたB案の詳しい要件
+3. `reference-c-schedule.png` — C案として採用する予約状況の情報構成
+4. `preview-v2.html` — 今回決めた操作を確認できるHTMLモック
+5. `README.md` — 決定事項と確認項目
 
 ## 採用する方向
 

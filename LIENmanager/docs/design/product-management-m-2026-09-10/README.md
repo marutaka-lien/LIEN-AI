@@ -9,6 +9,8 @@
 
 Claude Designへ渡す場合は、最初に `CLAUDE_DESIGN_HANDOFF.md` を渡す。B案の見た目は `reference-b-theme.png`、C案の予約構成は `reference-c-schedule.png` を参照する。
 
+B案について参考画像を見ながら決めた詳しい内容は、`B_THEME_REQUIREMENTS.md` を正とする。
+
 ## v2で確定した方向
 
 - 全体はB案の明るく柔らかいテーマ（アイボリー、ベージュ、くすみローズ）で統一。
