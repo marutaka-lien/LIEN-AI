@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+  :root{
+    --bg:oklch(0.115 0.018 255); --ink:oklch(0.97 0 0); --ink2:oklch(0.80 0 0); --ink3:oklch(0.62 0 0); --ink4:oklch(0.46 0 0);
+    --panel:oklch(0.163 0.018 255); --panel2:oklch(0.196 0.02 255); --panel3:oklch(0.225 0.022 255);
+    --line:oklch(1 0 0 / 7%); --line2:oklch(1 0 0 / 13%);
+    --primary:oklch(0.78 0.13 205); --on-primary:oklch(0.13 0.02 255);
+    --primary-soft:oklch(0.78 0.13 205 / 12%); --primary-line:oklch(0.78 0.13 205 / 28%);
+    --ok:oklch(0.78 0.16 155); --warn:oklch(0.80 0.15 80); --err:oklch(0.72 0.19 25); --neutral:oklch(0.60 0 0);
+  }
+  body{margin:0; background:var(--bg);}
+  a{color:var(--primary); text-decoration:none;}
+  a:hover{color:oklch(0.86 0.12 205);}
+  ::selection{background:var(--primary-soft);}
+  :focus-visible{outline:2px solid var(--primary); outline-offset:2px;}
+  .sc::-webkit-scrollbar{width:10px;}
+  .sc::-webkit-scrollbar-thumb{background:oklch(1 0 0 / 10%); border-radius:99px; border:3px solid transparent; background-clip:content-box;}
+  .sc::-webkit-scrollbar-track{background:transparent;}
+  @keyframes sk{0%,100%{opacity:.3}50%{opacity:.6}}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important;}}
+</style>
+</helmet>
+
+<div style="width:1440px; height:900px; overflow:hidden; box-sizing:border-box; display:flex; font-family:Inter,'Noto Sans JP','Yu Gothic UI',Meiryo,sans-serif; font-size:13px; line-height:1.45; color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased;">
+
+  <!-- RAIL -->
+  <aside style="width:212px; flex:none; box-sizing:border-box; border-right:1px solid var(--line); display:flex; flex-direction:column; padding:18px 12px;">
+    <div style="display:flex; align-items:center; gap:10px; padding:0 8px 20px;">
+      <div style="width:26px; height:26px; flex:none; border-radius:8px; border:1px solid var(--primary-line); display:flex; align-items:center; justify-content:center; color:var(--primary);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+      </div>
+      <span style="font-size:13px; font-weight:600; letter-spacing:.01em; white-space:nowrap;">LIEN Manager</span>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:2px;">
+      <a href="#" style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; font-size:13px; color:var(--ink3); white-space:nowrap;" style-hover="background:var(--panel); color:var(--ink);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1.5"></rect><rect width="7" height="5" x="14" y="3" rx="1.5"></rect><rect width="7" height="9" x="14" y="12" rx="1.5"></rect><rect width="7" height="5" x="3" y="16" rx="1.5"></rect></svg>
+        ダッシュボード
+      </a>
+      <span style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; font-size:13px; font-weight:500; background:var(--panel2); color:var(--ink); white-space:nowrap;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect></svg>
+        発送エントリー
+      </span>
+      <a href="#" style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; font-size:13px; color:var(--ink3); white-space:nowrap;" style-hover="background:var(--panel); color:var(--ink);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        レビュー
+      </a>
+    </nav>
+
+    <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px; padding:0 8px;">
+      <div style="display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink3); white-space:nowrap;">
+        <span style="width:5px; height:5px; border-radius:50%; background:var(--ok); flex:none;"></span>
+        RMS同期 14:28
+      </div>
+      <div style="font-size:10px; letter-spacing:.14em; color:var(--ink4); white-space:nowrap;">MOCK · 架空データ</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="flex:1; min-width:0; box-sizing:border-box; display:flex; flex-direction:column; padding:16px 20px 18px;">
+
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:20px; padding:0 2px 14px;">
+      <div style="display:flex; align-items:baseline; gap:12px; white-space:nowrap;">
+        <h1 style="margin:0; font-size:17px; font-weight:600; letter-spacing:-.012em;">発送エントリー</h1>
+        <span style="font-size:12px; color:var(--ink3);" data-om-label="注文/発送準備">注文を各ステータスで処理してください</span>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:14px; font-size:12px; color:var(--ink3); white-space:nowrap; font-variant-numeric:tabular-nums;">
+        <span>2026-09-10（木）</span>
+        <span style="color:var(--ink2);">14:32</span>
+      </div>
+    </div>
+
+    <!-- FLOW BAR = ステータス切替 -->
+    <div style="display:flex; align-items:stretch; gap:8px; padding:0 0 14px;">
+      <div style="flex:1; min-width:0; display:flex; align-items:stretch; gap:6px;">
+        <button type="button" onClick="{{ goAwaiting }}" style="{{ segAwaiting }}">
+          <span style="display:flex; align-items:center; gap:7px; white-space:nowrap;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--neutral); flex:none;"></span>
+            <span style="font-size:12px; font-weight:500;">確認待ち</span>
+          </span>
+          <span style="display:flex; align-items:baseline; gap:4px;">
+            <span style="font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em;">{{ cAwaiting }}</span>
+            <span style="font-size:11px; color:var(--ink3);">件</span>
+          </span>
+        </button>
+        <span style="display:flex; align-items:center; color:var(--ink4);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+        </span>
+        <button type="button" onClick="{{ goUnprocessed }}" style="{{ segUnprocessed }}">
+          <span style="display:flex; align-items:center; gap:7px; white-space:nowrap;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--warn); flex:none;"></span>
+            <span style="font-size:12px; font-weight:500;">未処理</span>
+          </span>
+          <span style="display:flex; align-items:baseline; gap:4px;">
+            <span style="font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em;">{{ cUnprocessed }}</span>
+            <span style="font-size:11px; color:var(--ink3);">件</span>
+          </span>
+        </button>
+        <span style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--ink4); padding:0 2px; white-space:nowrap;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+          <span style="font-size:9px; letter-spacing:.1em;">GoQ</span>
+        </span>
+        <button type="button" onClick="{{ goInProgress }}" style="{{ segInProgress }}">
+          <span style="display:flex; align-items:center; gap:7px; white-space:nowrap;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--primary); flex:none;"></span>
+            <span style="font-size:12px; font-weight:500;">作業中</span>
+          </span>
+          <span style="display:flex; align-items:baseline; gap:4px;">
+            <span style="font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em;">{{ cInProgress }}</span>
+            <span style="font-size:11px; color:var(--ink3);">件</span>
+          </span>
+        </button>
+        <span style="display:flex; align-items:center; color:var(--ink4);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+        </span>
+        <button type="button" onClick="{{ goDone }}" style="{{ segDone }}">
+          <span style="display:flex; align-items:center; gap:7px; white-space:nowrap;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--ok); flex:none;"></span>
+            <span style="font-size:12px; font-weight:500;">処理済み</span>
+          </span>
+          <span style="display:flex; align-items:baseline; gap:4px;">
+            <span style="font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em;">{{ cDone }}</span>
+            <span style="font-size:11px; color:var(--ink3);">件</span>
+          </span>
+        </button>
+      </div>
+      <span style="width:1px; background:var(--line); flex:none;"></span>
+      <button type="button" onClick="{{ goHeld }}" style="{{ segHeld }}">
+        <span style="display:flex; align-items:center; gap:7px; white-space:nowrap;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path></svg>
+          <span style="font-size:12px; font-weight:500;">一時保存</span>
+        </span>
+        <span style="display:flex; align-items:baseline; gap:4px;">
+          <span style="font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em;">{{ cHeld }}</span>
+          <span style="font-size:11px; color:var(--ink3);">件</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- SPLIT -->
+    <div style="flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 384px; gap:14px;">
+
+      <!-- LIST -->
+      <section style="min-width:0; display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px; background:var(--panel); overflow:hidden;">
+        <div style="flex:none; height:50px; box-sizing:border-box; display:flex; align-items:center; gap:12px; padding:0 14px; border-bottom:1px solid var(--line); white-space:nowrap;">
+          <h2 style="margin:0; font-size:13.5px; font-weight:600;">{{ listTitle }}</h2>
+          <span style="font-size:12px; color:var(--ink3); font-variant-numeric:tabular-nums;">{{ listCount }}件</span>
+          <span style="width:1px; height:16px; background:var(--line); margin:0 2px;"></span>
+          <span style="font-size:11.5px; color:var(--ink3);">{{ listNote }}</span>
+          <label style="margin-left:auto; display:flex; align-items:center; gap:7px; height:30px; padding:0 10px; border:1px solid var(--line2); border-radius:8px; color:var(--ink3); width:210px; box-sizing:border-box;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.3-4.3"></path></svg>
+            <input type="text" placeholder="注文番号・氏名" style="flex:1; min-width:0; background:none; border:none; outline:none; font:inherit; font-size:12.5px; color:var(--ink);">
+          </label>
+        </div>
+
+        <sc-if value="{{ hasSelection }}">
+        <div style="flex:none; display:flex; align-items:center; gap:12px; padding:9px 14px; background:var(--primary-soft); border-bottom:1px solid var(--line); white-space:nowrap;">
+          <span style="font-size:12.5px; font-variant-numeric:tabular-nums;">{{ selCount }}件を選択中</span>
+          <button type="button" onClick="{{ clearSelection }}" style="font:inherit; font-size:11.5px; height:24px; padding:0 8px; border:1px solid var(--line2); border-radius:7px; background:transparent; color:var(--ink2); cursor:pointer;" style-hover="background:var(--panel3); color:var(--ink);">選択を解除</button>
+          <span style="margin-left:auto; font-size:11.5px; color:var(--ink3);">右のパネルから選択分だけを処理できます</span>
+        </div>
+        </sc-if>
+
+        <div style="flex:none; display:grid; grid-template-columns:34px 152px 108px 84px minmax(0,1fr) 92px 104px; align-items:center; height:34px; padding:0 14px; border-bottom:1px solid var(--line); background:var(--panel2); font-size:11px; letter-spacing:.02em; color:var(--ink3); white-space:nowrap;">
+          <span><input type="checkbox" checked="{{ allChecked }}" onChange="{{ toggleAll }}" style="width:13px; height:13px; accent-color:var(--primary);"></span>
+          <span>注文番号</span>
+          <span>注文者</span>
+          <span>郵便番号</span>
+          <span>お届け先</span>
+          <span>{{ metaHead }}</span>
+          <span></span>
+        </div>
+
+        <div class="sc" style="flex:1; min-height:0; overflow-y:auto;">
+          <sc-if value="{{ isLoading }}">
+          <div style="padding:14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="height:30px; border-radius:7px; background:var(--panel2); animation:sk 1.6s ease-in-out infinite;"></div>
+            <div style="height:30px; border-radius:7px; background:var(--panel2); animation:sk 1.6s .15s ease-in-out infinite;"></div>
+            <div style="height:30px; border-radius:7px; background:var(--panel2); animation:sk 1.6s .3s ease-in-out infinite;"></div>
+            <div style="height:30px; border-radius:7px; background:var(--panel2); animation:sk 1.6s .45s ease-in-out infinite;"></div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmptyList }}">
+          <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--ink3);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12.2 2.4 2.4 4.6-4.9"></path></svg>
+            <span style="font-size:13px; color:var(--ink2); white-space:nowrap;">{{ emptyText }}</span>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ isErrorList }}">
+          <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:20px; text-align:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+            <span style="font-size:13.5px; font-weight:600; white-space:nowrap;">RMSと通信できません（APIキー期限切れの可能性）</span>
+            <span style="font-size:12px; color:var(--ink3); white-space:nowrap;">対象0件ではありません。回復すれば未処理の注文が表示されます（最終成功 09:12）</span>
+            <button type="button" style="margin-top:8px; font:inherit; font-size:12.5px; height:30px; padding:0 12px; border:none; border-radius:8px; background:var(--primary); color:var(--on-primary); cursor:pointer;" style-hover="background:oklch(0.84 0.13 205);">再試行する</button>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ rows }}" as="row" hint-placeholder-count="8">
+            <div onClick="{{ row.toggle }}" style="{{ row.style }}">
+              <span><input type="checkbox" checked="{{ row.checked }}" onChange="{{ row.toggle }}" style="width:13px; height:13px; accent-color:var(--primary);"></span>
+              <span style="font-variant-numeric:tabular-nums; letter-spacing:-.01em;">{{ row.id }}</span>
+              <span>{{ row.name }}</span>
+              <span style="font-variant-numeric:tabular-nums; color:var(--ink2);">{{ row.zip }}</span>
+              <span style="color:var(--ink2); overflow:hidden; text-overflow:ellipsis;">{{ row.addr }}</span>
+              <span style="font-variant-numeric:tabular-nums; color:var(--ink3);">{{ row.meta }}</span>
+              <span style="display:flex; justify-content:flex-end; gap:8px;">
+                <sc-if value="{{ row.isHeld }}">
+                  <button type="button" style="font:inherit; font-size:11px; height:24px; padding:0 8px; border:1px solid var(--primary-line); border-radius:7px; background:var(--primary-soft); color:var(--primary); cursor:pointer; white-space:nowrap;" style-hover="background:oklch(0.78 0.13 205 / 20%);">戻す</button>
+                  <button type="button" style="font:inherit; font-size:11px; height:24px; padding:0 6px; border:none; background:none; color:var(--ink3); cursor:pointer; white-space:nowrap; text-decoration:underline; text-underline-offset:2px;" style-hover="color:var(--ink);">外す</button>
+                </sc-if>
+                <sc-if value="{{ row.canHold }}">
+                  <button type="button" style="font:inherit; font-size:11px; height:24px; padding:0 8px; border:1px solid var(--line2); border-radius:7px; background:transparent; color:var(--ink2); cursor:pointer; white-space:nowrap;" style-hover="background:var(--panel3); color:var(--ink);">一時保存</button>
+                </sc-if>
+                <sc-if value="{{ row.isDone }}">
+                  <span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--ok); white-space:nowrap;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 12 5 5 13-13"></path></svg>
+                    報告済
+                  </span>
+                </sc-if>
+              </span>
+            </div>
+          </sc-for>
+          </sc-if>
+        </div>
+      </section>
+
+      <!-- INSPECTOR -->
+      <aside style="min-width:0; display:flex; flex-direction:column; gap:12px; overflow:hidden;">
+
+        <section style="flex:none; border:1px solid var(--primary-line); border-radius:12px; background:var(--panel); padding:16px 16px 15px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; white-space:nowrap;">
+            <span style="font-size:10px; font-weight:600; letter-spacing:.14em; color:var(--primary);">{{ stepKicker }}</span>
+            <span style="flex:1; height:1px; background:var(--line);"></span>
+          </div>
+          <h3 style="margin:0 0 6px; font-size:15px; font-weight:600; letter-spacing:-.01em; white-space:nowrap;">{{ actionTitle }}</h3>
+          <p style="margin:0 0 14px; font-size:12.5px; color:var(--ink2);">{{ actionDesc }}</p>
+
+          <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:12px; white-space:nowrap;">
+            <span style="font-size:32px; font-weight:600; line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums;">{{ targetCount }}</span>
+            <span style="font-size:12px; color:var(--ink3);">件が対象 · {{ targetSource }}</span>
+          </div>
+
+          <sc-if value="{{ ctaEnabled }}" hint-placeholder-val="{{ true }}">
+          <button type="button" style="width:100%; box-sizing:border-box; font:inherit; font-size:13.5px; font-weight:600; height:40px; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:9px; background:var(--primary); color:var(--on-primary); cursor:pointer; white-space:nowrap;" style-hover="background:oklch(0.84 0.13 205);" style-active="background:oklch(0.71 0.13 205);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5"></path><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"></path></svg>
+            {{ ctaLabel }}
+          </button>
+          </sc-if>
+          <sc-if value="{{ ctaDisabled }}">
+          <button type="button" disabled="{{ true }}" style="width:100%; box-sizing:border-box; font:inherit; font-size:13.5px; font-weight:600; height:40px; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--line2); border-radius:9px; background:transparent; color:var(--ink4); cursor:not-allowed; white-space:nowrap;">{{ ctaLabel }}</button>
+          <p style="margin:8px 0 0; font-size:11.5px; color:var(--ink3); white-space:nowrap;">{{ ctaReason }}</p>
+          </sc-if>
+
+          <sc-if value="{{ showSecondary }}">
+          <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+            <button type="button" style="flex:1; font:inherit; font-size:12px; height:32px; border:1px solid var(--line2); border-radius:8px; background:transparent; color:var(--ink2); cursor:pointer; white-space:nowrap;" style-hover="background:var(--panel2); color:var(--ink);">{{ secondaryA }}</button>
+            <button type="button" style="flex:1; font:inherit; font-size:12px; height:32px; border:1px solid var(--line2); border-radius:8px; background:transparent; color:var(--ink2); cursor:pointer; white-space:nowrap;" style-hover="background:var(--panel2); color:var(--ink);">{{ secondaryB }}</button>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ showSuccess }}">
+          <div style="margin-top:12px; display:flex; align-items:center; gap:8px; padding:9px 11px; border:1px solid oklch(0.78 0.16 155 / 26%); border-radius:8px; background:oklch(0.78 0.16 155 / 10%); white-space:nowrap;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12.2 2.4 2.4 4.6-4.9"></path></svg>
+            <span style="font-size:12px;">{{ successText }}</span>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ showHandoff }}">
+          <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line); display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink3); white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>
+            次: GoQSystemで 申込・決済・印刷
+          </div>
+          </sc-if>
+        </section>
+
+        <!-- 発送完了報告のプレビュー（作業中のみ） -->
+        <sc-if value="{{ showReportPreview }}">
+        <section style="flex:none; border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:14px 16px 15px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; white-space:nowrap;">
+            <span style="font-size:12.5px; font-weight:600;">取込プレビュー</span>
+            <span style="font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums;">13件を読み込み · 14:29</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:1px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="display:flex; align-items:center; gap:7px; font-size:12.5px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--ok);"></span>自動マッチ</span>
+              <span style="font-size:13px; font-variant-numeric:tabular-nums;">9</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="display:flex; align-items:center; gap:7px; font-size:12.5px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--neutral);"></span>代表1件</span>
+              <span style="font-size:13px; font-variant-numeric:tabular-nums;">2</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--warn);"><span style="width:6px; height:6px; border-radius:50%; background:var(--warn);"></span>要確認（氏名の表記差）</span>
+              <span style="font-size:13px; font-variant-numeric:tabular-nums; color:var(--warn);">1</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink3);"><span style="width:6px; height:6px; border-radius:50%; background:var(--ink4);"></span>未マッチ</span>
+              <span style="font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink3);">1</span>
+            </div>
+          </div>
+          <p style="margin:10px 0 0; font-size:11px; color:var(--ink3);">手入力済みの行はチェックを外して除外できます（二度流しは自動で防止）。</p>
+        </section>
+        </sc-if>
+
+        <!-- 要確認 -->
+        <sc-if value="{{ showWarning }}" hint-placeholder-val="{{ true }}">
+        <section style="flex:none; border:1px solid oklch(0.80 0.15 80 / 26%); border-radius:12px; background:oklch(0.80 0.15 80 / 8%); padding:12px 14px;">
+          <div style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            <span style="font-size:12.5px; color:var(--warn); font-weight:500;">CSVに変換できない文字 1件</span>
+            <span style="font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums;">…2075</span>
+            <a href="#" style="margin-left:auto; font-size:11.5px;">確認 →</a>
+          </div>
+          <p style="margin:6px 0 0; font-size:11.5px; color:var(--ink2);">発送は止まりません。GoQ側で表記を確認してください。</p>
+        </section>
+        </sc-if>
+
+        <!-- 本日の履歴 -->
+        <section class="sc" style="flex:1; min-height:0; overflow-y:auto; border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:13px 16px 14px;">
+          <div style="font-size:10px; font-weight:600; letter-spacing:.14em; color:var(--ink3); margin-bottom:8px; white-space:nowrap;">本日の履歴</div>
+          <div style="display:flex; flex-direction:column;">
+            <div style="display:flex; gap:10px; padding:6px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums; flex:none;">14:28</span>
+              <span style="font-size:12px; overflow:hidden; text-overflow:ellipsis;">発送完了報告CSVを作成（8件）</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:6px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums; flex:none;">13:52</span>
+              <span style="font-size:12px; overflow:hidden; text-overflow:ellipsis;">RMSと同期（未処理 +3）</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:6px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="font-size:11.5px; color:var(--warn); font-variant-numeric:tabular-nums; flex:none;">13:41</span>
+              <span style="font-size:12px; color:var(--warn); overflow:hidden; text-overflow:ellipsis;">CSV文字化けの警告 1件</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:6px 0; border-top:1px solid var(--line); white-space:nowrap;">
+              <span style="font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums; flex:none;">11:15</span>
+              <span style="font-size:12px; overflow:hidden; text-overflow:ellipsis;">対象者CSVを作成（12件）</span>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;stage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;awaiting&quot;,&quot;unprocessed&quot;,&quot;inProgress&quot;,&quot;done&quot;,&quot;held&quot;],&quot;default&quot;:&quot;unprocessed&quot;,&quot;tsType&quot;:&quot;'awaiting'|'unprocessed'|'inProgress'|'done'|'held'&quot;,&quot;section&quot;:&quot;表示&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;'normal'|'loading'|'empty'|'error'&quot;,&quot;section&quot;:&quot;表示&quot;},&quot;showSuccess&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;表示&quot;},&quot;awaitingCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;件数&quot;},&quot;unprocessedCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;min&quot;:0,&quot;max&quot;:40,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;件数&quot;},&quot;inProgressCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;min&quot;:0,&quot;max&quot;:40,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;件数&quot;},&quot;doneCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:34,&quot;min&quot;:0,&quot;max&quot;:40,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;件数&quot;},&quot;heldCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:10,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;件数&quot;}}">
+class Component extends DCLogic {
+  state = { stage: null, sel: {}, cleared: {} };
+
+  seg(active) {
+    const base = 'flex:1; min-width:0; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; gap:6px; height:66px; padding:10px 12px; border-radius:11px; text-align:left; font:inherit; color:inherit; cursor:pointer; transition:background .15s;';
+    return active
+      ? base + ' background:var(--panel2); border:1px solid var(--line2); box-shadow:inset 0 1px 0 oklch(1 0 0 / 6%);'
+      : base + ' background:transparent; border:1px solid var(--line);';
+  }
+
+  rowStyle(checked) {
+    const base = 'display:grid; grid-template-columns:34px 152px 108px 84px minmax(0,1fr) 92px 104px; align-items:center; gap:0; height:36px; padding:0 14px; border-bottom:1px solid var(--line); font-size:12.5px; white-space:nowrap; cursor:pointer;';
+    return checked ? base + ' background:var(--primary-soft);' : base;
+  }
+
+  go(stage) {
+    return () => this.setState({ stage, sel: {} });
+  }
+
+  renderVals() {
+    const p = this.props;
+    const mode = p.mode ?? 'normal';
+    const loading = mode === 'loading';
+    const error = mode === 'error';
+    const empty = mode === 'empty';
+    const stage = this.state.stage ?? p.stage ?? 'unprocessed';
+
+    const counts = {
+      awaiting: empty || error ? 0 : (p.awaitingCount ?? 2),
+      unprocessed: empty || error ? 0 : (p.unprocessedCount ?? 6),
+      inProgress: empty || error ? 0 : (p.inProgressCount ?? 12),
+      done: empty || error ? 0 : (p.doneCount ?? 34),
+      held: error ? 0 : (p.heldCount ?? 2)
+    };
+
+    const names = ['佐藤 みなみ','高橋 亮','小林 さくら','伊藤 健一','渡辺 ゆき','中村 大輔','山口 あさひ','松本 千夏','岡田 涼','森 ひかる','近藤 悠','石井 奈々'];
+    const zips = ['154-00XX','564-00XX','812-00XX','060-00XX','460-00XX','980-00XX','606-00XX','733-00XX','330-00XX','900-00XX','950-00XX','700-00XX'];
+    const addrs = ['東京都 世田谷区','大阪府 吹田市','福岡県 福岡市博多区','北海道 札幌市中央区','愛知県 名古屋市中区','宮城県 仙台市青葉区','京都府 京都市左京区','広島県 広島市西区','埼玉県 さいたま市浦和区','沖縄県 那覇市','新潟県 新潟市中央区','岡山県 岡山市北区'];
+
+    const meta = {
+      awaiting: i => '受注 09:1' + (i % 10),
+      unprocessed: i => '受注 ' + (9 + (i % 5)) + ':2' + (i % 10),
+      inProgress: () => 'CSV 11:15',
+      done: () => '報告 09:48',
+      held: () => '退避 10:22'
+    };
+    const metaHead = { awaiting: '受注時刻', unprocessed: '受注時刻', inProgress: 'CSV出力', done: '報告日時', held: '退避日時' }[stage];
+
+    const base = { awaiting: 2101, unprocessed: 2071, inProgress: 1955, done: 1902, held: 2044 }[stage];
+    const n = Math.min(counts[stage] ?? 0, 40);
+    const sel = this.state.sel;
+    const rows = Array.from({ length: n }, (_, i) => {
+      const id = '3782-2026091-' + String(base + i).padStart(4, '0');
+      const checked = !!sel[id];
+      return {
+        id, checked,
+        name: names[i % names.length],
+        zip: zips[i % zips.length],
+        addr: addrs[i % addrs.length],
+        meta: meta[stage](i),
+        isHeld: stage === 'held',
+        isDone: stage === 'done',
+        canHold: stage === 'unprocessed' || stage === 'awaiting',
+        style: this.rowStyle(checked),
+        toggle: () => this.setState(s => {
+          const next = Object.assign({}, s.sel);
+          if (next[id]) { delete next[id]; } else { next[id] = true; }
+          return { sel: next };
+        })
+      };
+    });
+
+    const selCount = rows.filter(r => r.checked).length;
+    const targetCount = selCount > 0 ? selCount : n;
+    const targetSource = selCount > 0 ? '選択した行' : '一覧の全件';
+
+    const copy = {
+      awaiting: {
+        kicker: '情報のみ',
+        title: '自動確認を待っています',
+        desc: '受注直後の注文です。自動確認が終わると「未処理」に移り、対象者CSVの対象になります。操作は不要です。',
+        cta: '操作はありません',
+        reason: '自動確認の完了を待ってください',
+        enabled: false, secondary: false, handoff: false
+      },
+      unprocessed: {
+        kicker: 'STEP 1 · 対象者CSV',
+        title: '対象者CSVを作成',
+        desc: 'GoQSystemへ読み込ませ、一括申込・一括決済・一括印刷を行います。一時保存の行は除外されます。',
+        cta: '対象者CSVを作成',
+        reason: '未処理の注文がありません',
+        enabled: n > 0, secondary: true, sA: '一時保存にする', sB: '前回のCSV', handoff: true
+      },
+      inProgress: {
+        kicker: 'STEP 2 · 発送完了報告',
+        title: '発送完了報告CSVを作成',
+        desc: 'クリックポストの追跡番号CSVを取り込み、発送日を添えて6列・Shift-JISで書き出します。',
+        cta: '報告CSVをダウンロード',
+        reason: '追跡番号CSVを取り込んでください',
+        enabled: n > 0, secondary: true, sA: '最新化', sB: '追跡番号CSVを取込', handoff: false
+      },
+      done: {
+        kicker: '再作成',
+        title: '処理済みからCSVを作り直す',
+        desc: '報告まで終わった注文です。控えが必要になったときは、行を選んでCSVを作り直せます。',
+        cta: 'CSVを再作成',
+        reason: '直近7日に処理済みの注文がありません',
+        enabled: n > 0, secondary: true, sA: '報告CSVを再作成', sB: '一覧をCSVで書き出す', handoff: false
+      },
+      held: {
+        kicker: '待機中',
+        title: '一時保存から戻す',
+        desc: '手動で退避した注文です。自動では戻りません。処理できる状態になったら未処理へ戻してください。',
+        cta: '未処理へ戻す',
+        reason: '一時保存中の注文がありません',
+        enabled: n > 0, secondary: true, sA: 'CSVを作成', sB: '一時保存から外す', handoff: false
+      }
+    }[stage];
+
+    const listTitle = { awaiting: '確認待ち', unprocessed: '未処理', inProgress: '作業中', done: '処理済み', held: '一時保存' }[stage];
+    const listNote = {
+      awaiting: '自動確認のあと未処理へ',
+      unprocessed: '発送待ち × CSV未出力 × 一時保存でない',
+      inProgress: 'CSV出力済 · 追跡番号の反映待ち（直近7日）',
+      done: '発送完了報告まで完了（直近7日）',
+      held: '手動で退避 · 全件表示'
+    }[stage];
+    const emptyText = {
+      awaiting: '確認待ちの注文はありません',
+      unprocessed: '未処理の注文はありません',
+      inProgress: '作業中の注文はありません',
+      done: '直近7日に処理済みの注文はありません',
+      held: '一時保存中の注文はありません'
+    }[stage];
+
+    return {
+      cAwaiting: counts.awaiting, cUnprocessed: counts.unprocessed, cInProgress: counts.inProgress, cDone: counts.done, cHeld: counts.held,
+      segAwaiting: this.seg(stage === 'awaiting'), segUnprocessed: this.seg(stage === 'unprocessed'),
+      segInProgress: this.seg(stage === 'inProgress'), segDone: this.seg(stage === 'done'),
+      segHeld: this.seg(stage === 'held') + ' flex:none; width:150px;',
+      goAwaiting: this.go('awaiting'), goUnprocessed: this.go('unprocessed'),
+      goInProgress: this.go('inProgress'), goDone: this.go('done'), goHeld: this.go('held'),
+
+      listTitle, listCount: counts[stage] ?? 0, listNote, metaHead, emptyText,
+      rows, hasRows: n > 0 && !loading && !error,
+      isLoading: loading, isErrorList: error, isEmptyList: !loading && !error && n === 0,
+      allChecked: n > 0 && selCount === n,
+      toggleAll: () => this.setState(s => {
+        const all = rows.length > 0 && rows.every(r => !!s.sel[r.id]);
+        if (all) return { sel: {} };
+        const next = {};
+        rows.forEach(r => { next[r.id] = true; });
+        return { sel: next };
+      }),
+      selCount, hasSelection: selCount > 0,
+      clearSelection: () => this.setState({ sel: {} }),
+
+      stepKicker: copy.kicker,
+      actionTitle: copy.title,
+      actionDesc: copy.desc,
+      targetCount, targetSource,
+      ctaLabel: selCount > 0 ? copy.cta + '（' + selCount + '件）' : copy.cta + '（' + n + '件）',
+      ctaEnabled: copy.enabled && !loading && !error,
+      ctaDisabled: !copy.enabled || loading || error,
+      ctaReason: error ? 'RMSと通信できません' : copy.reason,
+      showSecondary: copy.secondary && !error,
+      secondaryA: copy.sA, secondaryB: copy.sB,
+      showHandoff: copy.handoff,
+      showReportPreview: stage === 'inProgress' && !error && n > 0,
+      showWarning: stage === 'unprocessed' && !error && n > 0,
+      showSuccess: !!p.showSuccess && mode === 'normal',
+      successText: stage === 'inProgress' ? '報告CSVをダウンロードしました。RMSへアップロードしてください。' : targetCount + '件をCSVに出力しました。'
+    };
+  }
+}
+</script>
+</body>
+</html>
