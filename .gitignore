@@ -33,6 +33,15 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
+# ─── Claude Code skill packages (personal, per-machine install) ──
+.agents/
+.claude/skills/
+
+# ─── Design tool raw exports — working copies before curation ───
+# (整理後は展開してLIENmanager/docs/design/配下へ正式取り込みする運用。
+#  生zipは容量が大きく差分も追いづらいためコミット対象外とする)
+/LIENmanager/docs/design/_zip-archive/
+
 # ─── Node — any package dir in the workspace ────────────────────
 node_modules/
 .pnp
