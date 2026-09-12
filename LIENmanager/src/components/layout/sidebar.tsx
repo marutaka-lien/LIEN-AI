@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MessageSquare, Workflow, Package, Sparkles } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Workflow, Package, Shirt, Sparkles } from "lucide-react";
 
 import { useRunningJobCount } from "@/features/automation/hooks/useRunningJobCount";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,11 @@ const NAV_ITEMS = [
     label: "レビュー",
     icon: MessageSquare,
   },
+  {
+    href: "/products",
+    label: "商品管理",
+    icon: Shirt,
+  },
 ];
 
 export function Sidebar() {
@@ -33,7 +38,7 @@ export function Sidebar() {
     <>
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-xl md:flex">
       <div className="flex items-center gap-3 px-5 py-6">
-        <div className="relative flex size-10 items-center justify-center rounded-xl border border-primary-border bg-primary-subtle text-primary shadow-[0_0_28px_oklch(0.78_0.13_205/0.12)]">
+        <div className="relative flex size-10 items-center justify-center rounded-xl border border-primary-border bg-primary-subtle text-primary shadow-[0_0_28px_rgba(189,125,116,0.18)]">
           <Package className="size-5" />
           <Sparkles className="absolute -right-1 -top-1 size-3.5" />
         </div>
@@ -57,7 +62,7 @@ export function Sidebar() {
               className={cn(
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200",
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "bg-primary-subtle text-foreground shadow-[inset_0_0_0_1px_oklch(0.78_0.13_205/0.12)]"
+                isActive && "bg-primary-subtle text-foreground shadow-[inset_0_0_0_1px_rgba(189,125,116,0.18)]"
               )}
             >
               <Icon
@@ -94,7 +99,7 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
-    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-3 rounded-2xl border border-sidebar-border bg-sidebar/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="モバイルナビゲーション">
+    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 rounded-2xl border border-sidebar-border bg-sidebar/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="モバイルナビゲーション">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;

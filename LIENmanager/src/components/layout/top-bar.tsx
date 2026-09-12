@@ -9,6 +9,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/automation": "発送エントリー",
   "/reviews": "レビュー管理",
+  "/products": "商品管理",
 };
 
 function resolvePageTitle(pathname: string): string {

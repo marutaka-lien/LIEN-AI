@@ -1,0 +1,140 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { MOCK_PRODUCTS } from "@/lib/mock-products";
+import type { Product, ProductState } from "@/types/product";
+import { ProductDetailPanel } from "./product-detail-panel";
+import { ProductStateBadge } from "./product-state-badge";
+
+const SORT_OPTIONS = ["売れている順", "在庫が少ない順", "購入率が高い順", "更新が新しい順"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
+
+const STATE_FILTERS: Array<{ value: ProductState | "all"; label: string }> = [
+  { value: "all", label: "すべて" },
+  { value: "公開中", label: "公開中" },
+  { value: "在庫注意", label: "在庫注意" },
+  { value: "下書き", label: "下書き" },
+];
+
+function sortProducts(products: Product[], sort: SortOption): Product[] {
+  const sorted = [...products];
+  switch (sort) {
+    case "在庫が少ない順":
+      return sorted.sort((a, b) => a.stock - b.stock);
+    case "購入率が高い順":
+      return sorted.sort((a, b) => parseFloat(b.cvr) - parseFloat(a.cvr));
+    case "更新が新しい順":
+      return sorted;
+    case "売れている順":
+    default:
+      return sorted.sort((a, b) => b.sold30d - a.sold30d);
+  }
+}
+
+export function ProductList() {
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortOption>("売れている順");
+  const [stateFilter, setStateFilter] = useState<ProductState | "all">("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const byQuery = MOCK_PRODUCTS.filter((p) => {
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
+    });
+    const byState =
+      stateFilter === "all" ? byQuery : byQuery.filter((p) => p.state === stateFilter);
+    return sortProducts(byState, sort);
+  }, [query, sort, stateFilter]);
+
+  const selected = filtered.find((p) => p.id === selectedId) ?? null;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex h-11 w-full items-center gap-2.5 rounded-lg border border-border bg-surface px-4 sm:w-72">
+          <Search className="size-4 text-text-secondary" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="商品名・品番で検索"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-text-secondary"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap gap-2">
+            {STATE_FILTERS.map((chip) => (
+              <button
+                key={chip.value}
+                onClick={() => setStateFilter(chip.value)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  stateFilter === chip.value
+                    ? "border-primary-border bg-primary-subtle text-primary"
+                    : "border-border bg-surface text-text-secondary hover:text-foreground"
+                )}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="h-11 rounded-lg border border-border bg-surface px-3 text-sm"
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border py-20 text-center text-sm text-text-secondary">
+          条件に合う商品がありません。
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((product) => (
+            <button
+              key={product.id}
+              onClick={() => setSelectedId(product.id === selectedId ? null : product.id)}
+              className={cn(
+                "rounded-2xl border bg-surface p-4 text-left transition-colors hover:border-primary-border",
+                selectedId === product.id ? "border-primary-border bg-primary-subtle/40" : "border-border"
+              )}
+            >
+              <div
+                className="aspect-square w-full rounded-xl"
+                style={{
+                  background: `linear-gradient(155deg, ${product.colors[0] ?? "#efe6d8"}, ${product.colors[1] ?? "#e4dbd1"})`,
+                }}
+              />
+              <div className="mt-4 flex items-baseline gap-2.5">
+                <span className="truncate text-sm">{product.name}</span>
+                <ProductStateBadge state={product.state} className="shrink-0" />
+              </div>
+              <div className="mt-2 font-heading text-base">{product.price}</div>
+              <div className="mt-3 flex gap-4 text-xs text-text-secondary">
+                <span>在庫 {product.stock}</span>
+                <span>30日 {product.sold30d}</span>
+                <span>購入率 {product.cvr}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <ProductDetailPanel product={selected} onClose={() => setSelectedId(null)} />
+      )}
+    </div>
+  );
+}
