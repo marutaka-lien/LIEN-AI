@@ -1,9 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(git push:*)",
-      "Bash(git remote:*)"
-    ],
     "deny": [
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~)",
@@ -14,11 +10,12 @@
       "Bash(rm .env)",
       "Bash(rm -f .env)",
       "Bash(rm -rf .env)",
-      "Bash(rm LIENmanager/.env)",
-      "Bash(rm -f LIENmanager/.env)",
-      "Bash(rm -rf LIENmanager/.env)",
-      "Bash(rm -rf BusinessData)",
-      "Bash(rm -rf BusinessData/*)",
+      "Bash(rm .env.local)",
+      "Bash(rm -f .env.local)",
+      "Bash(rm -rf .env.local)",
+      "Bash(rm -rf prisma/dev.db)",
+      "Bash(rm dev.db)",
+      "Bash(rm -f dev.db)",
       "Bash(git push --force*)",
       "Bash(git push -f*)"
     ]
