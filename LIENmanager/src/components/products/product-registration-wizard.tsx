@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MOCK_DRAFTS, REGISTRATION_STEP_LABELS } from "@/lib/mock-products";
+import { REGISTRATION_STEP_LABELS } from "@/lib/mock-products";
 
 type PublishMode = "draft" | "now" | "schedule";
 
@@ -95,7 +95,7 @@ export function ProductRegistrationWizard() {
       {/* 中央: フォーム本体 */}
       <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-surface">
         <div className="min-h-0 flex-1 overflow-auto p-7">
-          <StepContent step={step} publish={publish} onSetPublish={setPublish} onResumeDraft={goTo} />
+          <StepContent step={step} publish={publish} onSetPublish={setPublish} />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border-subtle bg-surface-hover px-7 py-4">
@@ -220,12 +220,10 @@ function StepContent({
   step,
   publish,
   onSetPublish,
-  onResumeDraft,
 }: {
   step: number;
   publish: PublishMode;
   onSetPublish: (mode: PublishMode) => void;
-  onResumeDraft: (step: number) => void;
 }) {
   const eyebrow = (n: number) => (
     <div className="text-xs tracking-wider text-primary">
@@ -283,45 +281,10 @@ function StepContent({
                   中断した登録作業の続きから再開できます。保存から30日を過ぎたものは自動で削除されます。
                 </p>
               </div>
-              <span className="text-xs text-text-secondary">{MOCK_DRAFTS.length} 件</span>
+              <span className="text-xs text-text-secondary">0 件</span>
             </div>
-            <div className="overflow-hidden rounded-xl border border-border">
-              <div className="grid grid-cols-[1.6fr_.9fr_1fr_.9fr_160px] bg-surface-hover text-xs text-text-secondary">
-                <div className="px-4 py-2.5">商品名 ／ 管理番号</div>
-                <div className="px-4 py-2.5">進捗</div>
-                <div className="px-4 py-2.5">最後の保存</div>
-                <div className="px-4 py-2.5">担当</div>
-                <div />
-              </div>
-              {MOCK_DRAFTS.map((draft) => (
-                <div
-                  key={draft.id}
-                  className="grid grid-cols-[1.6fr_.9fr_1fr_.9fr_160px] items-center border-t border-border-subtle bg-surface-elevated"
-                >
-                  <div className="min-w-0 px-4 py-3">
-                    <div className="truncate text-sm">{draft.name}</div>
-                    <div className="mt-1 text-[11px] text-text-disabled">{draft.code}</div>
-                  </div>
-                  <div className="px-4 py-3">
-                    <div className="text-xs text-text-secondary">
-                      STEP {draft.step}　{REGISTRATION_STEP_LABELS[draft.step - 1]}
-                    </div>
-                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-hover">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{ width: `${Math.round((draft.step / TOTAL_STEPS) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 text-xs text-text-secondary">{draft.savedAt}</div>
-                  <div className="px-4 py-3 text-xs text-text-secondary">{draft.owner}</div>
-                  <div className="flex justify-end gap-2 px-4 py-3">
-                    <Button variant="outline" size="sm" onClick={() => onResumeDraft(draft.step)}>
-                      続きから再開
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-hidden rounded-xl border border-dashed border-border py-8 text-center text-xs text-text-secondary">
+              保存された下書きはまだありません（一時保存の保存機能は今後実装予定）
             </div>
           </div>
         </div>

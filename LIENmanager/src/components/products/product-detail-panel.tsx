@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
-import { MOCK_HISTORY, MOCK_SCHEDULES } from "@/lib/mock-products";
 import type { Product } from "@/types/product";
 import { ProductStateBadge } from "./product-state-badge";
 
@@ -15,12 +14,10 @@ export function ProductDetailPanel({
   product: Product;
   onClose: () => void;
 }) {
-  const schedules = MOCK_SCHEDULES[product.id] ?? [];
-  const history = MOCK_HISTORY[product.id] ?? [];
   const maxTrend = product.trend.length > 0 ? Math.max(...product.trend) : 0;
 
   return (
-    <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-surface-elevated shadow-sm">
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-elevated shadow-xl">
       <div className="flex items-center gap-4 border-b border-border-subtle px-6 py-4">
         <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-surface-hover">
           {product.imageUrl ? (
@@ -51,7 +48,7 @@ export function ProductDetailPanel({
         </Button>
       </div>
 
-      <Tabs defaultValue="sales" className="min-h-0 flex-1 gap-0 px-6 py-5">
+      <Tabs defaultValue="sales" className="min-h-0 flex-1 gap-0 overflow-y-auto px-6 py-5">
         <TabsList>
           <TabsTab value="sales">売れ行き</TabsTab>
           <TabsTab value="info">商品情報</TabsTab>
@@ -169,45 +166,15 @@ export function ProductDetailPanel({
         </TabsPanel>
 
         <TabsPanel value="schedule" className="pt-5">
-          {schedules.length === 0 ? (
-            <p className="py-10 text-center text-sm text-text-secondary">
-              この商品に登録されている予約はありません。
-            </p>
-          ) : (
-            <div className="max-w-3xl divide-y divide-border-subtle">
-              {schedules.map((s) => (
-                <div key={s.id} className="flex items-center gap-6 py-4">
-                  <span className="rounded-full bg-success-subtle px-2.5 py-0.5 text-xs text-success-foreground">
-                    {s.state}
-                  </span>
-                  <span className="w-32 font-heading text-base">{s.when}</span>
-                  <span className="flex-1 text-sm text-text-secondary">{s.what}</span>
-                  <Button variant="outline" size="sm">
-                    内容を見る
-                  </Button>
-                  <Button variant="destructive" size="sm">
-                    取り消す
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="py-10 text-center text-sm text-text-secondary">
+            この商品に登録されている予約はありません。（予約機能は今後追加予定）
+          </p>
         </TabsPanel>
 
         <TabsPanel value="history" className="pt-5">
-          {history.length === 0 ? (
-            <p className="py-10 text-center text-sm text-text-secondary">変更履歴はありません。</p>
-          ) : (
-            <div className="max-w-3xl divide-y divide-border-subtle text-sm">
-              {history.map((h) => (
-                <div key={h.id} className="flex items-baseline gap-6 py-3.5">
-                  <span className="w-32 text-text-secondary">{h.when}</span>
-                  <span className="flex-1 text-text-secondary">{h.what}</span>
-                  <span className="text-text-secondary">{h.who}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="py-10 text-center text-sm text-text-secondary">
+            変更履歴はありません。（変更履歴の記録は今後追加予定）
+          </p>
         </TabsPanel>
       </Tabs>
     </div>

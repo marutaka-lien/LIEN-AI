@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +56,15 @@ export function ProductList() {
   }, [data, query, sort, stateFilter]);
 
   const selected = filtered.find((p) => p.id === selectedId) ?? null;
+
+  useEffect(() => {
+    if (!selected) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selected]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -166,9 +175,24 @@ export function ProductList() {
         </div>
       )}
 
-      {selected && (
-        <ProductDetailPanel product={selected} onClose={() => setSelectedId(null)} />
-      )}
+      {/* 商品詳細はグリッド末尾への挿入ではなく、下から重なって出るシート(スライドオーバー)として
+          画面下部に固定表示する。背後の一覧はスクロールしたままで良い(デザイン仕様どおり)。 */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-foreground/20 transition-opacity duration-300 md:left-64",
+          selected ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        onClick={() => setSelectedId(null)}
+        aria-hidden="true"
+      />
+      <div
+        className={cn(
+          "fixed inset-x-0 bottom-20 z-50 flex max-h-[78vh] flex-col transition-transform duration-300 ease-out md:inset-x-6 md:bottom-6 md:left-[17rem]",
+          selected ? "translate-y-0" : "pointer-events-none translate-y-[110%]"
+        )}
+      >
+        {selected && <ProductDetailPanel product={selected} onClose={() => setSelectedId(null)} />}
+      </div>
     </div>
   );
 }
