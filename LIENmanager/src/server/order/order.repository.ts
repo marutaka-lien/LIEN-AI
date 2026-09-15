@@ -13,19 +13,22 @@ function segmentWhere(segment: ShippingSegment, now: Date): Prisma.OrderWhereInp
   const recentSince = getRecentDaysStart(SHIPPING_SEGMENT_RECENT_DAYS, now);
   switch (segment) {
     case "awaiting":
-      return { orderStatus: "100" };
+      return { orderStatus: "100", excludedAt: null };
     case "unprocessed":
-      return { orderStatus: "300", csvExportedAt: null, heldAt: null };
+      return { orderStatus: "300", csvExportedAt: null, heldAt: null, excludedAt: null };
     case "inProgress":
       // gte指定だけでnull(未出力)は自動的に除外される。
       return {
         csvExportedAt: { gte: recentSince },
         shippingReportedAt: null,
+        excludedAt: null,
       };
     case "done":
       return { shippingReportedAt: { gte: recentSince } };
     case "held":
       return { heldAt: { not: null } };
+    case "excluded":
+      return { excludedAt: { not: null } };
   }
 }
 
@@ -125,15 +128,16 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
     },
 
     // 「CSVを作成」ボタン用(全件出力=orderNumbers未指定時)の状態ベース対象判定。
-    // 対象 = orderStatus=300(発送待ち) かつ csvExportedAtが未設定 かつ 一時保存でない。
-    // 受注日には依存しない(2026-08-25経営判断。findClickPostTargetOrdersと同じ方針)。
-    // heldAt(一時保存)除外は2026-09-10発送ページ集約で追加(選択実行時はこの判定を経由
-    // しないため、一時保存中の注文でも選び直せば従来どおりCSV化できる)。待たせている
-    // 時間が長い順(orderedAt昇順)に返す。件数上限は設けない(ClickPost側の1回の
-    // アップロード上限(40件)はCSV作成側で警告として扱う)。
+    // 対象 = orderStatus=300(発送待ち) かつ csvExportedAtが未設定 かつ 一時保存でない
+    // かつ 対象外でない。受注日には依存しない(2026-08-25経営判断。
+    // findClickPostTargetOrdersと同じ方針)。heldAt(一時保存)除外は2026-09-10発送ページ
+    // 集約で追加、excludedAt(対象外)除外は2026-09-15追加(いずれも選択実行時はこの判定を
+    // 経由しないため、一時保存/対象外中の注文でも選び直せば従来どおりCSV化できる)。
+    // 待たせている時間が長い順(orderedAt昇順)に返す。件数上限は設けない(ClickPost側の
+    // 1回のアップロード上限(40件)はCSV作成側で警告として扱う)。
     findCsvExportTargetOrders() {
       return prismaClient.order.findMany({
-        where: { orderStatus: "300", csvExportedAt: null, heldAt: null },
+        where: { orderStatus: "300", csvExportedAt: null, heldAt: null, excludedAt: null },
         orderBy: { orderedAt: "asc" },
       });
     },
@@ -169,11 +173,12 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
 
     // 「発送完了報告CSVを作る」(クリックポスト追跡番号 → RMS発送完了報告データCSV)の
     // 変換対象判定。findCsvExportTargetOrders と同じ「状態ベース」の方針:
-    // 対象 = orderStatus=300(発送待ち) かつ shippingReportedAt が未設定。受注日には依存しない
-    // (日付判定は変換側で「注文日から180日以内」を別途行う)。古い注文から順(orderedAt昇順)。
+    // 対象 = orderStatus=300(発送待ち) かつ shippingReportedAt が未設定 かつ 対象外でない
+    // (excludedAt除外は2026-09-15追加)。受注日には依存しない(日付判定は変換側で
+    // 「注文日から180日以内」を別途行う)。古い注文から順(orderedAt昇順)。
     findShippingReportTargetOrders() {
       return prismaClient.order.findMany({
-        where: { orderStatus: "300", shippingReportedAt: null },
+        where: { orderStatus: "300", shippingReportedAt: null, excludedAt: null },
         orderBy: { orderedAt: "asc" },
       });
     },
@@ -210,7 +215,14 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
     // 発送エントリー「作業メニュー」タブ(2026-09-10 発送ページ集約)。
     // 5セグメントすべての件数を1回で返す(上部フローバー表示用)。
     async countShippingSegments(now: Date = new Date()): Promise<ShippingSegmentCounts> {
-      const segments: ShippingSegment[] = ["awaiting", "unprocessed", "inProgress", "done", "held"];
+      const segments: ShippingSegment[] = [
+        "awaiting",
+        "unprocessed",
+        "inProgress",
+        "done",
+        "held",
+        "excluded",
+      ];
       const counts = await Promise.all(
         segments.map((segment) => prismaClient.order.count({ where: segmentWhere(segment, now) }))
       );
@@ -220,6 +232,7 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
         inProgress: counts[2],
         done: counts[3],
         held: counts[4],
+        excluded: counts[5],
       };
     },
 
@@ -235,7 +248,9 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
             ? { shippingReportedAt: "desc" }
             : segment === "held"
               ? { heldAt: "asc" }
-              : { orderedAt: "asc" };
+              : segment === "excluded"
+                ? { excludedAt: "asc" }
+                : { orderedAt: "asc" };
 
       return prismaClient.order.findMany({
         where: segmentWhere(segment, now),
@@ -253,6 +268,17 @@ export function createOrderRepository(prismaClient: PrismaClient = defaultPrisma
     async setHeldMany(ids: string[], heldAt: Date | null) {
       if (ids.length === 0) return { count: 0 };
       return prismaClient.order.updateMany({ where: { id: { in: ids } }, data: { heldAt } });
+    },
+
+    // 「対象外にする」/「対象外から戻す」の切り替え。excludedAt以外のフィールドには
+    // 一切触れない(RMS同期でも自動で戻したり消したりしない)。
+    setExcluded(id: string, excludedAt: Date | null) {
+      return prismaClient.order.update({ where: { id }, data: { excludedAt } });
+    },
+
+    async setExcludedMany(ids: string[], excludedAt: Date | null) {
+      if (ids.length === 0) return { count: 0 };
+      return prismaClient.order.updateMany({ where: { id: { in: ids } }, data: { excludedAt } });
     },
 
     // 発送エントリー「注文者情報一覧」タブ用。全ステータス・全期間を対象に、

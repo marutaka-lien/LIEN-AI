@@ -28,6 +28,7 @@ function buildOrderDTO(overrides: Partial<OrderDTO> = {}): OrderDTO {
     csvExportedAt: null,
     shippingReportedAt: null,
     heldAt: null,
+    excludedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,

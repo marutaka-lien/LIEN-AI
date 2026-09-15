@@ -32,13 +32,16 @@ export interface OrderDTO {
   // 「一時保存」= 人が手動で退避した目印(2026-09-10 発送ページ集約)。ON=押した時刻、
   // OFF(null)=「未処理へ戻す」/「一時保存から外す」。RMS同期では一切触れない。
   heldAt: string | null;
+  // 「対象外」= アプリでの処理が不要になった目印(2026-09-15)。ON=ゴミ箱ボタンを押した時刻、
+  // OFF(null)=「対象外から戻す」。確認待ち・未処理・処理中のいずれからでもON可能。
+  excludedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 // 発送エントリー「作業メニュー」タブのセグメント切替(2026-09-10 発送ページ集約)。
-// 確認待ち→未処理→作業中→処理済みが基本の流れ、一時保存はいつでも出入りする退避置き場。
-export type ShippingSegment = "awaiting" | "unprocessed" | "inProgress" | "done" | "held";
+// 確認待ち→未処理→作業中→処理済みが基本の流れ、一時保存・対象外はいつでも出入りする退避置き場。
+export type ShippingSegment = "awaiting" | "unprocessed" | "inProgress" | "done" | "held" | "excluded";
 
 export interface ShippingSegmentCounts {
   awaiting: number;
@@ -46,6 +49,7 @@ export interface ShippingSegmentCounts {
   inProgress: number;
   done: number;
   held: number;
+  excluded: number;
 }
 
 // セグメント一覧の1行。氏名・住所などはOrderDTOと同じ粒度で持つ(表示用に絞らない。
@@ -62,6 +66,7 @@ export interface ShippingSegmentRowDTO {
   csvExportedAt: string | null;
   shippingReportedAt: string | null;
   heldAt: string | null;
+  excludedAt: string | null;
 }
 
 export interface ShippingSegmentsDTO {

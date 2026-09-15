@@ -1,9 +1,10 @@
 "use client";
 
-import { CheckCircle2, RotateCcw, Search, TriangleAlert } from "lucide-react";
+import { CheckCircle2, RotateCcw, Search, Trash2, TriangleAlert } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  canExcludeInSegment,
   canHoldInSegment,
   formatOrderAddress,
   getSegmentEmptyText,
@@ -32,7 +33,8 @@ export function ShippingSegmentList({
   onSearchTermChange,
   selection,
   onHold,
-  onUnhold,
+  onExclude,
+  onRestore,
 }: {
   segment: ShippingSegment;
   rows: ShippingSegmentRowDTO[];
@@ -44,7 +46,9 @@ export function ShippingSegmentList({
   onSearchTermChange: (value: string) => void;
   selection: ShippingSegmentListSelection;
   onHold: (id: string) => void;
-  onUnhold: (id: string) => void;
+  onExclude: (id: string) => void;
+  // 一時保存・対象外どちらのタブでも使う「戻す」(2026-09-15)。
+  onRestore: (id: string) => void;
 }) {
   const allChecked = rows.length > 0 && rows.every((row) => selection.selectedIds.has(row.id));
   const selectedCount = rows.filter((row) => selection.selectedIds.has(row.id)).length;
@@ -175,10 +179,10 @@ export function ShippingSegmentList({
                   className="flex items-center justify-end gap-1.5"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  {segment === "held" && (
+                  {(segment === "held" || segment === "excluded") && (
                     <button
                       type="button"
-                      onClick={() => onUnhold(row.id)}
+                      onClick={() => onRestore(row.id)}
                       className="flex h-6 items-center gap-1 whitespace-nowrap rounded-md border border-primary-border bg-primary-subtle px-2 text-[11px] text-primary hover:bg-primary/20"
                     >
                       <RotateCcw className="size-3" aria-hidden />
@@ -198,6 +202,17 @@ export function ShippingSegmentList({
                       className="h-6 whitespace-nowrap rounded-md border border-border-strong px-2 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-foreground"
                     >
                       一時保存
+                    </button>
+                  )}
+                  {canExcludeInSegment(segment) && (
+                    <button
+                      type="button"
+                      onClick={() => onExclude(row.id)}
+                      aria-label="対象外にする"
+                      title="対象外にする（アプリでの処理が不要な注文をここから外す）"
+                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border-strong text-text-secondary hover:border-error-border hover:bg-error-subtle hover:text-error-foreground"
+                    >
+                      <Trash2 className="size-3.5" aria-hidden />
                     </button>
                   )}
                 </span>

@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Archive } from "lucide-react";
+import { Archive, Trash2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { SHIPPING_SEGMENT_LABELS } from "@/lib/shipping-segments";
 import type { ShippingSegment, ShippingSegmentCounts } from "@/types/order";
 
 // 発送エントリー「作業メニュー」の上部フローバー。確認待ち→未処理→作業中→処理済みが
-// 基本の流れ、一時保存は区切りを空けて右端に置く(Claude Design v2モック準拠)。
+// 基本の流れ、一時保存・対象外は区切りを空けて右端に置く(Claude Design v2モック準拠、
+// 対象外は2026-09-15マスター指示で一時保存の隣に追加)。
 const FLOW_SEGMENTS: { segment: ShippingSegment; dotClassName: string }[] = [
   { segment: "awaiting", dotClassName: "bg-status-skipped" },
   { segment: "unprocessed", dotClassName: "bg-warning-foreground" },
@@ -47,6 +48,14 @@ export function ShippingFlowBar({
         label={SHIPPING_SEGMENT_LABELS.held}
         count={counts?.held ?? null}
         onClick={() => onChange("held")}
+        className="w-[150px] shrink-0"
+      />
+      <SegmentButton
+        active={active === "excluded"}
+        icon={<Trash2 className="size-[13px] text-muted-foreground" aria-hidden />}
+        label={SHIPPING_SEGMENT_LABELS.excluded}
+        count={counts?.excluded ?? null}
+        onClick={() => onChange("excluded")}
         className="w-[150px] shrink-0"
       />
     </div>

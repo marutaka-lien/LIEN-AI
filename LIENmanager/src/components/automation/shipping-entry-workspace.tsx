@@ -8,6 +8,7 @@ import { ShippingFlowBar } from "@/components/automation/shipping-flow-bar";
 import { ShippingSegmentList } from "@/components/automation/shipping-segment-list";
 import { ShippingTodayHistory } from "@/components/automation/shipping-today-history";
 import { createClickPostCsv } from "@/features/orders/create-csv";
+import { setOrderExcluded, setOrdersExcludedMany } from "@/features/orders/exclude-actions";
 import { setOrderHeld, setOrdersHeldMany } from "@/features/orders/hold-actions";
 import { useShippingSegments } from "@/features/orders/hooks/useShippingSegments";
 import { CLICKPOST_CSV_FIELD_LABELS, type ClickPostCsvUnmappableReport } from "@/types/clickpost-csv";
@@ -23,6 +24,7 @@ export function ShippingEntryWorkspace() {
   const [unmappableReport, setUnmappableReport] = useState<ClickPostCsvUnmappableReport>([]);
   const [isCreatingCsv, setIsCreatingCsv] = useState(false);
   const [isUpdatingHold, setIsUpdatingHold] = useState(false);
+  const [isUpdatingExclude, setIsUpdatingExclude] = useState(false);
 
   const { data, error, isLoading, refresh } = useShippingSegments(active);
 
@@ -121,6 +123,61 @@ export function ShippingEntryWorkspace() {
     }
   }
 
+  // 確認待ち・未処理・作業中のいずれからでも「対象外にする」(2026-09-15)。
+  async function handleExclude(id: string) {
+    setIsUpdatingExclude(true);
+    try {
+      await setOrderExcluded(id, true);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      await refresh();
+    } finally {
+      setIsUpdatingExclude(false);
+    }
+  }
+
+  // 一覧行の「戻す」。一時保存タブからは一時保存を外し、対象外タブからは対象外を外す
+  // (どちらの一覧を見ているかはactiveで分かる)。
+  async function handleRestore(id: string) {
+    if (active === "excluded") {
+      setIsUpdatingExclude(true);
+      try {
+        await setOrderExcluded(id, false);
+        await refresh();
+      } finally {
+        setIsUpdatingExclude(false);
+      }
+      return;
+    }
+    await handleUnhold(id);
+  }
+
+  async function handleExcludeSelected() {
+    setIsUpdatingExclude(true);
+    try {
+      await setOrdersExcludedMany(Array.from(selectedIds), true);
+      setSelectedIds(new Set());
+      await refresh();
+    } finally {
+      setIsUpdatingExclude(false);
+    }
+  }
+
+  async function handleRestoreSelected() {
+    setIsUpdatingExclude(true);
+    try {
+      const ids = selectedIds.size > 0 ? Array.from(selectedIds) : rows.map((row) => row.id);
+      await setOrdersExcludedMany(ids, false);
+      setSelectedIds(new Set());
+      await refresh();
+    } finally {
+      setIsUpdatingExclude(false);
+    }
+  }
+
   async function handleCreateCsv() {
     setIsCreatingCsv(true);
     try {
@@ -160,7 +217,8 @@ export function ShippingEntryWorkspace() {
           onSearchTermChange={setSearchTerm}
           selection={{ selectedIds, onToggle: toggle, onToggleAll: toggleAll }}
           onHold={handleHold}
-          onUnhold={handleUnhold}
+          onExclude={handleExclude}
+          onRestore={handleRestore}
         />
 
         <aside className="flex min-w-0 flex-col gap-3">
@@ -173,6 +231,9 @@ export function ShippingEntryWorkspace() {
             onHoldSelected={handleHoldSelected}
             onUnholdSelected={handleUnholdSelected}
             isUpdatingHold={isUpdatingHold}
+            onExcludeSelected={handleExcludeSelected}
+            onRestoreSelected={handleRestoreSelected}
+            isUpdatingExclude={isUpdatingExclude}
             onReportDone={refresh}
           />
 

@@ -4,13 +4,20 @@ import { orderService } from "@/server/order/order.service";
 import { createDefaultRmsService } from "@/server/integrations/rms/rms-service";
 import type { ShippingSegment } from "@/types/order";
 
-const VALID_SEGMENTS: ShippingSegment[] = ["awaiting", "unprocessed", "inProgress", "done", "held"];
+const VALID_SEGMENTS: ShippingSegment[] = [
+  "awaiting",
+  "unprocessed",
+  "inProgress",
+  "done",
+  "held",
+  "excluded",
+];
 
 function isShippingSegment(value: string | null): value is ShippingSegment {
   return value !== null && (VALID_SEGMENTS as string[]).includes(value);
 }
 
-// 発送エントリー「作業メニュー」タブ用。5セグメントすべての件数(フローバー表示)と、
+// 発送エントリー「作業メニュー」タブ用。6セグメントすべての件数(フローバー表示)と、
 // 選択中セグメントの一覧を1回で返す。旧/orders画面のuseOrderList({pendingOnly:true})が
 // 担っていた「画面を開くたびRMSと同期する」役割をこのルートが引き継ぐ(2026-09-10
 // 発送ページ集約でこの画面が唯一の常時ポーリング先になったため)。RMS側が失敗しても

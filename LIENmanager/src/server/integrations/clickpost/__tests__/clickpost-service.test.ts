@@ -30,6 +30,7 @@ function buildOrder(overrides: Partial<Order> = {}): Order {
     csvExportedAt: null,
     shippingReportedAt: null,
     heldAt: null,
+    excludedAt: null,
     rawPayload: null,
     createdAt: new Date("2026-07-22T00:00:00Z"),
     updatedAt: new Date("2026-07-22T00:00:00Z"),

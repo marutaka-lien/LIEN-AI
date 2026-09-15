@@ -70,6 +70,13 @@ model Order {
   // heldAt あり の注文を除外するために使う。注文データ自体は消さず、注文者情報一覧には残る。
   heldAt DateTime?
 
+  // 「対象外」= アプリでの処理が不要になった注文の目印(2026-09-15 マスター指示)。
+  // ON = 一覧行のゴミ箱ボタンを押した時刻。OFF(null) = 「対象外から戻す」。
+  // 確認待ち・未処理・処理中のいずれからでもON可能(RMS側で手入力対応した等、アプリの
+  // キューに残り続けても意味が無くなった注文を退避する用途)。手動でのみON/OFFし、
+  // RMS同期では一切触れない。注文データ自体は消さず、注文者情報一覧には残る。
+  excludedAt DateTime?
+
   rawPayload String? // RMS APIレスポンス生データ(JSON文字列)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

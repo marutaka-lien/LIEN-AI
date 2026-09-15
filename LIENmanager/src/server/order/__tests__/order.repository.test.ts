@@ -191,6 +191,22 @@ describe("orderRepository.findCsvExportTargetOrders / markCsvExported", () => {
     expect(targetOrderNumbers).not.toContain("csv-held");
     expect(targetOrderNumbers).toContain("csv-not-held");
   });
+
+  it("対象外(excludedAtあり)の注文はCSV作成の全件対象から除外される(2026-09-15)", async () => {
+    const excluded = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "csv-excluded", orderStatus: "300" })
+    );
+    await repository.setExcluded(excluded.id, new Date());
+    await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "csv-not-excluded", orderStatus: "300" })
+    );
+
+    const targets = await repository.findCsvExportTargetOrders();
+    const targetOrderNumbers = targets.map((o) => o.orderNumber);
+
+    expect(targetOrderNumbers).not.toContain("csv-excluded");
+    expect(targetOrderNumbers).toContain("csv-not-excluded");
+  });
 });
 
 describe("orderRepository.setHeld / setHeldMany", () => {
@@ -235,6 +251,48 @@ describe("orderRepository.setHeld / setHeldMany", () => {
   });
 });
 
+describe("orderRepository.setExcluded / setExcludedMany", () => {
+  let prisma: PrismaClient;
+  let repository: ReturnType<typeof createOrderRepository>;
+
+  beforeAll(async () => {
+    prisma = await createTestPrismaClient();
+    repository = createOrderRepository(prisma);
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
+
+  it("setExcludedはexcludedAtだけを更新する", async () => {
+    const order = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "exclude-single", orderStatus: "300", ordererName: "対象外 花子" })
+    );
+
+    const excluded = await repository.setExcluded(order.id, new Date("2026-09-15T01:00:00Z"));
+    expect(excluded.excludedAt).toEqual(new Date("2026-09-15T01:00:00Z"));
+    expect(excluded.ordererName).toBe("対象外 花子");
+
+    const restored = await repository.setExcluded(order.id, null);
+    expect(restored.excludedAt).toBeNull();
+  });
+
+  it("setExcludedManyは複数件を一括で更新し、空配列では何もしない", async () => {
+    const a = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "exclude-many-a", orderStatus: "300" })
+    );
+    const b = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "exclude-many-b", orderStatus: "300" })
+    );
+
+    const result = await repository.setExcludedMany([a.id, b.id], new Date());
+    expect(result.count).toBe(2);
+
+    const empty = await repository.setExcludedMany([], new Date());
+    expect(empty.count).toBe(0);
+  });
+});
+
 describe("orderRepository.countShippingSegments / findSegmentOrders", () => {
   let prisma: PrismaClient;
   let repository: ReturnType<typeof createOrderRepository>;
@@ -248,7 +306,7 @@ describe("orderRepository.countShippingSegments / findSegmentOrders", () => {
     await prisma.$disconnect();
   });
 
-  it("5セグメントの判定条件どおりに件数・一覧を返す", async () => {
+  it("6セグメントの判定条件どおりに件数・一覧を返す", async () => {
     const now = new Date("2026-09-10T12:00:00Z");
     const withinWeek = new Date("2026-09-08T00:00:00Z");
     const overWeek = new Date("2026-08-01T00:00:00Z");
@@ -281,12 +339,24 @@ describe("orderRepository.countShippingSegments / findSegmentOrders", () => {
     await repository.markCsvExported([doneOne.id], withinWeek);
     await repository.markShippingReported([doneOne.id], withinWeek);
 
+    const excludedFromUnprocessed = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "seg-excluded-unprocessed", orderStatus: "300" })
+    );
+    await repository.setExcluded(excludedFromUnprocessed.id, now);
+
+    const excludedFromInProgress = await repository.upsertByChannelAndOrderNumber(
+      buildInput({ orderNumber: "seg-excluded-in-progress", orderStatus: "300" })
+    );
+    await repository.markCsvExported([excludedFromInProgress.id], withinWeek);
+    await repository.setExcluded(excludedFromInProgress.id, now);
+
     const counts = await repository.countShippingSegments(now);
     expect(counts.awaiting).toBeGreaterThanOrEqual(1);
     expect(counts.unprocessed).toBeGreaterThanOrEqual(1);
     expect(counts.inProgress).toBe(1); // 直近7日超のseg-in-progress-oldは含まない
     expect(counts.done).toBeGreaterThanOrEqual(1);
     expect(counts.held).toBeGreaterThanOrEqual(1);
+    expect(counts.excluded).toBe(2);
 
     const heldRows = await repository.findSegmentOrders("held", 200, now);
     expect(heldRows.map((o) => o.orderNumber)).toContain("seg-held");
@@ -295,10 +365,19 @@ describe("orderRepository.countShippingSegments / findSegmentOrders", () => {
     const inProgressOrderNumbers = inProgressRows.map((o) => o.orderNumber);
     expect(inProgressOrderNumbers).toContain("seg-in-progress");
     expect(inProgressOrderNumbers).not.toContain("seg-in-progress-old");
+    // 対象外にした注文は処理中セグメントには出ない。
+    expect(inProgressOrderNumbers).not.toContain("seg-excluded-in-progress");
 
     const unprocessedRows = await repository.findSegmentOrders("unprocessed", 200, now);
-    // 一時保存中の注文は未処理セグメントには出ない。
-    expect(unprocessedRows.map((o) => o.orderNumber)).not.toContain("seg-held");
+    const unprocessedOrderNumbers = unprocessedRows.map((o) => o.orderNumber);
+    // 一時保存中・対象外の注文は未処理セグメントには出ない。
+    expect(unprocessedOrderNumbers).not.toContain("seg-held");
+    expect(unprocessedOrderNumbers).not.toContain("seg-excluded-unprocessed");
+
+    const excludedRows = await repository.findSegmentOrders("excluded", 200, now);
+    const excludedOrderNumbers = excludedRows.map((o) => o.orderNumber);
+    expect(excludedOrderNumbers).toContain("seg-excluded-unprocessed");
+    expect(excludedOrderNumbers).toContain("seg-excluded-in-progress");
   });
 });
 

@@ -12,6 +12,7 @@ export const SHIPPING_SEGMENT_ORDER: ShippingSegment[] = [
   "inProgress",
   "done",
   "held",
+  "excluded",
 ];
 
 export const SHIPPING_SEGMENT_LABELS: Record<ShippingSegment, string> = {
@@ -20,6 +21,7 @@ export const SHIPPING_SEGMENT_LABELS: Record<ShippingSegment, string> = {
   inProgress: "作業中",
   done: "処理済み",
   held: "一時保存",
+  excluded: "対象外",
 };
 
 const LIST_NOTE: Record<ShippingSegment, string> = {
@@ -28,6 +30,7 @@ const LIST_NOTE: Record<ShippingSegment, string> = {
   inProgress: "CSV出力済 · 追跡番号の反映待ち（直近7日）",
   done: "発送完了報告まで完了（直近7日）",
   held: "手動で退避 · 全件表示",
+  excluded: "アプリでの処理が不要 · 全件表示",
 };
 
 const EMPTY_TEXT: Record<ShippingSegment, string> = {
@@ -36,6 +39,7 @@ const EMPTY_TEXT: Record<ShippingSegment, string> = {
   inProgress: "作業中の注文はありません",
   done: "直近7日に処理済みの注文はありません",
   held: "一時保存中の注文はありません",
+  excluded: "対象外の注文はありません",
 };
 
 const META_HEAD: Record<ShippingSegment, string> = {
@@ -44,6 +48,7 @@ const META_HEAD: Record<ShippingSegment, string> = {
   inProgress: "CSV出力",
   done: "報告日時",
   held: "退避日時",
+  excluded: "対象外日時",
 };
 
 export function getSegmentListNote(segment: ShippingSegment): string {
@@ -70,7 +75,9 @@ export function getSegmentRowMetaValue(
         ? row.shippingReportedAt
         : segment === "held"
           ? row.heldAt
-          : row.orderedAt;
+          : segment === "excluded"
+            ? row.excludedAt
+            : row.orderedAt;
   return iso ? formatJstDateTime(iso) : "—";
 }
 
@@ -86,6 +93,13 @@ export function formatOrderAddress(row: {
 // held/inProgress/doneでは出さない(作業中・処理済みの注文を今から退避する意味がないため)。
 export function canHoldInSegment(segment: ShippingSegment): boolean {
   return segment === "awaiting" || segment === "unprocessed";
+}
+
+// 確認待ち・未処理・作業中の行だけ「対象外にする」(ゴミ箱ボタン)を出す(2026-09-15
+// マスター指示)。done/held/excludedでは出さない(処理済み・すでに退避済みの注文を
+// 今から対象外にする意味がないため)。
+export function canExcludeInSegment(segment: ShippingSegment): boolean {
+  return segment === "awaiting" || segment === "unprocessed" || segment === "inProgress";
 }
 
 export interface ShippingSegmentCopy {
@@ -137,6 +151,14 @@ const COPY: Record<ShippingSegment, ShippingSegmentCopy> = {
     desc: "手動で退避した注文です。自動では戻りません。処理できる状態になったら未処理へ戻してください。",
     ctaLabelBase: "未処理へ戻す",
     disabledReason: "一時保存中の注文がありません",
+    actionable: true,
+  },
+  excluded: {
+    kicker: "対象外",
+    title: "対象外から戻す",
+    desc: "アプリでの処理が不要になったとして手動で外した注文です。自動では戻りません。もう一度アプリで扱いたい場合は戻してください。",
+    ctaLabelBase: "対象外から戻す",
+    disabledReason: "対象外の注文がありません",
     actionable: true,
   },
 };

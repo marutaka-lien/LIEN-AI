@@ -27,6 +27,9 @@ export interface ShippingActionPanelProps {
   onHoldSelected: () => Promise<void> | void;
   onUnholdSelected: () => Promise<void> | void;
   isUpdatingHold: boolean;
+  onExcludeSelected: () => Promise<void> | void;
+  onRestoreSelected: () => Promise<void> | void;
+  isUpdatingExclude: boolean;
   onReportDone: () => void;
 }
 
@@ -41,6 +44,9 @@ export function ShippingActionPanel({
   onHoldSelected,
   onUnholdSelected,
   isUpdatingHold,
+  onExcludeSelected,
+  onRestoreSelected,
+  isUpdatingExclude,
   onReportDone,
 }: ShippingActionPanelProps) {
   const copy = getSegmentCopy(segment);
@@ -74,8 +80,10 @@ export function ShippingActionPanel({
           hasSelection={hasSelection}
           isCreatingCsv={isCreatingCsv}
           isUpdatingHold={isUpdatingHold}
+          isUpdatingExclude={isUpdatingExclude}
           onCreateCsv={onCreateCsv}
           onHoldSelected={onHoldSelected}
+          onExcludeSelected={onExcludeSelected}
         />
       )}
 
@@ -107,6 +115,15 @@ export function ShippingActionPanel({
         />
       )}
 
+      {segment === "excluded" && (
+        <ExcludedActions
+          n={n}
+          hasSelection={hasSelection}
+          isUpdatingExclude={isUpdatingExclude}
+          onRestoreSelected={onRestoreSelected}
+        />
+      )}
+
       {!copy.actionable && (
         <p className="text-[11.5px] text-text-secondary">{copy.disabledReason}</p>
       )}
@@ -119,15 +136,19 @@ function UnprocessedActions({
   hasSelection,
   isCreatingCsv,
   isUpdatingHold,
+  isUpdatingExclude,
   onCreateCsv,
   onHoldSelected,
+  onExcludeSelected,
 }: {
   n: number;
   hasSelection: boolean;
   isCreatingCsv: boolean;
   isUpdatingHold: boolean;
+  isUpdatingExclude: boolean;
   onCreateCsv: () => Promise<void> | void;
   onHoldSelected: () => Promise<void> | void;
+  onExcludeSelected: () => Promise<void> | void;
 }) {
   const enabled = n > 0 && !isCreatingCsv;
   return (
@@ -162,6 +183,16 @@ function UnprocessedActions({
           className="h-8 rounded-lg border border-border-strong text-xs text-text-secondary hover:bg-surface-hover hover:text-foreground disabled:opacity-60"
         >
           選択した行を一時保存にする
+        </button>
+      )}
+      {hasSelection && (
+        <button
+          type="button"
+          onClick={() => onExcludeSelected()}
+          disabled={isUpdatingExclude}
+          className="h-8 rounded-lg border border-border-strong text-xs text-text-secondary hover:border-error-border hover:bg-error-subtle hover:text-error-foreground disabled:opacity-60"
+        >
+          選択した行を対象外にする
         </button>
       )}
       <div className="mt-1 flex items-center gap-2 border-t border-border-subtle pt-2.5 text-[11.5px] text-text-secondary">
@@ -215,6 +246,41 @@ function HeldActions({
           className="h-8 rounded-lg border border-border-strong text-xs text-text-secondary hover:bg-surface-hover hover:text-foreground disabled:opacity-60"
         >
           選択した行でCSVを作成
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ExcludedActions({
+  n,
+  hasSelection,
+  isUpdatingExclude,
+  onRestoreSelected,
+}: {
+  n: number;
+  hasSelection: boolean;
+  isUpdatingExclude: boolean;
+  onRestoreSelected: () => Promise<void> | void;
+}) {
+  const enabled = n > 0 && !isUpdatingExclude;
+  return (
+    <div className="flex flex-col gap-2">
+      {enabled ? (
+        <button
+          type="button"
+          onClick={() => onRestoreSelected()}
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[13.5px] font-semibold text-primary-foreground hover:bg-primary-hover active:bg-primary-active disabled:opacity-60"
+        >
+          対象外から戻す{hasSelection ? `（選択${n}件）` : `（${n}件）`}
+        </button>
+      ) : (
+        <button
+          type="button"
+          disabled
+          className="flex h-10 w-full cursor-not-allowed items-center justify-center rounded-lg border border-border-strong text-[13.5px] font-semibold text-text-disabled"
+        >
+          対象外から戻す
         </button>
       )}
     </div>

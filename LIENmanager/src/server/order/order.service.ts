@@ -50,6 +50,7 @@ export const orderService = {
           ? order.shippingReportedAt.toISOString()
           : null,
         heldAt: order.heldAt ? order.heldAt.toISOString() : null,
+        excludedAt: order.excludedAt ? order.excludedAt.toISOString() : null,
       })),
     };
   },
@@ -62,6 +63,16 @@ export const orderService = {
 
   async setHeldMany(ids: string[], held: boolean): Promise<{ count: number }> {
     return orderRepository.setHeldMany(ids, held ? new Date() : null);
+  },
+
+  // 「対象外にする」/「対象外から戻す」。
+  async setExcluded(id: string, excluded: boolean): Promise<OrderDTO> {
+    const order = await orderRepository.setExcluded(id, excluded ? new Date() : null);
+    return toOrderDTO(order);
+  },
+
+  async setExcludedMany(ids: string[], excluded: boolean): Promise<{ count: number }> {
+    return orderRepository.setExcludedMany(ids, excluded ? new Date() : null);
   },
 
   // 発送エントリー「注文者情報一覧」タブ用。
