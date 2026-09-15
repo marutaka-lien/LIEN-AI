@@ -40,7 +40,7 @@ export function createRmsItemService(deps: RmsItemServiceDeps): RmsItemService {
       skippedCount += parsed.skippedCount;
 
       for (const item of parsed.items) {
-        products.push(RmsItemMapper.toProduct(item));
+        products.push(RmsItemMapper.toProduct(item, config.itemImageBaseUrl));
       }
 
       offset += hits;

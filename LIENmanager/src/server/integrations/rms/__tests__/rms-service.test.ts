@@ -24,6 +24,7 @@ function buildConfig(overrides: Partial<RmsConfig> = {}): RmsConfig {
     requestTimeoutMs: 30000,
     itemSearchPath: "/es/2.0/items/search",
     itemSearchHits: 100,
+    itemImageBaseUrl: "https://image.rakuten.co.jp/test-shop/cabinet",
     ...overrides,
   };
 }

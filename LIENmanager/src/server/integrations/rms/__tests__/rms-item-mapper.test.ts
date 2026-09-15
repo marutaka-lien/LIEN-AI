@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { RmsItemMapper } from "../rms-item-mapper";
 import type { RmsItemModel } from "../rms-item-types";
 
+const IMAGE_BASE_URL = "https://image.rakuten.co.jp/test-shop/cabinet";
+
 function buildRmsItem(overrides: Partial<RmsItemModel> = {}): RmsItemModel {
   return {
     manageNumber: "1000000151",
@@ -52,7 +54,7 @@ describe("RmsItemMapper.toProduct", () => {
   it("RMS商品モデルからProduct型へ変換する(基本ケース)", () => {
     const item = buildRmsItem();
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.id).toBe("1000000151");
     expect(product.name).toBe("ワンピース レディース");
@@ -70,7 +72,7 @@ describe("RmsItemMapper.toProduct", () => {
   it("hideItem:trueの商品は下書き扱いにする", () => {
     const item = buildRmsItem({ hideItem: true });
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.state).toBe("下書き");
   });
@@ -78,7 +80,7 @@ describe("RmsItemMapper.toProduct", () => {
   it("在庫・売上・購入率・評価は商品APIに存在しないためnullにする(捏造しない)", () => {
     const item = buildRmsItem();
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.stock).toBeNull();
     expect(product.sold30d).toBeNull();
@@ -102,7 +104,7 @@ describe("RmsItemMapper.toProduct", () => {
       },
     });
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.price).toBe("¥2,680");
   });
@@ -110,7 +112,7 @@ describe("RmsItemMapper.toProduct", () => {
   it("価格情報が無い場合は「－」を表示する", () => {
     const item = buildRmsItem({ variants: {} });
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.price).toBe("－");
   });
@@ -126,15 +128,35 @@ describe("RmsItemMapper.toProduct", () => {
       ],
     });
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.colors).toEqual(["#c9c2b8"]);
+  });
+
+  it("CABINET画像がある場合、ショップ固有のimageBaseUrlと連結して画像URLを組み立てる", () => {
+    const item = buildRmsItem({
+      images: [{ type: "CABINET", location: "/12487046/12678117/yp02.jpg", alt: "商品画像" }],
+    });
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
+
+    expect(product.imageUrl).toBe(
+      "https://image.rakuten.co.jp/test-shop/cabinet/12487046/12678117/yp02.jpg"
+    );
+  });
+
+  it("画像が無い場合はimageUrlをnullにする(フロント側でグラデーション表示にフォールバック)", () => {
+    const item = buildRmsItem({ images: [] });
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
+
+    expect(product.imageUrl).toBeNull();
   });
 
   it("titleが無い場合はプレースホルダーを表示する", () => {
     const item = buildRmsItem({ title: undefined });
 
-    const product = RmsItemMapper.toProduct(item);
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.name).toBe("(タイトル未設定)");
   });

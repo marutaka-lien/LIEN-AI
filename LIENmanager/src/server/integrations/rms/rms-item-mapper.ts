@@ -8,7 +8,9 @@ import type { RmsItemModel, RmsItemVariant } from "./rms-item-types";
 // 無いままダミー値を表示すると捏造に見えるため、null(表示側で「－」)とする。
 // 2026-09-15 マスター指示: 週次販売数字の記録が十分に蓄積してから実データを載せる。
 export const RmsItemMapper = {
-  toProduct(item: RmsItemModel): Product {
+  // imageBaseUrl: RmsConfig.itemImageBaseUrl(例: https://image.rakuten.co.jp/{ショップURL}/cabinet)。
+  // R-Cabinet画像のURLはショップ固有のため、このファイル内にドメインを埋め込まず呼び出し側から渡す。
+  toProduct(item: RmsItemModel, imageBaseUrl: string): Product {
     const variants = Object.values(item.variants ?? {});
     const prices = variants
       .map((v) => (v.standardPrice !== undefined ? Number(v.standardPrice) : NaN))
@@ -33,6 +35,7 @@ export const RmsItemMapper = {
       state: deriveState(item.hideItem),
       updatedAt: formatUpdatedAt(item.updated),
       description: item.tagline ?? "",
+      imageUrl: extractImageUrl(item, imageBaseUrl),
       colors: colorNames.map(colorNameToHex),
       sizes: sizeNames,
       stockMatrix: [] as ProductStockRow[],
@@ -40,6 +43,14 @@ export const RmsItemMapper = {
     };
   },
 };
+
+function extractImageUrl(item: RmsItemModel, imageBaseUrl: string): string | null {
+  const image =
+    (item.images ?? []).find((img) => img.type === "CABINET" && img.location) ??
+    (item.images ?? []).find((img) => img.location);
+  if (!image?.location) return null;
+  return `${imageBaseUrl}${image.location}`;
+}
 
 function deriveState(hideItem: boolean | undefined): ProductState {
   return hideItem ? "下書き" : "公開中";

@@ -28,6 +28,7 @@ export const MOCK_PRODUCTS: Product[] = [
     updatedAt: "9/10 17:20",
     description:
       "やわらかな落ち感と、程よいボリュームのギャザーが魅力のブラウス。オンにもオフにも使える、シーズンレスな一枚です。",
+    imageUrl: null,
     colors: ["#efe6d8", "#e2d3bd", "#8f9d8c", "#2f3a52"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -55,6 +56,7 @@ export const MOCK_PRODUCTS: Product[] = [
     updatedAt: "9/9 11:05",
     description:
       "ウエストのリボンでシルエットを自由に。一枚で着姿が決まる、軽やかなロングワンピースです。",
+    imageUrl: null,
     colors: ["#efe6d8", "#ddcbb4", "#93a2c4"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -81,6 +83,7 @@ export const MOCK_PRODUCTS: Product[] = [
     updatedAt: "9/8 15:42",
     description:
       "肩の力を抜いたリラックスシルエット。深すぎないVネックで、インナーを選ばず羽織れます。",
+    imageUrl: null,
     colors: ["#7f8c7a", "#dcd6cb", "#9aa398"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -107,6 +110,7 @@ export const MOCK_PRODUCTS: Product[] = [
     updatedAt: "9/7 09:30",
     description:
       "深めのタックで脚のラインを拾わない、きれいめワイドパンツ。丈感は9分でバランスよく。",
+    imageUrl: null,
     colors: ["#e8dfd0", "#d6c7b0", "#9aa7bd"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -132,6 +136,7 @@ export const MOCK_PRODUCTS: Product[] = [
     state: "在庫注意",
     updatedAt: "9/6 13:12",
     description: "小花を敷きつめた総柄スカート。ふわりと広がる裾で、歩くたびに軽やかな印象に。",
+    imageUrl: null,
     colors: ["#6f6a63", "#ddd6cc"],
     sizes: ["S", "M"],
     stockMatrix: [
@@ -156,6 +161,7 @@ export const MOCK_PRODUCTS: Product[] = [
     state: "公開中",
     updatedAt: "9/5 18:04",
     description: "長く着られる定番の丈感とディテール。裏地つきで、肌寒い季節の始まりから活躍します。",
+    imageUrl: null,
     colors: ["#e6dccb", "#cfc0a8", "#2f3a52"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -181,6 +187,7 @@ export const MOCK_PRODUCTS: Product[] = [
     state: "公開中",
     updatedAt: "9/4 10:22",
     description: "首元をやさしく覆うハイネック。一枚でも重ね着でも心地よく着られる、定番のインナーです。",
+    imageUrl: null,
     colors: ["#efe6d8", "#2f3a52", "#d8c97f"],
     sizes: ["S", "M", "L"],
     stockMatrix: [
@@ -206,6 +213,7 @@ export const MOCK_PRODUCTS: Product[] = [
     state: "下書き",
     updatedAt: "9/3 16:48",
     description: "短め丈で重心を上げる、風通しのよいリネンブラウス。ボトムスを選ばず合わせられます。",
+    imageUrl: null,
     colors: ["#efe6d8", "#d8c97f"],
     sizes: ["S", "M"],
     stockMatrix: [

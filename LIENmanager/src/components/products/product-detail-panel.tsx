@@ -22,12 +22,19 @@ export function ProductDetailPanel({
   return (
     <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-surface-elevated shadow-sm">
       <div className="flex items-center gap-4 border-b border-border-subtle px-6 py-4">
-        <div
-          className="size-10 shrink-0 rounded-lg"
-          style={{
-            background: `linear-gradient(155deg, ${product.colors[0] ?? "#efe6d8"}, ${product.colors[1] ?? "#e4dbd1"})`,
-          }}
-        />
+        <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-surface-hover">
+          {product.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- 楽天R-Cabinetの外部ドメイン画像のためnext/imageの最適化対象外
+            <img src={product.imageUrl} alt={product.name} className="size-full object-cover" />
+          ) : (
+            <div
+              className="size-full"
+              style={{
+                background: `linear-gradient(155deg, ${product.colors[0] ?? "#efe6d8"}, ${product.colors[1] ?? "#e4dbd1"})`,
+              }}
+            />
+          )}
+        </div>
         <div className="flex min-w-0 items-center gap-3">
           <h2 className="truncate font-heading text-lg">{product.name}</h2>
           <ProductStateBadge state={product.state} />

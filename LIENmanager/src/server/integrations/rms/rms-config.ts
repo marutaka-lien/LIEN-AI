@@ -22,6 +22,10 @@ const RmsEnvSchema = z.object({
   // かつhitsは1〜100の範囲であることを確認済み(超えるとIE0003エラー)。
   RMS_ITEM_SEARCH_PATH: z.string().min(1).default("/es/2.0/items/search"),
   RMS_ITEM_SEARCH_HITS: z.coerce.number().int().min(1).max(100).default(100),
+  // 商品画像(R-Cabinet)のURLは https://image.rakuten.co.jp/{ショップURL}/cabinet{location}
+  // で配信されることを実画像への疎通確認(2026-09-15)で確認済み。ショップURLは非公開情報ではない
+  // (楽天市場の店舗ページURL: https://item.rakuten.co.jp/lien-ame/)。
+  RMS_SHOP_URL: z.string().min(1).default("lien-ame"),
 });
 
 export interface RmsConfig {
@@ -38,6 +42,7 @@ export interface RmsConfig {
   requestTimeoutMs: number;
   itemSearchPath: string;
   itemSearchHits: number;
+  itemImageBaseUrl: string;
 }
 
 // 環境変数はモジュール読み込み時ではなく、実際にRMSへアクセスするタイミングで検証する。
@@ -67,6 +72,7 @@ export function loadRmsConfig(env: NodeJS.ProcessEnv = process.env): RmsConfig {
     requestTimeoutMs: data.RMS_REQUEST_TIMEOUT_MS,
     itemSearchPath: data.RMS_ITEM_SEARCH_PATH,
     itemSearchHits: data.RMS_ITEM_SEARCH_HITS,
+    itemImageBaseUrl: `https://image.rakuten.co.jp/${data.RMS_SHOP_URL}/cabinet`,
   };
 }
 

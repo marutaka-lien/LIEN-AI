@@ -27,6 +27,7 @@ export type Product = {
   state: ProductState;
   updatedAt: string;
   description: string;
+  imageUrl: string | null;
   colors: string[];
   sizes: string[];
   stockMatrix: ProductStockRow[];

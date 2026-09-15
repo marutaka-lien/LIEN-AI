@@ -133,12 +133,24 @@ export function ProductList() {
                 selectedId === product.id ? "border-primary-border bg-primary-subtle/40" : "border-border"
               )}
             >
-              <div
-                className="aspect-square w-full rounded-xl"
-                style={{
-                  background: `linear-gradient(155deg, ${product.colors[0] ?? "#efe6d8"}, ${product.colors[1] ?? "#e4dbd1"})`,
-                }}
-              />
+              <div className="aspect-square w-full overflow-hidden rounded-xl bg-surface-hover">
+                {product.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- 楽天R-Cabinetの外部ドメイン画像のためnext/imageの最適化対象外
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="size-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div
+                    className="size-full"
+                    style={{
+                      background: `linear-gradient(155deg, ${product.colors[0] ?? "#efe6d8"}, ${product.colors[1] ?? "#e4dbd1"})`,
+                    }}
+                  />
+                )}
+              </div>
               <div className="mt-4 flex items-baseline gap-2.5">
                 <span className="truncate text-sm">{product.name}</span>
                 <ProductStateBadge state={product.state} className="shrink-0" />
