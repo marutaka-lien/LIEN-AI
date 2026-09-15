@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { MOCK_PRODUCTS } from "@/lib/mock-products";
+import { useProducts } from "@/features/products/hooks/useProducts";
 import type { Product, ProductState } from "@/types/product";
 import { ProductDetailPanel } from "./product-detail-panel";
 import { ProductStateBadge } from "./product-state-badge";
@@ -23,33 +23,37 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
   const sorted = [...products];
   switch (sort) {
     case "在庫が少ない順":
-      return sorted.sort((a, b) => a.stock - b.stock);
+      return sorted.sort((a, b) => (a.stock ?? Infinity) - (b.stock ?? Infinity));
     case "購入率が高い順":
-      return sorted.sort((a, b) => parseFloat(b.cvr) - parseFloat(a.cvr));
+      return sorted.sort(
+        (a, b) => (b.cvr ? parseFloat(b.cvr) : -Infinity) - (a.cvr ? parseFloat(a.cvr) : -Infinity)
+      );
     case "更新が新しい順":
       return sorted;
     case "売れている順":
     default:
-      return sorted.sort((a, b) => b.sold30d - a.sold30d);
+      return sorted.sort((a, b) => (b.sold30d ?? -Infinity) - (a.sold30d ?? -Infinity));
   }
 }
 
 export function ProductList() {
+  const { data, error, isLoading, refresh } = useProducts();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOption>("売れている順");
   const [stateFilter, setStateFilter] = useState<ProductState | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
+    const products = data?.products ?? [];
     const q = query.trim().toLowerCase();
-    const byQuery = MOCK_PRODUCTS.filter((p) => {
+    const byQuery = products.filter((p) => {
       if (!q) return true;
       return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
     });
     const byState =
       stateFilter === "all" ? byQuery : byQuery.filter((p) => p.state === stateFilter);
     return sortProducts(byState, sort);
-  }, [query, sort, stateFilter]);
+  }, [data, query, sort, stateFilter]);
 
   const selected = filtered.find((p) => p.id === selectedId) ?? null;
 
@@ -93,10 +97,28 @@ export function ProductList() {
               </option>
             ))}
           </select>
+          <button
+            onClick={refresh}
+            disabled={isLoading}
+            className="flex h-11 items-center gap-2 rounded-lg border border-border bg-surface px-3 text-sm text-text-secondary transition-colors hover:text-foreground disabled:opacity-60"
+          >
+            <RefreshCw className={cn("size-4", isLoading && "animate-spin")} />
+            最新化
+          </button>
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {error && (
+        <div className="rounded-xl border border-warning-border bg-warning-subtle px-4 py-3 text-sm text-warning-foreground">
+          楽天(RMS)から商品データを取得できませんでした。{error}
+        </div>
+      )}
+
+      {isLoading && !data ? (
+        <div className="rounded-2xl border border-dashed border-border py-20 text-center text-sm text-text-secondary">
+          楽天(RMS)から商品データを取得しています…
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border py-20 text-center text-sm text-text-secondary">
           条件に合う商品がありません。
         </div>
@@ -123,9 +145,9 @@ export function ProductList() {
               </div>
               <div className="mt-2 font-heading text-base">{product.price}</div>
               <div className="mt-3 flex gap-4 text-xs text-text-secondary">
-                <span>在庫 {product.stock}</span>
-                <span>30日 {product.sold30d}</span>
-                <span>購入率 {product.cvr}</span>
+                <span>在庫 {product.stock ?? "－"}</span>
+                <span>30日 {product.sold30d ?? "－"}</span>
+                <span>購入率 {product.cvr ?? "－"}</span>
               </div>
             </button>
           ))}

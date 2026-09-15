@@ -7,7 +7,8 @@ import type {
 
 /**
  * 見た目確認用のダミーデータ（架空の商品）。
- * プロジェクトM第1段階＝UIのみ実装のため、楽天APIとは接続していない。
+ * 2026-09-15時点、商品一覧・詳細パネルはRMS商品APIの実データに切り替え済みのため
+ * 未使用（MOCK_SCHEDULES/MOCK_HISTORY/MOCK_DRAFTSは予約・履歴・下書きがまだ未接続のため使用中）。
  */
 export const MOCK_PRODUCTS: Product[] = [
   {

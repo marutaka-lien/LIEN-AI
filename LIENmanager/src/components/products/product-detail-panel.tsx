@@ -17,7 +17,7 @@ export function ProductDetailPanel({
 }) {
   const schedules = MOCK_SCHEDULES[product.id] ?? [];
   const history = MOCK_HISTORY[product.id] ?? [];
-  const maxTrend = Math.max(...product.trend);
+  const maxTrend = product.trend.length > 0 ? Math.max(...product.trend) : 0;
 
   return (
     <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-surface-elevated shadow-sm">
@@ -55,25 +55,30 @@ export function ProductDetailPanel({
         <TabsPanel value="sales" className="pt-5">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_minmax(0,1fr)]">
             <div className="grid grid-cols-2 gap-5">
-              <Metric label="直近30日の販売" value={`${product.sold30d}`} />
-              <Metric label="購入率" value={product.cvr} />
-              <Metric label="今月の売上" value={product.revenue} />
-              <Metric label="レビュー" value={product.rating} />
+              <Metric label="直近30日の販売" value={product.sold30d !== null ? `${product.sold30d}` : "－"} />
+              <Metric label="購入率" value={product.cvr ?? "－"} />
+              <Metric label="今月の売上" value={product.revenue ?? "－"} />
+              <Metric label="レビュー" value={product.rating ?? "－"} />
             </div>
             <div>
               <div className="flex items-baseline justify-between">
                 <span className="text-xs text-text-secondary">販売動向　直近6ヶ月</span>
-                <span className="text-xs text-text-secondary">※ 架空データ</span>
               </div>
-              <div className="mt-4 flex h-28 items-end gap-1.5">
-                {product.trend.map((value, index) => (
-                  <span
-                    key={index}
-                    className="w-full rounded-t bg-primary/60"
-                    style={{ height: `${Math.max(6, (value / maxTrend) * 100)}%` }}
-                  />
-                ))}
-              </div>
+              {product.trend.length > 0 ? (
+                <div className="mt-4 flex h-28 items-end gap-1.5">
+                  {product.trend.map((value, index) => (
+                    <span
+                      key={index}
+                      className="w-full rounded-t bg-primary/60"
+                      style={{ height: `${Math.max(6, (value / maxTrend) * 100)}%` }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 flex h-28 items-center justify-center rounded-xl border border-dashed border-border-subtle text-xs text-text-secondary">
+                  週次データを蓄積中です
+                </div>
+              )}
             </div>
           </div>
         </TabsPanel>
@@ -86,15 +91,15 @@ export function ProductDetailPanel({
                 <dt className="text-text-secondary">品番</dt>
                 <dd>{product.code}</dd>
                 <dt className="text-text-secondary">カテゴリ</dt>
-                <dd>{product.category}</dd>
+                <dd>{product.category ?? "－"}</dd>
                 <dt className="text-text-secondary">素材</dt>
-                <dd>{product.material}</dd>
+                <dd>{product.material ?? "－"}</dd>
                 <dt className="text-text-secondary">シーズン</dt>
-                <dd>{product.season}</dd>
+                <dd>{product.season ?? "－"}</dd>
                 <dt className="text-text-secondary">価格</dt>
                 <dd>{product.price}</dd>
                 <dt className="text-text-secondary">在庫合計</dt>
-                <dd>{product.stock}</dd>
+                <dd>{product.stock ?? "－"}</dd>
               </dl>
               <div className="mt-7 flex gap-3">
                 <Button onClick={() => toast.info("デモ操作です（プロジェクトM 第2段階で実装予定）")}>
@@ -110,6 +115,11 @@ export function ProductDetailPanel({
             </div>
             <div>
               <span className="text-xs text-text-secondary">色とサイズの在庫</span>
+              {product.stockMatrix.length === 0 ? (
+                <div className="mt-3 rounded-xl border border-dashed border-border-subtle py-8 text-center text-xs text-text-secondary">
+                  在庫データは未対応です（在庫APIとの連携は今後追加予定）
+                </div>
+              ) : (
               <div className="mt-3 overflow-hidden rounded-xl border border-border-subtle">
                 <div
                   className="grid border-b border-border-subtle bg-surface-hover text-center text-xs text-text-secondary"
@@ -146,6 +156,7 @@ export function ProductDetailPanel({
                   </div>
                 ))}
               </div>
+              )}
             </div>
           </div>
         </TabsPanel>

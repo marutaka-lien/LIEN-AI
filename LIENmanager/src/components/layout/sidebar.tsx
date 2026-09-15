@@ -19,14 +19,14 @@ const NAV_ITEMS = [
     icon: Workflow,
   },
   {
-    href: "/reviews",
-    label: "レビュー",
-    icon: MessageSquare,
-  },
-  {
     href: "/products",
     label: "商品管理",
     icon: Shirt,
+  },
+  {
+    href: "/reviews",
+    label: "レビュー",
+    icon: MessageSquare,
   },
 ];
 

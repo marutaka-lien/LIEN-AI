@@ -22,6 +22,8 @@ function buildConfig(overrides: Partial<RmsConfig> = {}): RmsConfig {
     searchMaxRecordsPerPage: 200,
     requestIntervalMs: 0,
     requestTimeoutMs: 30000,
+    itemSearchPath: "/es/2.0/items/search",
+    itemSearchHits: 100,
     ...overrides,
   };
 }
