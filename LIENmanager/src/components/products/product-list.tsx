@@ -166,8 +166,8 @@ export function ProductList() {
                   />
                 )}
               </div>
-              <div className="mt-4 flex items-baseline gap-2.5">
-                <span className="truncate text-sm">{product.name}</span>
+              <div className="mt-4 flex min-w-0 items-baseline gap-2.5">
+                <span className="min-w-0 truncate text-sm">{product.name}</span>
                 <ProductStateBadge state={product.state} className="shrink-0" />
               </div>
               <div className="mt-2 font-heading text-base">{product.price}</div>

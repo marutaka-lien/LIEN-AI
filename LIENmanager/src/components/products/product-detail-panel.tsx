@@ -32,9 +32,9 @@ export function ProductDetailPanel({
             />
           )}
         </div>
-        <div className="flex min-w-0 items-center gap-3">
-          <h2 className="truncate font-heading text-lg">{product.name}</h2>
-          <ProductStateBadge state={product.state} />
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <h2 className="min-w-0 truncate font-heading text-lg">{product.name}</h2>
+          <ProductStateBadge state={product.state} className="shrink-0" />
         </div>
         <span className="text-xs text-text-secondary">{product.code}</span>
         <Button

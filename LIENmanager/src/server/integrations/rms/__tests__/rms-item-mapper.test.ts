@@ -183,6 +183,24 @@ describe("RmsItemMapper.toProduct", () => {
     expect(product.stockMatrix).toEqual([]);
   });
 
+  it("先頭の【販促文言】を取り除いて表示名にする(一覧の省略表示で商品名が読めるように)", () => {
+    const item = buildRmsItem({
+      title: "【15日は当店P5倍＆クーポンあり】ワンピース レディース 秋 前開き ノーアイロン",
+    });
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
+
+    expect(product.name).toBe("ワンピース レディース 秋 前開き ノーアイロン");
+  });
+
+  it("本文中の【】や、先頭の【】除去後に何も残らない場合は元のタイトルのままにする", () => {
+    const item = buildRmsItem({ title: "【夏限定】" });
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
+
+    expect(product.name).toBe("【夏限定】");
+  });
+
   it("titleが無い場合はプレースホルダーを表示する", () => {
     const item = buildRmsItem({ title: undefined });
 

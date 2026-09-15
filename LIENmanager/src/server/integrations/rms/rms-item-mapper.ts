@@ -27,7 +27,7 @@ export const RmsItemMapper = {
 
     return {
       id: item.manageNumber,
-      name: item.title ?? "(タイトル未設定)",
+      name: stripPromoPrefix(item.title) ?? "(タイトル未設定)",
       code: item.itemNumber ?? item.manageNumber,
       category: null,
       material: findAttributeValue(variants, "素材"),
@@ -49,6 +49,16 @@ export const RmsItemMapper = {
     };
   },
 };
+
+// 楽天の商品名は先頭に「【15日は当店P5倍＆クーポンあり】」のような販促文言が付くことが多く、
+// 一覧カードの限られた幅で省略表示すると販促文言しか見えず商品名が分からなくなる。
+// 先頭1個だけの【...】を取り除き、実際の商品名から表示・省略できるようにする
+// (本文中の【】や複数連続する【】はそのまま残す＝過剰に削らない)。
+function stripPromoPrefix(title: string | undefined): string | null {
+  if (!title) return null;
+  const stripped = title.replace(/^【[^】]*】\s*/, "").trim();
+  return stripped.length > 0 ? stripped : title;
+}
 
 function extractImageUrl(item: RmsItemModel, imageBaseUrl: string): string | null {
   const image =
