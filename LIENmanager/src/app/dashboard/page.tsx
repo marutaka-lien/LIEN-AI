@@ -1,47 +1,43 @@
-import { PackageCheck } from "lucide-react";
-
 import { PageHeader } from "@/components/layout/page-header";
 import { AlertPanel } from "@/components/dashboard/operations/alert-panel";
 import { MetricTile } from "@/components/dashboard/operations/metric-tile";
 import { NextActionCard } from "@/components/dashboard/operations/next-action-card";
-import { OperationLog } from "@/components/dashboard/operations/operation-log";
 import { OperationsClock } from "@/components/dashboard/operations/operations-clock";
 import { ShippingPipeline } from "@/components/dashboard/operations/shipping-pipeline";
-import { ThroughputChart } from "@/components/dashboard/operations/throughput-chart";
+import { SalesKpiRow } from "@/components/dashboard/sales/sales-kpi-row";
+import { SalesTrendChart } from "@/components/dashboard/sales/sales-trend-chart";
 import {
   buildPipelineStages,
-  buildThroughputSeries,
   deriveOperationAlerts,
   formatJstHm,
 } from "@/lib/operations-dashboard";
-import { automationJobService } from "@/server/automation/automation-job.service";
 import { orderRepository } from "@/server/order/order.repository";
 import { reviewRepository } from "@/server/review/review.repository";
+import { listWeeklySales } from "@/server/sales/weekly-sales.service";
 
 export const dynamic = "force-dynamic";
 
 // C案（ハイブリッド型）: 1画面を「いま やること＝作業」「きょうの ようす＝把握」の2ゾーンに分ける。
+// 右ゾーンは2026-09-15マスター指示により「本日の発送処理状況」から「週次販売実績」へ差し替え
+// （発送処理状況は/automationで直接見るため、ここで参照する実用性が無いとの判断）。
 // すべて実データ。取れないものは空状態で出し、値は捏造しない。
 
 export default async function DashboardPage() {
-  const [overview, shippingToday, timeline, unrepliedReviews, recentJobs] = await Promise.all([
+  const [overview, shippingToday, unrepliedReviews, weeklySales] = await Promise.all([
     orderRepository.countOperationsOverview(),
     orderRepository.getTodayShippingReportSummary(),
-    orderRepository.getTodayOrderTimeline(),
     reviewRepository.countUnreplied(),
-    automationJobService.listRecentJobs(5),
+    listWeeklySales(),
   ]);
 
   const checkedAt = formatJstHm(new Date());
   const alerts = deriveOperationAlerts({ awaitingConfirm: overview.awaitingConfirm });
-  const series = buildThroughputSeries(timeline.orderedAt, timeline.shippedAt);
   const stages = buildPipelineStages({
     awaitingConfirm: overview.awaitingConfirm,
     pendingShip: overview.csvUnexported,
     csvExported: overview.csvExported,
     shippedToday: shippingToday.count,
   });
-  const shipDone = overview.pendingShip === 0;
 
   return (
     <>
@@ -108,22 +104,11 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* 右: 把握 */}
+        {/* 右: 把握（週次販売実績） */}
         <div className="flex flex-col gap-4">
-          <ZoneHeading title="実績モニタリング" tag="MONITORING" />
-          <ThroughputChart series={series} />
-          <OperationLog jobs={recentJobs} />
-          {shipDone && (
-            <section className="flex items-center gap-2.5 rounded-xl border border-success-border bg-success-subtle px-4 py-3.5">
-              <PackageCheck className="size-4 shrink-0 text-success-foreground" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold">本日の発送は完了</p>
-                <p className="text-xs text-text-secondary">
-                  発送待ち 0件。新しい受注が入るとここに表示されます。
-                </p>
-              </div>
-            </section>
-          )}
+          <ZoneHeading title="週次販売実績" tag="WEEKLY SALES" />
+          <SalesKpiRow records={weeklySales} />
+          <SalesTrendChart records={weeklySales} />
         </div>
       </div>
     </>
