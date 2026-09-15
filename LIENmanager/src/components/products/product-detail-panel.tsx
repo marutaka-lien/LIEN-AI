@@ -121,7 +121,7 @@ export function ProductDetailPanel({
               <span className="text-xs text-text-secondary">色とサイズの在庫</span>
               {product.stockMatrix.length === 0 ? (
                 <div className="mt-3 rounded-xl border border-dashed border-border-subtle py-8 text-center text-xs text-text-secondary">
-                  在庫データは未対応です（在庫APIとの連携は今後追加予定）
+                  在庫データを取得できませんでした
                 </div>
               ) : (
               <div className="mt-3 overflow-hidden rounded-xl border border-border-subtle">

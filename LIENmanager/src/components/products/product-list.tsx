@@ -123,6 +123,12 @@ export function ProductList() {
         </div>
       )}
 
+      {!error && data?.inventoryError && (
+        <div className="rounded-xl border border-warning-border bg-warning-subtle px-4 py-3 text-sm text-warning-foreground">
+          在庫数の取得に失敗しました（商品情報は表示していますが在庫は「－」のままです）。{data.inventoryError}
+        </div>
+      )}
+
       {isLoading && !data ? (
         <div className="rounded-2xl border border-dashed border-border py-20 text-center text-sm text-text-secondary">
           楽天(RMS)から商品データを取得しています…

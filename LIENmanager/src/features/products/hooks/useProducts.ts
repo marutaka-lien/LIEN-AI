@@ -8,6 +8,7 @@ export interface ProductsResult {
   products: Product[];
   totalFound: number;
   skippedCount: number;
+  inventoryError: string | null;
 }
 
 async function fetchProducts(): Promise<ProductsResult> {

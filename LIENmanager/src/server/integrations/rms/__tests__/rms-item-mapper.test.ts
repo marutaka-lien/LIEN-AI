@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { inventoryKey } from "../rms-inventory-types";
 import { RmsItemMapper } from "../rms-item-mapper";
 import type { RmsItemModel } from "../rms-item-types";
 
@@ -151,6 +152,35 @@ describe("RmsItemMapper.toProduct", () => {
     const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL);
 
     expect(product.imageUrl).toBeNull();
+  });
+
+  it("在庫API(inventoryByKey)を渡すと在庫数・在庫マトリクスに実数を反映する", () => {
+    const item = buildRmsItem();
+    const inventoryByKey = new Map<string, number>([
+      [inventoryKey("1000000151", "YP-02beige"), 5],
+      [inventoryKey("1000000151", "YP-02black"), 3],
+    ]);
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL, inventoryByKey);
+
+    expect(product.stock).toBe(8);
+    expect(product.sizes).toEqual(["フリーサイズ"]);
+    expect(product.stockMatrix).toEqual([
+      { color: "ベージュ", swatch: "#ddcbb4", cells: [5] },
+      { color: "ブラック", swatch: "#2b2b2b", cells: [3] },
+    ]);
+  });
+
+  it("inventoryByKeyに該当バリアントが1件も無い場合は在庫「－」のままにする(捏造しない)", () => {
+    const item = buildRmsItem();
+    const inventoryByKey = new Map<string, number>([
+      [inventoryKey("別の管理番号", "別のバリアント"), 99],
+    ]);
+
+    const product = RmsItemMapper.toProduct(item, IMAGE_BASE_URL, inventoryByKey);
+
+    expect(product.stock).toBeNull();
+    expect(product.stockMatrix).toEqual([]);
   });
 
   it("titleが無い場合はプレースホルダーを表示する", () => {

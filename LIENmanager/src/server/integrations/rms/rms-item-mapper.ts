@@ -1,23 +1,29 @@
 import type { Product, ProductState, ProductStockRow } from "@/types/product";
+import { inventoryKey } from "./rms-inventory-types";
 import type { RmsItemModel, RmsItemVariant } from "./rms-item-types";
 
 // RmsItemModel(RMS商品API固有の形) → アプリ共通のProduct型への変換のみを責務とする。
 //
-// 既知の制約: 商品API 2.0には在庫数・売上・購入率・レビュー評価が含まれない
-// (在庫は在庫API、売上等はRMSに存在しない社内集計値のため)。これらは実データが
-// 無いままダミー値を表示すると捏造に見えるため、null(表示側で「－」)とする。
-// 2026-09-15 マスター指示: 週次販売数字の記録が十分に蓄積してから実データを載せる。
+// 既知の制約: 商品API 2.0には売上・購入率・レビュー評価が含まれない(RMSに存在しない
+// 社内集計値のため)。これらは実データが無いままダミー値を表示すると捏造に見えるため、
+// null(表示側で「－」)とする。2026-09-15 マスター指示: 売れ行き系はマスターが別途
+// CSVから作成するまで待つ。在庫数は在庫API 2.0(inventories.bulk-get)から実数を取れるため
+// inventoryByKey(呼び出し側で一括取得済みのMap)を渡された場合のみ実数を載せる。
 export const RmsItemMapper = {
   // imageBaseUrl: RmsConfig.itemImageBaseUrl(例: https://image.rakuten.co.jp/{ショップURL}/cabinet)。
   // R-Cabinet画像のURLはショップ固有のため、このファイル内にドメインを埋め込まず呼び出し側から渡す。
-  toProduct(item: RmsItemModel, imageBaseUrl: string): Product {
-    const variants = Object.values(item.variants ?? {});
+  // inventoryByKey: `${manageNumber}::${variantId}` -> 在庫数。未指定の場合は在庫「－」表示のまま
+  // (在庫APIを呼ばない/呼べなかった場合でも商品一覧自体は表示できるようにするため)。
+  toProduct(item: RmsItemModel, imageBaseUrl: string, inventoryByKey?: Map<string, number>): Product {
+    const variantEntries = Object.entries(item.variants ?? {});
+    const variants = variantEntries.map(([, v]) => v);
     const prices = variants
       .map((v) => (v.standardPrice !== undefined ? Number(v.standardPrice) : NaN))
       .filter((n) => Number.isFinite(n));
 
     const colorNames = extractColorNames(item);
     const sizeNames = extractSizeNames(item, variants);
+    const stock = buildStock(item, variantEntries, colorNames, sizeNames, inventoryByKey);
 
     return {
       id: item.manageNumber,
@@ -27,7 +33,7 @@ export const RmsItemMapper = {
       material: findAttributeValue(variants, "素材"),
       season: findAttributeValue(variants, "シーズン"),
       price: formatPriceRange(prices),
-      stock: null,
+      stock: stock.total,
       sold30d: null,
       cvr: null,
       revenue: null,
@@ -37,8 +43,8 @@ export const RmsItemMapper = {
       description: item.tagline ?? "",
       imageUrl: extractImageUrl(item, imageBaseUrl),
       colors: colorNames.map(colorNameToHex),
-      sizes: sizeNames,
-      stockMatrix: [] as ProductStockRow[],
+      sizes: stock.sizes,
+      stockMatrix: stock.matrix,
       trend: [],
     };
   },
@@ -105,6 +111,81 @@ function findAttributeValue(variants: RmsItemVariant[], nameIncludes: string): s
     if (attribute && attribute.values.length > 0) return attribute.values.join("・");
   }
   return null;
+}
+
+function variantSelectorKey(item: RmsItemModel, nameIncludes: string): string | undefined {
+  return (item.variantSelectors ?? []).find((s) => (s.displayName ?? "").includes(nameIncludes))
+    ?.key;
+}
+
+// バリアント1件の色を決める。カラーのセレクター値を優先し、無ければ属性(カラー系)を見る。
+function colorForVariant(variant: RmsItemVariant, colorSelectorKey: string | undefined): string | null {
+  if (colorSelectorKey) {
+    const fromSelector = variant.selectorValues?.[colorSelectorKey];
+    if (fromSelector) return fromSelector;
+  }
+  const attribute = (variant.attributes ?? []).find((a) => a.name.includes("カラー"));
+  return attribute?.values[0] ?? null;
+}
+
+// バリアント1件のサイズを決める。extractSizeNamesと同じ優先順位(セレクター→属性)。
+function sizeForVariant(variant: RmsItemVariant, sizeSelectorKey: string | undefined): string | null {
+  if (sizeSelectorKey) {
+    const fromSelector = variant.selectorValues?.[sizeSelectorKey];
+    if (fromSelector) return fromSelector;
+  }
+  const attribute = (variant.attributes ?? []).find((a) => a.name.includes("サイズ"));
+  return attribute?.values[0] ?? null;
+}
+
+interface StockResult {
+  total: number | null;
+  matrix: ProductStockRow[];
+  sizes: string[];
+}
+
+// 在庫API(inventories.bulk-get)の結果をバリアント単位で突き合わせ、
+// 色×サイズの在庫表と合計在庫数を組み立てる。inventoryByKeyが無い/該当が1件も
+// 無い場合は在庫「－」のまま(捏造しない)。
+function buildStock(
+  item: RmsItemModel,
+  variantEntries: Array<[string, RmsItemVariant]>,
+  colorNames: string[],
+  sizeNames: string[],
+  inventoryByKey: Map<string, number> | undefined
+): StockResult {
+  if (!inventoryByKey) return { total: null, matrix: [], sizes: sizeNames };
+
+  const colorSelectorKey = variantSelectorKey(item, "カラー");
+  const sizeSelectorKey = variantSelectorKey(item, "サイズ");
+  const effectiveColors = colorNames.length > 0 ? colorNames : ["本体"];
+  const effectiveSizes = sizeNames.length > 0 ? sizeNames : ["数量"];
+
+  const cellQuantities = new Map<string, number>();
+  let total = 0;
+  let matched = false;
+
+  for (const [variantId, variant] of variantEntries) {
+    const quantity = inventoryByKey.get(inventoryKey(item.manageNumber, variantId));
+    if (quantity === undefined) continue;
+    matched = true;
+    total += quantity;
+
+    const color = colorForVariant(variant, colorSelectorKey) ?? effectiveColors[0];
+    const size = sizeForVariant(variant, sizeSelectorKey) ?? effectiveSizes[0];
+    const cellKey = `${color}::${size}`;
+    cellQuantities.set(cellKey, (cellQuantities.get(cellKey) ?? 0) + quantity);
+  }
+
+  if (!matched) return { total: null, matrix: [], sizes: sizeNames };
+
+  const matrix: ProductStockRow[] = effectiveColors.map((color) => ({
+    color,
+    swatch: colorNames.length > 0 ? colorNameToHex(color) : "#c9c2b8",
+    cells: effectiveSizes.map((size) => cellQuantities.get(`${color}::${size}`) ?? 0),
+  }));
+
+  return { total, matrix, sizes: effectiveSizes };
 }
 
 // 商品API 2.0のカラー値は表示名(日本語)のみでスウォッチ用の色コードを持たないため、

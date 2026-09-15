@@ -25,6 +25,7 @@ function buildConfig(overrides: Partial<RmsConfig> = {}): RmsConfig {
     itemSearchPath: "/es/2.0/items/search",
     itemSearchHits: 100,
     itemImageBaseUrl: "https://image.rakuten.co.jp/test-shop/cabinet",
+    inventoryBulkGetPath: "/es/2.0/inventories/bulk-get",
     ...overrides,
   };
 }

@@ -26,6 +26,9 @@ const RmsEnvSchema = z.object({
   // で配信されることを実画像への疎通確認(2026-09-15)で確認済み。ショップURLは非公開情報ではない
   // (楽天市場の店舗ページURL: https://item.rakuten.co.jp/lien-ame/)。
   RMS_SHOP_URL: z.string().min(1).default("lien-ame"),
+  // 在庫API 2.0(inventories.bulk-get)。実APIへの疎通確認(2026-09-15)で
+  // POST + {inventories:[{manageNumber,variantId}]} 形式、691件一括でも成功することを確認済み。
+  RMS_INVENTORY_BULK_GET_PATH: z.string().min(1).default("/es/2.0/inventories/bulk-get"),
 });
 
 export interface RmsConfig {
@@ -43,6 +46,7 @@ export interface RmsConfig {
   itemSearchPath: string;
   itemSearchHits: number;
   itemImageBaseUrl: string;
+  inventoryBulkGetPath: string;
 }
 
 // 環境変数はモジュール読み込み時ではなく、実際にRMSへアクセスするタイミングで検証する。
@@ -73,6 +77,7 @@ export function loadRmsConfig(env: NodeJS.ProcessEnv = process.env): RmsConfig {
     itemSearchPath: data.RMS_ITEM_SEARCH_PATH,
     itemSearchHits: data.RMS_ITEM_SEARCH_HITS,
     itemImageBaseUrl: `https://image.rakuten.co.jp/${data.RMS_SHOP_URL}/cabinet`,
+    inventoryBulkGetPath: data.RMS_INVENTORY_BULK_GET_PATH,
   };
 }
 
