@@ -32,6 +32,8 @@
 | `C:\lien_AI_manage\Gram\` | グラムのプロフィール(`PROFILE.md`)と課題メモ |
 | `C:\lien_AI_manage\Shared\` | 全員が共有する優先事項・承認・決定・数字の定義 |
 | `C:\lien_AI_manage\BusinessData\` | 個人情報を除いた販売実績・公開レビューなど、過去と比較するための元データ |
+| `C:\lien_AI_manage\Money\` | AI活用 新規収益源構築(プロジェクトO)の作業場。市場調査・企画・投稿案・投稿記録を扱う |
+| `C:\lien_AI_manage\CashFlow\` | 資金繰り・お金の管理(プロジェクトN、保留中)の作業場。現金残高・入出金の集計値のみ扱う |
 | `C:\lien_AI_manage\LIENmanager\` | 発送・レビュー対応を自動化する自社Webアプリ(Next.js)。大規模なのでCEO作業場とは分離 |
 
 記憶(メモリ)はフォルダ内ではなく `C:\Users\lien-\.claude\projects\<プロジェクトキー>\memory\` に
