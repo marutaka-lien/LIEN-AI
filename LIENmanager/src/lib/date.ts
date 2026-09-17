@@ -14,6 +14,26 @@ export function getJstDayRange(now: Date = new Date()): { start: Date; end: Date
   return { start, end };
 }
 
+// 「直近N日」の開始時刻(N日前の同時刻)を返す。発送エントリー画面の作業中/処理済み
+// セグメント(直近7日で絞る)向け。JST日付境界ではなく単純な経過時間で判定する
+// (「7日前の同時刻から現在まで」であり、日付が変わった瞬間に一覧から消えるわけではない)。
+export function getRecentDaysStart(days: number, now: Date = new Date()): Date {
+  return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+}
+
+// 日本時間で "M/D HH:mm" に整形する。発送エントリー「作業メニュー」の一覧行(受注時刻・
+// CSV出力・報告日時・退避日時)向け。今日とは限らない日付を扱うため月日まで出す
+// (時刻だけのformatJstHmとは用途が違う)。
+export function formatJstDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tokyo",
+  });
+}
+
 // 日本時間で "YYYYMMDD_HHMMSS" 形式に整形する。1日に複数回作成され得る
 // ファイル名の一意性・可読性を確保するために使う(ClickPost CSV出力等)。
 export function formatJstTimestampCompact(now: Date = new Date()): string {

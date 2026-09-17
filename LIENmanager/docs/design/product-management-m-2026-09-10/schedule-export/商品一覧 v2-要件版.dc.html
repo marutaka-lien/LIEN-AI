@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#faf6f0}
+*{box-sizing:border-box}
+input,select,button{font-family:inherit;color:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid #c08d85;outline-offset:2px}
+::selection{background:#efdcd7}
+</style>
+</helmet>
+
+<div style="width:1920px;height:1080px;position:relative;display:grid;grid-template-columns:252px minmax(0,1fr);font-family:'Noto Sans JP',sans-serif;color:#463d38;background:#faf6f0;overflow:hidden">
+
+  <aside style="background:#f3ece3;display:grid;grid-template-rows:auto 1fr auto;min-height:0">
+    <div style="padding:38px 32px 0">
+      <div style="font:300 28px 'Noto Serif JP',serif;letter-spacing:.32em">LIEN</div>
+      <div style="font:400 12.5px/2 'Noto Serif JP',serif;color:#6f665e;margin-top:12px">日々の装いに、<br>やさしい選択を。</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px;padding:38px 16px 0;align-content:start">
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:10px;color:#6c635c;font-size:14.5px;cursor:pointer" style-hover="background:#f8f3ec">今日の運営</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:10px;color:#6c635c;font-size:14.5px;cursor:pointer" style-hover="background:#f8f3ec">発送業務</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:10px;color:#6c635c;font-size:14.5px;cursor:pointer" style-hover="background:#f8f3ec">レビュー</button>
+      <button style="border:0;background:#f9f4ee;text-align:left;padding:14px 18px;border-radius:10px;color:#463d38;font-size:14.5px;font-weight:500;cursor:pointer;box-shadow:inset 2px 0 #c08d85">商品管理</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:10px;color:#6c635c;font-size:14.5px;cursor:pointer" style-hover="background:#f8f3ec">設定</button>
+    </nav>
+    <div style="padding:0 32px 36px;font:400 13px/2.2 'Noto Serif JP',serif;color:#736a62">つくる人も<br>着る人も<br>心地よく</div>
+  </aside>
+
+  <div style="min-width:0;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr)">
+
+    <header style="display:flex;align-items:center;justify-content:space-between;padding:34px 56px 0">
+      <h1 style="font:300 34px 'Noto Serif JP',serif;margin:0;letter-spacing:.16em">商品管理</h1>
+      <div style="display:flex;align-items:center;gap:14px;font-size:13.5px;color:#6c635c">
+        <span style="width:30px;height:30px;border-radius:50%;background:#e8ded2"></span>アトリエ運営部
+      </div>
+    </header>
+
+    <div style="padding:26px 56px 0">
+      <div style="display:flex;gap:34px;border-bottom:1px solid #e9e0d5">
+        <button style="border:0;background:transparent;padding:0 2px 14px;font-size:15px;font-weight:500;color:#463d38;cursor:pointer;position:relative">商品一覧<span style="position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:#c08d85"></span></button>
+        <button style="border:0;background:transparent;padding:0 2px 14px;font-size:15px;color:#6c635c;cursor:pointer" style-hover="color:#463d38">新商品登録</button>
+        <button style="border:0;background:transparent;padding:0 2px 14px;font-size:15px;color:#6c635c;cursor:pointer" style-hover="color:#463d38">予約状況</button>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 0 4px">
+        <div style="display:flex;align-items:center;gap:10px;background:#fffdf9;border:1px solid #e9e0d5;border-radius:10px;padding:0 16px;height:44px;width:300px">
+          <span style="color:#6f665e;font-size:14px">⌕</span>
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="商品名・品番で検索" style="border:0;background:transparent;font-size:13.5px;width:100%;outline:none">
+        </div>
+        <div style="display:flex;align-items:center;gap:20px">
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="4">
+              <button onClick="{{ ch.onClick }}" style="{{ ch.style }}">{{ ch.label }}</button>
+            </sc-for>
+          </div>
+          <select value="{{ sort }}" onChange="{{ onSort }}" style="height:44px;border:1px solid #e9e0d5;border-radius:10px;background:#fffdf9;font-size:13.5px;padding:0 14px;cursor:pointer">
+            <option>売れている順</option>
+            <option>在庫が少ない順</option>
+            <option>購入率が高い順</option>
+            <option>更新が新しい順</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <main style="min-height:0;overflow:auto;padding:24px 56px 0">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;padding-bottom:{{ listPad }}">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="8">
+          <button onClick="{{ c.onSelect }}" style="{{ c.style }}">
+            <div style="{{ c.photoStyle }}"></div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px">
+              <span style="font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+              <span style="{{ c.chipStyle }}">{{ c.chip }}</span>
+            </div>
+            <div style="font:400 17px 'Noto Serif JP',serif;margin-top:8px">{{ c.price }}</div>
+            <div style="display:flex;gap:18px;margin-top:12px;font-size:12.5px;color:#736a62">
+              <span>在庫 {{ c.stock }}</span>
+              <span>30日 {{ c.sold }}</span>
+              <span>購入率 {{ c.cvr }}</span>
+            </div>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:70px;text-align:center;font-size:14px;color:#736a62">条件に合う商品がありません。</div>
+      </sc-if>
+    </main>
+  </div>
+
+  <section style="{{ panelStyle }}">
+    <div onMouseDown="{{ onResizeStart }}" style="height:16px;display:grid;place-items:center;cursor:ns-resize"><span style="width:44px;height:3px;border-radius:3px;background:#ded3c6"></span></div>
+
+    <div style="display:flex;align-items:center;gap:20px;padding:0 40px 0 44px;height:56px;border-bottom:1px solid #f0e8de">
+      <div style="{{ panelThumb }}"></div>
+      <div style="font:400 20px 'Noto Serif JP',serif;letter-spacing:.06em">{{ p.name }}</div>
+      <span style="{{ panelChipStyle }}">{{ panelChip }}</span>
+      <span style="font-size:12.5px;color:#736a62">{{ p.code }}</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <button onClick="{{ minimize }}" title="最小化" style="border:1px solid #e9e0d5;background:#fffdf9;border-radius:8px;width:34px;height:34px;color:#6c635c;font-size:13px;cursor:pointer" style-hover="border-color:#c08d85;color:#463d38">—</button>
+        <button onClick="{{ maximize }}" title="大きく表示" style="border:1px solid #e9e0d5;background:#fffdf9;border-radius:8px;width:34px;height:34px;color:#6c635c;font-size:13px;cursor:pointer" style-hover="border-color:#c08d85;color:#463d38">⤢</button>
+        <button onClick="{{ close }}" title="閉じる" style="border:1px solid #e9e0d5;background:#fffdf9;border-radius:8px;width:34px;height:34px;color:#6c635c;font-size:14px;cursor:pointer" style-hover="border-color:#c08d85;color:#463d38">×</button>
+      </div>
+    </div>
+
+    <div style="{{ panelBodyStyle }}">
+      <div style="display:flex;gap:30px;padding:0 44px;border-bottom:1px solid #f0e8de">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="min-height:0;overflow:auto;padding:26px 44px 30px">
+
+        <sc-if value="{{ tabSales }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:48px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;align-content:start">
+              <div><div style="font-size:12.5px;color:#736a62">直近30日の販売</div><div style="font:400 26px 'Noto Serif JP',serif;margin-top:8px">{{ p.sold }}</div></div>
+              <div><div style="font-size:12.5px;color:#736a62">購入率</div><div style="font:400 26px 'Noto Serif JP',serif;margin-top:8px">{{ p.cvr }}</div></div>
+              <div><div style="font-size:12.5px;color:#736a62">今月の売上</div><div style="font:400 26px 'Noto Serif JP',serif;margin-top:8px">{{ p.revenue }}</div></div>
+              <div><div style="font-size:12.5px;color:#736a62">レビュー</div><div style="font:400 26px 'Noto Serif JP',serif;margin-top:8px">{{ p.rating }}</div></div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;color:#736a62">販売動向　直近6ヶ月</span><span style="font-size:12px;color:#736a62">※ 架空データ</span></div>
+              <div style="display:flex;align-items:flex-end;gap:6px;height:112px;margin-top:16px">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="24">
+                  <span style="{{ b.style }}"></span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabInfo }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:56px">
+            <div>
+              <p style="font-size:14px;line-height:2.1;color:#6c635c;margin:0 0 22px;max-width:640px">{{ p.description }}</p>
+              <div style="display:grid;grid-template-columns:92px 1fr 92px 1fr;row-gap:14px;column-gap:16px;font-size:13.5px">
+                <span style="color:#736a62">品番</span><span>{{ p.code }}</span>
+                <span style="color:#736a62">カテゴリ</span><span>{{ p.category }}</span>
+                <span style="color:#736a62">素材</span><span>{{ p.material }}</span>
+                <span style="color:#736a62">シーズン</span><span>{{ p.season }}</span>
+                <span style="color:#736a62">価格</span><span>{{ p.price }}</span>
+                <span style="color:#736a62">在庫合計</span><span>{{ p.stock }}</span>
+              </div>
+              <div style="display:flex;gap:14px;margin-top:28px">
+                <button style="border:0;background:#c08d85;color:#fffdf9;border-radius:10px;padding:14px 32px;font-size:14px;cursor:pointer" style-hover="background:#b17d75">編集する</button>
+                <button style="border:1px solid #e9e0d5;background:#fffdf9;border-radius:10px;padding:14px 26px;font-size:14px;cursor:pointer" style-hover="border-color:#c08d85">コピーして登録</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12.5px;color:#736a62">色とサイズの在庫</div>
+              <div style="margin-top:14px">
+                <div style="display:grid;grid-template-columns:110px repeat(3,1fr);font-size:12px;color:#736a62;text-align:center;border-bottom:1px solid #f0e8de">
+                  <div></div><div style="padding:8px 0">S</div><div style="padding:8px 0">M</div><div style="padding:8px 0">L</div>
+                </div>
+                <sc-for list="{{ matrix }}" as="m" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:110px repeat(3,1fr);align-items:center;border-bottom:1px solid #f6f0e8">
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;font-size:12.5px"><span style="{{ m.swatch }}"></span>{{ m.color }}</div>
+                    <sc-for list="{{ m.cells }}" as="cell" hint-placeholder-count="3">
+                      <div style="padding:10px 12px;text-align:center;font-size:12.5px;color:{{ cell.color }}">{{ cell.text }}</div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabSchedule }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:900px">
+            <div style="font-size:12.5px;color:#736a62">この商品に登録されている予約</div>
+            <sc-for list="{{ schedules }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:24px;padding:18px 0;border-bottom:1px solid #f6f0e8">
+                <span style="{{ s.chipStyle }}">{{ s.state }}</span>
+                <span style="font:400 16px 'Noto Serif JP',serif;width:150px">{{ s.when }}</span>
+                <span style="font-size:13.5px;color:#6c635c;flex:1">{{ s.what }}</span>
+                <button style="border:1px solid #e9e0d5;background:#fffdf9;border-radius:9px;padding:9px 18px;font-size:12.5px;cursor:pointer" style-hover="border-color:#c08d85">内容を見る</button>
+                <button style="border:1px solid #e3c6c0;background:#fffdf9;color:#a05f55;border-radius:9px;padding:9px 18px;font-size:12.5px;cursor:pointer" style-hover="background:#fbf1ee">取り消す</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabHistory }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:900px">
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+              <div style="display:flex;align-items:baseline;gap:24px;padding:15px 0;border-bottom:1px solid #f6f0e8;font-size:13.5px">
+                <span style="color:#736a62;width:130px">{{ h.when }}</span>
+                <span style="flex:1;color:#6c635c">{{ h.what }}</span>
+                <span style="color:#736a62">{{ h.who }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080}}">
+const A = 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/';
+
+class Component extends DCLogic {
+  products = [
+    { name: 'ギャザーブラウス', photo: A + 'summer-lineup.jpg', code: 'BL-001', category: 'トップス',
+      material: 'ポリエステル・レーヨン', season: '春夏', price: '¥6,800', stock: 124, sold: 86, cvr: '4.2%',
+      revenue: '¥486,200', rating: '4.6', state: '公開予約', updated: '9/10 17:20',
+      description: 'やわらかな落ち感と、程よいボリュームのギャザーが魅力のブラウス。オンにもオフにも使える、シーズンレスな一枚です。',
+      colors: ['#efe6d8', '#e2d3bd', '#8f9d8c', '#2f3a52'], grid: [[18,24,6],[12,20,4],[0,9,3],[0,0,8]],
+      trend: [22,30,26,44,38,52,70,46,58,40,34,50,62,44,30,38,54,72,48,36,44,80,58,42] },
+    { name: 'ウエストリボンワンピース', photo: A + 'color-lineup.jpg', code: 'OP-014', category: 'ワンピース',
+      material: 'コットン・リネン', season: '春夏', price: '¥12,800', stock: 68, sold: 112, cvr: '5.8%',
+      revenue: '¥742,400', rating: '4.8', state: '公開中', updated: '9/9 11:05',
+      description: 'ウエストのリボンでシルエットを自由に。一枚で着姿が決まる、軽やかなロングワンピースです。',
+      colors: ['#efe6d8', '#ddcbb4', '#93a2c4'], grid: [[14,18,9],[6,16,11],[0,4,3]],
+      trend: [30,26,38,42,50,46,62,58,44,52,66,48,40,56,72,60,38,44,68,54,46,62,76,50] },
+    { name: 'Vネックカーディガン', photo: A + 'highneck-navy.jpg', code: 'KN-208', category: 'トップス',
+      material: 'コットン100%', season: '通年', price: '¥8,900', stock: 31, sold: 38, cvr: '2.4%',
+      revenue: '¥214,800', rating: '4.3', state: '在庫注意', updated: '9/8 15:42',
+      description: '肩の力を抜いたリラックスシルエット。深すぎないVネックで、インナーを選ばず羽織れます。',
+      colors: ['#7f8c7a', '#dcd6cb', '#9aa398'], grid: [[7,14,0],[0,6,4],[0,0,0]],
+      trend: [18,24,20,32,28,36,30,42,26,34,44,30,22,38,46,28,34,40,24,30,48,36,26,32] },
+    { name: 'タックワイドパンツ', photo: A + 'highneck-yellow.jpg', code: 'PT-052', category: 'ボトムス',
+      material: 'ポリエステル', season: '秋冬', price: '¥9,600', stock: 96, sold: 64, cvr: '3.6%',
+      revenue: '¥398,000', rating: '4.5', state: '公開中', updated: '9/7 09:30',
+      description: '深めのタックで脚のラインを拾わない、きれいめワイドパンツ。丈感は9分でバランスよく。',
+      colors: ['#e8dfd0', '#d6c7b0', '#9aa7bd'], grid: [[16,22,14],[8,18,10],[0,6,2]],
+      trend: [26,34,30,28,42,38,46,52,36,44,30,50,58,40,34,46,62,44,38,52,48,36,56,42] },
+    { name: 'フラワープリントスカート', photo: A + 'summer-lineup.jpg', code: 'SK-119', category: 'ボトムス',
+      material: 'レーヨン', season: '春夏', price: '¥11,200', stock: 12, sold: 22, cvr: '1.8%',
+      revenue: '¥156,400', rating: '4.1', state: '在庫注意', updated: '9/6 13:12',
+      description: '小花を敷きつめた総柄スカート。ふわりと広がる裾で、歩くたびに軽やかな印象に。',
+      colors: ['#6f6a63', '#ddd6cc'], grid: [[0,6,0],[2,4,0]],
+      trend: [14,20,16,24,18,28,22,30,18,26,34,20,16,28,22,32,24,18,30,26,20,34,28,22] },
+    { name: 'トレンチコート', photo: A + 'color-lineup.jpg', code: 'CT-003', category: 'アウター',
+      material: 'コットン・ナイロン', season: '秋冬', price: '¥24,800', stock: 54, sold: 41, cvr: '6.1%',
+      revenue: '¥892,600', rating: '4.9', state: '公開中', updated: '9/5 18:04',
+      description: '長く着られる定番の丈感とディテール。裏地つきで、肌寒い季節の始まりから活躍します。',
+      colors: ['#e6dccb', '#cfc0a8', '#2f3a52'], grid: [[9,14,6],[4,12,8],[0,2,1]],
+      trend: [10,16,14,22,20,30,26,38,32,44,40,54,62,48,58,70,52,64,78,56,66,84,60,72] },
+    { name: 'ハイネックインナー', photo: A + 'highneck-navy.jpg', code: 'IN-5102', category: 'トップス',
+      material: '綿100%', season: '通年', price: '¥2,680', stock: 210, sold: 148, cvr: '7.4%',
+      revenue: '¥396,600', rating: '4.7', state: '公開中', updated: '9/4 10:22',
+      description: '首元をやさしく覆うハイネック。一枚でも重ね着でも心地よく着られる、定番のインナーです。',
+      colors: ['#efe6d8', '#2f3a52', '#d8c97f'], grid: [[34,46,22],[18,40,26],[0,14,10]],
+      trend: [40,46,38,52,60,48,66,58,72,54,62,70,58,64,76,60,68,54,72,66,58,80,62,70] },
+    { name: 'リネンショートブラウス', photo: A + 'highneck-yellow.jpg', code: 'BL-047', category: 'トップス',
+      material: 'リネン100%', season: '春夏', price: '¥7,400', stock: 0, sold: 12, cvr: '0.9%',
+      revenue: '¥64,800', rating: '4.2', state: '下書き', updated: '9/3 16:48',
+      description: '短め丈で重心を上げる、風通しのよいリネンブラウス。ボトムスを選ばず合わせられます。',
+      colors: ['#efe6d8', '#d8c97f'], grid: [[0,0,0],[0,0,0]],
+      trend: [12,8,14,10,16,12,18,14,10,16,12,20,14,10,18,12,16,10,14,18,12,16,10,14] }
+  ];
+
+  colorNames = ['アイボリー', 'ベージュ', 'セージ', 'ネイビー'];
+  tabDefs = [['sales', '売れ行き'], ['info', '商品情報'], ['schedule', '予約'], ['history', '変更履歴']];
+
+  state = { sel: 0, open: true, mode: 'normal', height: 420, tab: 'sales', query: '', sort: '売れている順', filter: null };
+
+  componentWillUnmount() { this.stopResize(); }
+
+  startResize = e => {
+    this.dragY = e.clientY;
+    this.dragH = this.state.height;
+    this.move = ev => {
+      const h = Math.max(160, Math.min(820, this.dragH + (this.dragY - ev.clientY)));
+      this.setState({ height: h, mode: 'normal' });
+    };
+    this.up = () => this.stopResize();
+    window.addEventListener('mousemove', this.move);
+    window.addEventListener('mouseup', this.up);
+    e.preventDefault();
+  };
+  stopResize() {
+    if (this.move) window.removeEventListener('mousemove', this.move);
+    if (this.up) window.removeEventListener('mouseup', this.up);
+    this.move = null; this.up = null;
+  }
+
+  chipTone(state) {
+    if (state === '在庫注意') return ['#f7ebe7', '#94534a'];
+    if (state === '下書き') return ['#f1ece5', '#6b625b'];
+    if (state === '公開予約') return ['#f4efe3', '#6f5b28'];
+    return ['#ecf1ec', '#4c6252'];
+  }
+
+  renderVals() {
+    const st = this.state;
+    const p = this.products[st.sel];
+    const q = st.query.trim().toLowerCase();
+
+    let list = this.products.map((c, i) => ({ c, i }));
+    if (q) list = list.filter(o => (o.c.name + ' ' + o.c.code).toLowerCase().indexOf(q) >= 0);
+    if (st.filter) list = list.filter(o => o.c.state === st.filter);
+    if (st.sort === '在庫が少ない順') list = list.slice().sort((a, b) => a.c.stock - b.c.stock);
+    else if (st.sort === '購入率が高い順') list = list.slice().sort((a, b) => parseFloat(b.c.cvr) - parseFloat(a.c.cvr));
+    else if (st.sort === '更新が新しい順') list = list.slice().sort((a, b) => b.c.updated.localeCompare(a.c.updated));
+    else list = list.slice().sort((a, b) => b.c.sold - a.c.sold);
+
+    const cards = list.map(({ c, i }) => {
+      const tone = this.chipTone(c.state);
+      return {
+        name: c.name, price: c.price, stock: c.stock + '点', sold: c.sold + '点', cvr: c.cvr,
+        chipText: c.state,
+        chip: c.state,
+        chipStyle: 'background:' + tone[0] + ';color:' + tone[1] + ';border-radius:999px;padding:4px 11px;font-size:12px;flex:none',
+        onSelect: () => this.setState({ sel: i, open: true, mode: st.mode === 'min' ? 'normal' : st.mode }),
+        style: 'border:0;background:transparent;padding:0;text-align:left;cursor:pointer;display:block',
+        photoStyle: 'aspect-ratio:3/4;border-radius:12px;background:url("' + c.photo + '") center/cover;border:1px solid #ece3d8;box-shadow:' +
+          (i === st.sel && st.open ? '0 0 0 2px #c08d85' : 'none')
+      };
+    });
+
+    const tone = this.chipTone(p.state);
+    const max = Math.max.apply(null, p.trend);
+    const height = st.mode === 'min' ? 72 : st.mode === 'max' ? 780 : st.height;
+
+    const chips = [['公開中'], ['公開予約'], ['在庫注意'], ['下書き']].map(([label]) => ({
+      label,
+      onClick: () => this.setState({ filter: st.filter === label ? null : label }),
+      style: 'border-radius:999px;padding:9px 16px;font-size:12.5px;cursor:pointer;border:1px solid ' +
+        (st.filter === label ? '#c08d85;background:#f7ebe7;color:#8d5b53' : '#e9e0d5;background:#fffdf9;color:#5f574f')
+    }));
+
+    return {
+      cards,
+      noResults: cards.length === 0,
+      listPad: (st.open ? height : 0) + 40 + 'px',
+      query: st.query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      sort: st.sort,
+      onSort: e => this.setState({ sort: e.target.value }),
+      chips,
+      p: Object.assign({}, p, { stock: p.stock + '点', sold: p.sold + '点' }),
+      panelChip: p.state,
+      panelChipStyle: 'background:' + tone[0] + ';color:' + tone[1] + ';border-radius:999px;padding:5px 12px;font-size:12px',
+      panelThumb: 'width:34px;height:34px;border-radius:8px;background:url("' + p.photo + '") center/cover;flex:none',
+      panelStyle: 'position:absolute;left:252px;right:0;bottom:0;height:' + (st.open ? height : 0) + 'px;background:#fffdf9;border-top:1px solid #e9e0d5;box-shadow:0 -10px 34px rgba(120,98,82,.07);display:' +
+        (st.open ? 'grid' : 'none') + ';grid-template-rows:16px 56px minmax(0,1fr);overflow:hidden',
+      panelBodyStyle: 'min-height:0;display:' + (st.mode === 'min' ? 'none' : 'grid') + ';grid-template-rows:auto minmax(0,1fr)',
+      onResizeStart: this.startResize,
+      minimize: () => this.setState({ mode: st.mode === 'min' ? 'normal' : 'min' }),
+      maximize: () => this.setState({ mode: st.mode === 'max' ? 'normal' : 'max' }),
+      close: () => this.setState({ open: false }),
+      tabs: this.tabDefs.map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ tab: id }),
+        style: 'border:0;background:transparent;padding:14px 2px;font-size:13.5px;cursor:pointer;position:relative;' +
+          (st.tab === id ? 'color:#463d38;font-weight:500;box-shadow:inset 0 -1.5px #c08d85' : 'color:#5f574f')
+      })),
+      tabSales: st.tab === 'sales',
+      tabInfo: st.tab === 'info',
+      tabSchedule: st.tab === 'schedule',
+      tabHistory: st.tab === 'history',
+      bars: p.trend.map(v => ({
+        style: 'flex:1;border-radius:3px 3px 0 0;background:' + (v === max ? '#c08d85' : '#e7c9c3') + ';height:' + Math.round(v / max * 100) + '%'
+      })),
+      matrix: p.grid.map((row, i) => ({
+        color: this.colorNames[i] || 'その他',
+        swatch: 'width:18px;height:18px;border-radius:50%;background:' + (p.colors[i] || '#ded3c6') + ';border:1px solid rgba(0,0,0,.06);flex:none',
+        cells: row.map(v => ({ text: v === 0 ? '—' : v, color: v === 0 ? '#8a8078' : v <= 5 ? '#94534a' : '#463d38' }))
+      })),
+      schedules: [
+        { state: '確認済み', when: '9/18 09:00', what: '説明文とメイン画像を更新', chipStyle: 'background:#ecf1ec;color:#5b7361;border-radius:999px;padding:5px 12px;font-size:11px' },
+        { state: '下書き', when: '9/25 10:00', what: '秋冬カラー2色を追加', chipStyle: 'background:#f1ece5;color:#7c736c;border-radius:999px;padding:5px 12px;font-size:11px' }
+      ],
+      history: [
+        { when: '9/10 17:20', what: '在庫数を 118 → 124 に更新', who: '田中' },
+        { when: '9/8 11:04', what: 'メイン画像を差し替え', who: '佐藤' },
+        { when: '9/3 09:41', what: '販売価格を ¥7,200 → ¥6,800 に変更', who: '田中' },
+        { when: '8/28 14:15', what: '商品を公開', who: '田中' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

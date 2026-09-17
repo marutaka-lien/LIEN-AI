@@ -27,6 +27,9 @@ export function toOrderDTO(order: Order): OrderDTO {
       ? order.clickPostRegisteredAt.toISOString()
       : null,
     csvExportedAt: order.csvExportedAt ? order.csvExportedAt.toISOString() : null,
+    shippingReportedAt: order.shippingReportedAt ? order.shippingReportedAt.toISOString() : null,
+    heldAt: order.heldAt ? order.heldAt.toISOString() : null,
+    excludedAt: order.excludedAt ? order.excludedAt.toISOString() : null,
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
   };

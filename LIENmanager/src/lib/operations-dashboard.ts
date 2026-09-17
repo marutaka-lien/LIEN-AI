@@ -4,81 +4,11 @@
 
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-/** Date を日本時間の「時（0-23）」に変換する。 */
-export function jstHour(date: Date): number {
-  return new Date(date.getTime() + JST_OFFSET_MS).getUTCHours();
-}
-
 /** Date を日本時間の "HH:MM" 文字列にする。 */
 export function formatJstHm(date: Date): string {
   const jst = new Date(date.getTime() + JST_OFFSET_MS);
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${pad(jst.getUTCHours())}:${pad(jst.getUTCMinutes())}`;
-}
-
-export interface ThroughputSeries {
-  /** X 軸に並ぶ時（例: [9,10,...,16]）。 */
-  hours: number[];
-  /** hours と同じ長さ。その時までの受注累計。 */
-  orderedCumulative: number[];
-  /** hours と同じ長さ。その時までの発送完了累計。 */
-  shippedCumulative: number[];
-  /** グラフ Y 軸の上限（きりのよい値）。 */
-  yMax: number;
-  /** 描画すべきデータがあるか（無ければ空状態を出す）。 */
-  hasData: boolean;
-}
-
-/**
- * 今日(JST)の受注時刻・発送完了時刻の一覧から、時間帯別の累計系列を作る。
- * - startHour〜endHour の各時について「その時の終わりまでの累計」を出す。
- * - まだ来ていない時（現在時より後）は描かない。
- * - 2026-09-09 マスター決定により、集計テーブルは追加せず既存 Date 列だけで算出する。
- */
-export function buildThroughputSeries(
-  orderedAt: Date[],
-  shippedAt: Date[],
-  options: { startHour?: number; endHour?: number; now?: Date } = {}
-): ThroughputSeries {
-  const startHour = options.startHour ?? 9;
-  const endHour = options.endHour ?? 16;
-  const now = options.now ?? new Date();
-  const currentHour = jstHour(now);
-
-  const lastHour = Math.min(endHour, currentHour);
-  if (lastHour < startHour) {
-    return {
-      hours: [],
-      orderedCumulative: [],
-      shippedCumulative: [],
-      yMax: 10,
-      hasData: false,
-    };
-  }
-
-  const hours: number[] = [];
-  for (let h = startHour; h <= lastHour; h += 1) hours.push(h);
-
-  const orderedHours = orderedAt.map(jstHour);
-  const shippedHours = shippedAt.map(jstHour);
-  const countUpTo = (values: number[], hour: number) =>
-    values.reduce((acc, value) => acc + (value <= hour ? 1 : 0), 0);
-
-  const orderedCumulative = hours.map((h) => countUpTo(orderedHours, h));
-  const shippedCumulative = hours.map((h) => countUpTo(shippedHours, h));
-
-  const peak = Math.max(0, ...orderedCumulative, ...shippedCumulative);
-  const yMax = niceCeiling(Math.max(1, peak));
-  const hasData = peak > 0;
-
-  return { hours, orderedCumulative, shippedCumulative, yMax, hasData };
-}
-
-/** 値を少し上に丸めて、グラフ Y 軸の上限として使えるきりのよい数にする。 */
-export function niceCeiling(value: number): number {
-  if (value <= 10) return 10;
-  const step = value <= 50 ? 5 : value <= 200 ? 10 : 50;
-  return Math.ceil(value / step) * step + step;
 }
 
 export type PipelineStageKey = "confirm" | "await_ship" | "csv_exported" | "shipped";

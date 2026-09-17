@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f4ef}
+*{box-sizing:border-box}
+input,select,textarea,button{font-family:inherit;color:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid #bd7d74;outline-offset:2px}
+::selection{background:#ead5d0}
+</style>
+</helmet>
+
+<div style="width:1920px;height:1080px;position:relative;display:grid;grid-template-columns:272px minmax(0,1fr);font-family:'Noto Sans JP',sans-serif;color:#3a3431;background:#faf7f2;overflow:hidden">
+
+  <aside style="background:linear-gradient(180deg,#f6f1ea,#efe7dd);border-right:1px solid #e3dbd2;display:grid;grid-template-rows:auto auto 1fr;min-height:0">
+    <div style="padding:34px 30px 0">
+      <div style="font:400 30px 'Noto Serif JP',serif;letter-spacing:.3em">LIEN</div>
+      <div style="font:400 12px/2 'Noto Serif JP',serif;color:#6f665e;margin-top:12px">日々の装いに、<br>やさしい選択を。</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:4px;padding:30px 18px 0">
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:12px;color:#5f574f;font-size:14.5px;cursor:pointer" style-hover="background:rgba(255,253,249,.7)">今日の運営</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:12px;color:#5f574f;font-size:14.5px;cursor:pointer" style-hover="background:rgba(255,253,249,.7)">発送業務</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:12px;color:#5f574f;font-size:14.5px;cursor:pointer" style-hover="background:rgba(255,253,249,.7)">レビュー</button>
+      <button style="border:0;background:linear-gradient(90deg,#f3dfdb,#f6ece8);text-align:left;padding:14px 18px;border-radius:12px;color:#8d5b53;font-size:14.5px;font-weight:500;cursor:pointer">商品管理</button>
+      <button style="border:0;background:transparent;text-align:left;padding:14px 18px;border-radius:12px;color:#5f574f;font-size:14.5px;cursor:pointer" style-hover="background:rgba(255,253,249,.7)">設定</button>
+    </nav>
+    <div style="position:relative;min-height:0;margin-top:26px;background:linear-gradient(180deg,rgba(246,241,234,.96) 0%,rgba(246,241,234,.62) 34%,rgba(243,237,229,.9) 100%),url('LIENmanager/docs/design/product-management-m-2026-09-10/assets/summer-lineup.jpg') center/cover;display:flex;flex-direction:column;justify-content:flex-end;padding:0 30px 34px">
+      <div style="font:400 15px/2.3 'Noto Serif JP',serif;color:#6f6762">つくる人も<br>着る人も<br>心地よく</div>
+      <div style="width:34px;height:1px;background:#c9bcb0;margin:20px 0"></div>
+      <div style="font:400 12px/1.9 'Noto Serif JP',serif;color:#6f665e;letter-spacing:.04em">Fashion for<br>a kinder tomorrow</div>
+    </div>
+  </aside>
+
+  <div style="min-width:0;min-height:0;display:grid;grid-template-rows:60px auto minmax(0,1fr);background:#faf7f2">
+
+    <header style="display:flex;align-items:center;justify-content:flex-end;gap:22px;padding:0 40px">
+    </header>
+
+    <section style="display:flex;align-items:flex-end;justify-content:space-between;gap:28px;padding:0 40px 22px">
+      <div>
+        <h1 style="font:400 32px 'Noto Serif JP',serif;margin:0;letter-spacing:.14em">商品管理</h1>
+        <div style="display:flex;gap:30px;margin-top:16px">
+          <button style="border:0;background:transparent;padding:0 2px 11px;font-size:15px;font-weight:500;color:#3a3431;cursor:pointer;position:relative">商品一覧<span style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#c98a80"></span></button>
+          <button style="border:0;background:transparent;padding:0 2px 11px;font-size:15px;color:#5f574f;cursor:pointer" style-hover="color:#3a3431">新商品登録</button>
+          <button style="border:0;background:transparent;padding:0 2px 11px;font-size:15px;color:#5f574f;cursor:pointer" style-hover="color:#3a3431">予約状況</button>
+        </div>
+        <p style="font-size:12.5px;color:#736a62;margin:10px 0 0">{{ countLabel }}</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px;background:#fffdfa;border:1px solid #e3dbd2;border-radius:10px;padding:0 16px;height:46px;width:270px">
+          <span style="color:#6f665e;font-size:13px">⌕</span>
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="商品名・品番で検索" style="border:0;background:transparent;font-size:13.5px;width:100%;outline:none">
+        </div>
+        <select value="{{ sort }}" onChange="{{ onSort }}" style="height:46px;border:1px solid #e3dbd2;border-radius:10px;background:#fffdfa;font-size:13.5px;padding:0 14px;cursor:pointer">
+          <option>売れている順</option>
+          <option>在庫が少ない順</option>
+          <option>評価が高い順</option>
+          <option>更新が新しい順</option>
+        </select>
+        <select value="{{ category }}" onChange="{{ onCategory }}" style="height:46px;border:1px solid #e3dbd2;border-radius:10px;background:#fffdfa;font-size:13.5px;padding:0 14px;cursor:pointer">
+          <option>すべてのカテゴリ</option>
+          <option>トップス</option>
+          <option>ワンピース</option>
+          <option>ボトムス</option>
+          <option>アウター</option>
+        </select>
+        <button onClick="{{ toggleLow }}" style="{{ lowStyle }}"><span style="font-size:14px">⚠</span>在庫注意</button>
+        <button style="height:46px;border:1px solid #c3d3c7;background:#eef3ee;color:#4f6a58;border-radius:10px;padding:0 20px;font-size:13.5px;display:flex;align-items:center;gap:9px;cursor:pointer" style-hover="background:#e4ece6"><span style="font-size:14px">▤</span>公開予約</button>
+      </div>
+    </section>
+
+    <section style="min-height:0;overflow:auto;padding:0 40px 18px">
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px dashed #ddd2c6;background:#fffdfa;border-radius:14px;padding:34px;text-align:center;font-size:13.5px;color:#736a62">条件に合う商品がありません。検索語や絞り込みを変えてください。</div>
+      </sc-if>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;padding-bottom:{{ galleryPad }}">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="12">
+          <button onClick="{{ c.onSelect }}" style="{{ c.style }}">
+            <div style="{{ c.thumbStyle }}">
+              <span style="position:absolute;top:11px;right:12px;color:#6f665e;font-size:14px">♡</span>
+              <span style="{{ c.badgeStyle }}">{{ c.badge }}</span>
+            </div>
+            <div style="padding:12px 14px 14px;text-align:left">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</div>
+                <span style="font-size:10px;color:#6f665e;flex:none">{{ c.code }}</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:9px">
+                <sc-for list="{{ c.dots }}" as="d" hint-placeholder-count="3">
+                  <span style="{{ d.style }}"></span>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:32px 1fr;align-items:center;gap:7px;margin-top:9px;font-size:12px;color:#736a62">
+                <span>在庫</span>
+                <span style="height:6px;background:#ece5dd;border-radius:7px;overflow:hidden;display:block"><span style="{{ c.stockBar }}"></span></span>
+                <span>販売</span>
+                <span style="height:6px;background:#ece5dd;border-radius:7px;overflow:hidden;display:block"><span style="{{ c.salesBar }}"></span></span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;border-top:1px solid #f0eae3;margin-top:9px;padding-top:8px;font-size:12px;color:#736a62;white-space:nowrap">
+                <span>在庫 <b style="font-weight:500;color:#3a3431">{{ c.stock }}</b></span>
+                <span>30日 <b style="font-weight:500;color:#3a3431">{{ c.sold }}</b></span>
+                <span>購入率 <b style="font-weight:500;color:#3a3431">{{ c.cvr }}</b></span>
+              </div>
+            </div>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="{{ scrimStyle }}"></div>
+
+    <section style="{{ sheetStyle }}">
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 24px 0">
+        <span style="width:44px;height:3px;border-radius:3px;background:#e0d6c9"></span>
+        <span style="font-size:12px;color:#736a62">商品の詳細　—　上のギャラリーから別の商品を選ぶと切り替わります（Esc で閉じる）</span>
+        <button onClick="{{ closeDetail }}" style="margin-left:auto;border:1px solid #e3dbd2;background:#fffdfa;border-radius:9px;padding:8px 16px;font-size:12.5px;color:#5f574f;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:#a96b62;color:#3a3431">閉じる ×</button>
+      </div>
+      <div style="min-height:0;overflow:auto;padding:14px 24px 22px;display:grid;grid-template-columns:380px minmax(0,1fr) 420px;gap:26px;align-items:start">
+
+        <div style="display:grid;grid-template-columns:1fr 100px;gap:11px;min-height:0">
+          <div style="{{ heroStyle }}"></div>
+          <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:11px;min-height:0">
+            <div style="{{ subStyle }}"></div>
+            <div style="{{ subStyle }}"></div>
+            <div style="{{ subStyle }}"></div>
+          </div>
+        </div>
+
+        <div style="min-width:0;min-height:0;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <h2 style="font:400 27px 'Noto Serif JP',serif;margin:0;letter-spacing:.06em">{{ p.name }}</h2>
+            <button onClick="{{ togglePublish }}" style="{{ statusStyle }}">{{ p.status }}</button>
+            <span style="width:96px;flex:none"></span>
+          </div>
+          <p style="font-size:13.5px;line-height:2;color:#6f6762;margin:16px 0 0;max-width:520px">{{ p.description }}</p>
+
+          <div style="display:grid;grid-template-columns:86px 1fr;row-gap:12px;column-gap:14px;margin-top:22px;font-size:13.5px">
+            <span style="color:#736a62">品番</span><span>{{ p.code }}</span>
+            <span style="color:#736a62">カテゴリ</span><span>{{ p.category }}</span>
+            <span style="color:#736a62">素材</span><span>{{ p.material }}</span>
+            <span style="color:#736a62">シーズン</span><span>{{ p.season }}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px">
+            <div style="background:#f6f1ea;border:1px solid #eae2d8;border-radius:11px;padding:13px 14px">
+              <div style="font-size:12px;color:#736a62">販売価格（税込）</div>
+              <div style="display:flex;align-items:baseline;gap:3px;margin-top:7px"><span style="font:400 15px 'Noto Serif JP',serif;color:#736a62">¥</span><input value="{{ price }}" onChange="{{ onPrice }}" style="border:0;border-bottom:1px solid #ddd2c6;background:transparent;font:500 21px 'Noto Serif JP',serif;width:78px;padding:0 0 2px"></div>
+            </div>
+            <div style="background:#f6f1ea;border:1px solid #eae2d8;border-radius:11px;padding:13px 14px">
+              <div style="font-size:12px;color:#736a62">在庫（合計）</div>
+              <div style="display:flex;align-items:baseline;gap:4px;margin-top:7px"><input value="{{ stock }}" onChange="{{ onStock }}" style="border:0;border-bottom:1px solid #ddd2c6;background:transparent;font:500 21px 'Noto Serif JP',serif;width:52px;padding:0 0 2px"><span style="font-size:11px;color:#736a62">点</span></div>
+            </div>
+            <div style="background:#f6f1ea;border:1px solid #eae2d8;border-radius:11px;padding:13px 14px">
+              <div style="font-size:12px;color:#736a62">今月の売上</div>
+              <div style="font:500 21px 'Noto Serif JP',serif;margin-top:7px">{{ p.revenue }}</div>
+            </div>
+            <div style="background:#f6f1ea;border:1px solid #eae2d8;border-radius:11px;padding:13px 14px">
+              <div style="font-size:12px;color:#736a62">レビュー評価</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:7px"><span style="font:500 21px 'Noto Serif JP',serif">{{ p.rating }}</span><span style="font-size:12px;color:#8a6a2f">★★★★☆</span><span style="font-size:11px;color:#736a62">{{ p.reviews }}件</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:24px;align-items:center">
+            <button style="border:0;background:#a96b62;color:#fffdfa;border-radius:11px;padding:15px 34px;font-size:14.5px;display:flex;align-items:center;gap:10px;cursor:pointer" style-hover="background:#986055">✎ 編集する</button>
+            <button style="border:1px solid #e3dbd2;background:#fffdfa;border-radius:11px;padding:15px 26px;font-size:14.5px;display:flex;align-items:center;gap:10px;cursor:pointer" style-hover="border-color:#bd7d74">⧉ コピーして登録</button>
+            <button style="border:1px solid #e3dbd2;background:#fffdfa;border-radius:11px;width:52px;height:52px;font-size:15px;color:#736a62;cursor:pointer" style-hover="border-color:#bd7d74;color:#3a3431">⋯</button>
+            <span style="margin-left:auto;font-size:11.5px;color:#6f665e">最終更新 {{ p.updated }}</span>
+          </div>
+        </div>
+
+        <div style="border-left:1px solid #ece5dd;padding-left:26px;display:flex;flex-direction:column;min-height:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font:400 18px 'Noto Serif JP',serif;letter-spacing:.06em">在庫状況</span>
+              <sc-if value="{{ hasStockWarn }}" hint-placeholder-val="{{ true }}">
+                <span style="{{ stockWarnStyle }}">{{ stockWarn }}</span>
+              </sc-if>
+            </div>
+            <div style="font-size:12px;color:#6f665e">※ 2026/09/11 時点</div>
+          </div>
+          <div style="margin-top:16px;border-top:1px solid #ece5dd">
+            <div style="{{ headStyle }}">
+              <div style="text-align:left;padding:9px 0;font-size:11.5px">{{ sizeNote }}</div>
+              <sc-for list="{{ sizeCols }}" as="sc" hint-placeholder-count="2">
+                <div style="{{ sc.style }}">{{ sc.label }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ matrix }}" as="m" hint-placeholder-count="4">
+              <div style="{{ m.rowStyle }}">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 0;font-size:12.5px"><span style="{{ m.swatch }}"></span>{{ m.color }}</div>
+                <sc-for list="{{ m.cells }}" as="cell" hint-placeholder-count="2">
+                  <div style="padding:11px 10px;display:flex;align-items:center;gap:8px">
+                    <span style="flex:1;height:8px;background:#ece5dd;border-radius:8px;overflow:hidden;display:block"><span style="{{ cell.barStyle }}"></span></span>
+                    <span style="{{ cell.countStyle }}">{{ cell.count }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:12px;color:#736a62">
+            <span style="display:flex;align-items:center;gap:8px"><span style="width:26px;height:8px;border-radius:8px;background:#8fa894"></span>在庫あり</span>
+            <span style="display:flex;align-items:center;gap:8px"><span style="width:13px;height:8px;border-radius:8px;background:#c98a80"></span>残り5点以下</span>
+            <span style="display:flex;align-items:center;gap:8px"><span style="width:26px;height:8px;border-radius:8px;background:#ece5dd"></span>在庫なし</span>
+            <span>満量の目安 24点</span>
+          </div>
+
+          <div style="border-top:1px solid #ece5dd;margin-top:20px;padding-top:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font:400 17px 'Noto Serif JP',serif;letter-spacing:.06em">最近の販売動向</div>
+              <select style="border:1px solid #e3dbd2;border-radius:9px;background:#fffdfa;font-size:12px;padding:8px 12px;cursor:pointer"><option>直近6ヶ月</option><option>直近12ヶ月</option></select>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:5px;height:70px;margin-top:14px">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="24">
+                <span style="{{ b.style }}"></span>
+              </sc-for>
+            </div>
+            <div style="text-align:right;font-size:10.5px;color:#6f665e;margin-top:9px">※ グラフはイメージです</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(58,48,42,.3);display:grid;place-items:center;z-index:20">
+      <div style="width:460px;background:#fffdfa;border:1px solid #e8e1d8;border-radius:16px;padding:30px 32px;box-shadow:0 24px 60px rgba(90,70,58,.2)">
+        <div style="font:400 21px 'Noto Serif JP',serif;letter-spacing:.04em">{{ confirmTitle }}</div>
+        <p style="font-size:13.5px;line-height:2;color:#5f574f;margin:14px 0 0">{{ confirmBody }}</p>
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:26px">
+          <button onClick="{{ confirmCancel }}" style="border:1px solid #e3dbd2;background:#fffdfa;border-radius:10px;padding:12px 22px;font-size:13.5px;cursor:pointer" style-hover="border-color:#a96b62">キャンセル</button>
+          <button onClick="{{ confirmOk }}" style="border:0;background:#a96b62;color:#fffdfa;border-radius:10px;padding:12px 26px;font-size:13.5px;cursor:pointer" style-hover="background:#986055">{{ confirmLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080}}">
+class Component extends DCLogic {
+  photoBase = 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/';
+
+  products = [
+    { name: 'ギャザーブラウス', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/summer-lineup.jpg', code: 'BL-001', category: 'トップス', material: 'ポリエステル・レーヨン', season: '春夏',
+      description: 'やわらかな落ち感と、程よいボリュームのギャザーが魅力のブラウス。オンにもオフにも使える、シーズンレスな一枚です。',
+      price: '6800', stock: '124', revenue: '¥486,200', rating: '4.6', reviews: 82, updated: '9/10 17:20',
+      status: '公開予約', tone: ['#efe7dd', '#e3d8cb'], colors: ['#efe6d8', '#e2d3bd', '#8f9d8c', '#2f3a52'],
+      dots: ['#efe6d8', '#e2d3bd', '#8f9d8c'], stockPct: 72, salesPct: 64,
+      sizes: ['S','M'], grid: [[18,24],[12,20],[4,9],[0,3]],
+      trend: [22,30,26,44,38,52,70,46,58,40,34,50,62,44,30,38,54,72,48,36,44,80,58,42] },
+    { name: 'ウエストリボンワンピース', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/color-lineup.jpg', code: 'OP-014', category: 'ワンピース', material: 'コットン・リネン', season: '春夏',
+      description: 'ウエストのリボンでシルエットを自由に。一枚で着姿が決まる、軽やかなロングワンピースです。',
+      price: '12800', stock: '68', revenue: '¥742,400', rating: '4.8', reviews: 141, updated: '9/9 11:05',
+      status: '公開中', tone: ['#eee3d6', '#ded0bd'], colors: ['#efe6d8', '#ddcbb4', '#93a2c4'],
+      dots: ['#efe6d8', '#ddcbb4', '#93a2c4'], stockPct: 48, salesPct: 82,
+      sizes: ['S','M'], grid: [[14,18],[6,16],[2,4],[9,0]],
+      trend: [30,26,38,42,50,46,62,58,44,52,66,48,40,56,72,60,38,44,68,54,46,62,76,50] },
+    { name: 'Vネックカーディガン', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/highneck-navy.jpg', code: 'KN-208', category: 'トップス', material: 'コットン100%', season: '通年',
+      description: '肩の力を抜いたリラックスシルエット。深すぎないVネックで、インナーを選ばず羽織れます。',
+      price: '8900', stock: '31', revenue: '¥214,800', rating: '4.3', reviews: 47, updated: '9/8 15:42',
+      status: '在庫少', tone: ['#dfe6dc', '#cbd6c6'], colors: ['#7f8c7a', '#dcd6cb', '#9aa398'],
+      dots: ['#7f8c7a', '#dcd6cb', '#9aa398'], stockPct: 22, salesPct: 46,
+      sizes: ['S','M'], grid: [[7,14],[3,6],[0,2],[0,0]],
+      trend: [18,24,20,32,28,36,30,42,26,34,44,30,22,38,46,28,34,40,24,30,48,36,26,32] },
+    { name: 'タックワイドパンツ', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/highneck-yellow.jpg', code: 'PT-052', category: 'ボトムス', material: 'ポリエステル', season: '秋冬',
+      description: '深めのタックで脚のラインを拾わない、きれいめワイドパンツ。丈感は9分でバランスよく。',
+      price: '9600', stock: '96', revenue: '¥398,000', rating: '4.5', reviews: 63, updated: '9/7 09:30',
+      status: '公開中', tone: ['#ece5da', '#dbd0c1'], colors: ['#e8dfd0', '#d6c7b0', '#9aa7bd'],
+      dots: ['#e8dfd0', '#d6c7b0', '#9aa7bd'], stockPct: 64, salesPct: 58,
+      sizes: ['S','M'], grid: [[16,22],[8,18],[2,6],[12,10]],
+      trend: [26,34,30,28,42,38,46,52,36,44,30,50,58,40,34,46,62,44,38,52,48,36,56,42] },
+    { name: 'フラワープリントスカート', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/summer-lineup.jpg', code: 'SK-119', category: 'ボトムス', material: 'レーヨン', season: '春夏',
+      description: '小花を敷きつめた総柄スカート。ふわりと広がる裾で、歩くたびに軽やかな印象に。',
+      price: '11200', stock: '12', revenue: '¥156,400', rating: '4.1', reviews: 28, updated: '9/6 13:12',
+      status: '在庫切れ間近', tone: ['#efe9e2', '#e0d8ce'], colors: ['#6f6a63', '#ddd6cc'],
+      dots: ['#6f6a63', '#ddd6cc'], stockPct: 12, salesPct: 38,
+      sizes: ['フリー'], grid: [[6],[4],[0],[2]],
+      trend: [14,20,16,24,18,28,22,30,18,26,34,20,16,28,22,32,24,18,30,26,20,34,28,22] },
+    { name: 'トレンチコート', photo: 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/color-lineup.jpg', code: 'CT-003', category: 'アウター', material: 'コットン・ナイロン', season: '秋冬',
+      description: '長く着られる定番の丈感とディテール。裏地つきで、肌寒い季節の始まりから活躍します。',
+      price: '24800', stock: '54', revenue: '¥892,600', rating: '4.9', reviews: 96, updated: '9/5 18:04',
+      status: '公開中', tone: ['#eae2d6', '#d9cdba'], colors: ['#e6dccb', '#cfc0a8', '#2f3a52'],
+      dots: ['#e6dccb', '#cfc0a8', '#2f3a52'], stockPct: 42, salesPct: 88,
+      sizes: ['S','M'], grid: [[9,14],[4,12],[1,2],[6,3]],
+      trend: [10,16,14,22,20,30,26,38,32,44,40,54,62,48,58,70,52,64,78,56,66,84,60,72] }
+  ];
+
+  colorNames = ['アイボリー', 'ベージュ', 'セージ', 'ネイビー'];
+  cellColors = ['#9fb8a4', '#d9c48b', '#dda8a0', '#d8d2ca'];
+
+  componentDidMount() {
+    this.onKey = e => { if (e.key === 'Escape' && this.state.open) this.setState({ open: false }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); }
+
+  state = { sel: 0, open: false, low: false, query: '', sort: '売れている順', category: 'すべてのカテゴリ', edits: {}, confirm: false };
+
+  extras = [
+    ['ドレープカラーブラウス','BL-062','トップス','ポリエステル','春夏','9800',88,'¥412,000','4.4',54,'公開中','襟元のドレープがやわらかく表情をつくるブラウス。一枚で品よくまとまります。'],
+    ['リネンワイドシャツ','SH-031','トップス','リネン100%','春夏','8600',46,'¥268,400','4.2',31,'公開中','風を通すリネンの大きめシャツ。羽織りにも一枚にも使えます。'],
+    ['コットンタックスカート','SK-204','ボトムス','コットン100%','通年','9400',6,'¥142,600','4.0',22,'在庫少','front のタックで落ち感を出した、扱いやすいミディ丈スカート。'],
+    ['ハイウエストデニム','PT-077','ボトムス','コットン・ポリウレタン','通年','13800',112,'¥688,200','4.7',96,'公開中','脚の長さが出る股上深めのデニム。伸びる生地で一日じゅう楽に。'],
+    ['ウールブレンドコート','CT-018','アウター','ウール・ポリエステル','秋冬','32800',24,'¥984,000','4.8',48,'公開予約','ウール混の落ち着いた風合い。長く着られる定番のシルエット。'],
+    ['キルティングジャケット','CT-025','アウター','ナイロン','秋冬','18600',58,'¥576,000','4.5',37,'公開中','軽くて暖かいキルティング。肌寒い日の重ね着にちょうどよい厚み。'],
+    ['フレンチスリーブニット','KN-140','トップス','コットン・アクリル','通年','7200',0,'¥98,400','4.1',18,'在庫切れ間近','肩をすっきり見せるフレンチスリーブ。真夏以外はほぼ通年で。'],
+    ['ケーブル編みカーディガン','KN-233','トップス','ウール混','秋冬','12600',74,'¥446,800','4.6',61,'公開中','太めのケーブル編みで表情のあるカーディガン。前を開けても閉めても。'],
+    ['サテンロングスカート','SK-256','ボトムス','ポリエステル','秋冬','11800',35,'¥312,000','4.3',29,'公開中','光沢を抑えたサテン。歩くたびに揺れるきれいなロング丈。'],
+    ['プリーツワンピース','OP-039','ワンピース','ポリエステル','春夏','15200',52,'¥624,000','4.7',72,'公開中','細かいプリーツで縦のラインを出したワンピース。シワになりにくい生地。'],
+    ['シャツワンピース','OP-047','ワンピース','コットン100%','通年','13400',9,'¥286,400','4.2',33,'在庫少','羽織りにもなるシャツワンピース。ベルトでシルエットを調整できます。'],
+    ['ボウタイブラウス','BL-085','トップス','ポリエステル','通年','7800',126,'¥368,200','4.4',44,'公開中','取り外しできるボウタイつき。きちんとした場にも使えます。'],
+    ['テーパードスラックス','PT-091','ボトムス','ポリエステル・レーヨン','通年','10800',96,'¥482,600','4.5',58,'公開中','膝から裾へ細くなるテーパード。家で洗えて扱いやすい生地です。'],
+    ['ノーカラージャケット','CT-041','アウター','ポリエステル','春夏','16800',41,'¥398,400','4.4',35,'公開中','襟のない軽やかなジャケット。インナーを選ばず通年で羽織れます。'],
+    ['リブタンクトップ','IN-078','トップス','コットン100%','春夏','3200',188,'¥214,000','4.3',67,'公開中','重ね着の土台になるリブタンク。首元の開きは控えめに。'],
+    ['ロングスリーブカットソー','IN-095','トップス','コットン100%','通年','4600',0,'¥96,800','4.0',24,'下書き','手首まで届く袖丈のカットソー。一枚でも下に着ても。'],
+    ['ギャザーティアードスカート','SK-268','ボトムス','コットン・リネン','春夏','10400',63,'¥334,800','4.4',41,'公開中','二段のティアードで軽やかに広がるスカート。歩きやすい丈感。'],
+    ['ロングカーディガン','KN-247','トップス','コットン・ナイロン','通年','14200',5,'¥252,600','4.6',52,'在庫少','膝上まで届く長さで縦のラインを強調。薄手で通年着られます。']
+  ];
+
+  allProducts() {
+    if (this._all) return this._all;
+    const photos = ['summer-lineup.jpg', 'color-lineup.jpg', 'highneck-navy.jpg', 'highneck-yellow.jpg'];
+    const tones = [['#efe7dd','#e3d8cb'],['#eee3d6','#ded0bd'],['#dfe6dc','#cbd6c6'],['#ece5da','#dbd0c1'],['#efe9e2','#e0d8ce'],['#eae2d6','#d9cdba']];
+    const palettes = [['#efe6d8','#e2d3bd','#8f9d8c'],['#efe6d8','#ddcbb4','#93a2c4'],['#7f8c7a','#dcd6cb','#9aa398'],['#e8dfd0','#d6c7b0','#9aa7bd'],['#6f6a63','#ddd6cc'],['#e6dccb','#cfc0a8','#2f3a52']];
+    const base = 'LIENmanager/docs/design/product-management-m-2026-09-10/assets/';
+    const gen = this.extras.map((x, k) => {
+      const [name, code, category, material, season, price, stock, revenue, rating, reviews, status, description] = x;
+      const colors = palettes[k % palettes.length];
+      const free = k % 5 === 4;
+      const sizes = free ? ['フリー'] : ['S', 'M'];
+      const grid = colors.map((_, ci) => sizes.map((_, si) => {
+        const v = Math.max(0, Math.round(stock / (colors.length * sizes.length)) - ci * 3 + si * 2 - (k % 3));
+        return stock === 0 ? 0 : v;
+      }));
+      const trend = Array.from({ length: 24 }, (_, t) => 18 + ((k * 7 + t * 5) % 46) + (t > 16 ? 10 : 0));
+      const salesPct = Math.min(94, 34 + ((k * 11) % 58));
+      return {
+        name, photo: base + photos[k % photos.length], code, category, material, season,
+        description, price, stock: String(stock), revenue, rating, reviews,
+        updated: '9/' + (2 + (k % 9)) + ' ' + (9 + (k % 8)) + ':' + (k % 6) + '5',
+        status, tone: tones[k % tones.length], colors,
+        dots: colors.slice(0, 3), stockPct: Math.min(96, Math.round(stock / 2.2)), salesPct,
+        sizes, grid, trend
+      };
+    });
+    this._all = this.products.concat(gen);
+    return this._all;
+  }
+
+  field(i, key) {
+    const e = this.state.edits[i] || {};
+    return e[key] !== undefined ? e[key] : this.allProducts()[i][key];
+  }
+  setField(i, key, v) {
+    const edits = Object.assign({}, this.state.edits);
+    edits[i] = Object.assign({}, edits[i] || {}, { [key]: v });
+    this.setState({ edits });
+  }
+
+  renderVals() {
+    const sel = this.state.sel;
+    const low = this.state.low;
+    const all = this.allProducts();
+    const p0 = all[sel];
+    const p = Object.assign({}, p0, { status: this.field(sel, 'status') });
+
+    const q = this.state.query.trim();
+    const cat = this.state.category;
+    let list = all.map((c, i) => ({ c, i }));
+    if (q) list = list.filter(o => (o.c.name + ' ' + o.c.code).toLowerCase().indexOf(q.toLowerCase()) >= 0);
+    if (cat !== 'すべてのカテゴリ') list = list.filter(o => o.c.category === cat);
+    if (low) list = list.filter(o => o.c.stockPct <= 25);
+    const order = this.state.sort;
+    if (order === '在庫が少ない順') list = list.slice().sort((a, b) => a.c.stockPct - b.c.stockPct);
+    else if (order === '評価が高い順') list = list.slice().sort((a, b) => parseFloat(b.c.rating) - parseFloat(a.c.rating));
+    else if (order === '更新が新しい順') list = list.slice().sort((a, b) => b.c.updated.localeCompare(a.c.updated));
+    else list = list.slice().sort((a, b) => b.c.salesPct - a.c.salesPct);
+
+    const cards = list.map(({ c, i }) => {
+      const active = i === sel;
+      let st = this.field(i, 'status');
+      const hasZero = (c.grid || []).some(row => row.slice(0, (c.sizes || []).length).some(v => v === 0));
+      if (hasZero && st !== '非公開' && st !== '下書き') st = '在庫切れあり';
+      const warn = st === '在庫少' || st === '在庫切れ間近' || st === '在庫切れあり';
+      return {
+        name: c.name,
+        code: c.code,
+        stock: this.field(i, 'stock') + '点',
+        sold: Math.round(c.salesPct * 1.6) + '点',
+        cvr: (c.salesPct / 12).toFixed(1) + '%',
+        revenue: c.revenue,
+        rating: c.rating,
+        onSelect: () => this.setState({ sel: i, open: true }),
+        style: 'border:1px solid ' + (active && this.state.open ? '#c98a80' : '#e8e1d8') + ';background:#fffdfa;border-radius:14px;padding:0;overflow:hidden;cursor:pointer;text-align:left;box-shadow:' +
+          (active ? '0 6px 20px rgba(140,110,98,.13)' : '0 2px 8px rgba(140,120,105,.05)'),
+        thumbStyle: 'position:relative;height:132px;background:url("' + c.photo + '") center/cover,linear-gradient(158deg,' + c.tone[0] + ',' + c.tone[1] + ');margin:8px;border-radius:11px',
+        badge: warn ? st : '',
+        badgeStyle: warn ? 'position:absolute;left:11px;bottom:11px;background:#f7ebe7;color:#94534a;border-radius:999px;padding:5px 11px;font-size:12px' : 'display:none',
+        dots: c.dots.map(d => ({ style: 'width:13px;height:13px;border-radius:50%;background:' + d + ';border:1px solid rgba(0,0,0,.07)' })),
+        stockBar: 'display:block;height:100%;border-radius:7px;background:' + (c.stockPct < 25 ? '#dda8a0' : '#9fb8a4') + ';width:' + c.stockPct + '%',
+        salesBar: 'display:block;height:100%;border-radius:7px;background:#dda8a0;width:' + c.salesPct + '%'
+      };
+    });
+
+    const sizes = p.sizes || ['S', 'M'];
+    const full = 24;
+    const rowTpl = 'display:grid;grid-template-columns:104px repeat(' + sizes.length + ',minmax(0,1fr));';
+    const matrix = p.grid.map((row, i) => ({
+      color: this.colorNames[i],
+      rowStyle: rowTpl + 'align-items:center;border-bottom:1px solid #f2ece5',
+      swatch: 'width:19px;height:19px;border-radius:50%;background:' + (p.colors[i] || '#ddd6cc') + ';border:1px solid rgba(0,0,0,.07);flex:none',
+      cells: row.slice(0, sizes.length).map(v => {
+        const pct = Math.max(v > 0 ? 6 : 0, Math.min(100, Math.round(v / full * 100)));
+        return {
+          count: v === 0 ? '—' : v,
+          countStyle: 'font-size:11.5px;width:22px;text-align:right;flex:none;color:' + (v === 0 ? '#8a8078' : v <= 5 ? '#94534a' : '#3a3431'),
+          barStyle: 'display:block;height:100%;border-radius:8px;width:' + pct + '%;background:' + (v === 0 ? 'transparent' : v <= 5 ? '#c98a80' : '#8fa894')
+        };
+      })
+    }));
+
+    const max = Math.max.apply(null, p.trend);
+    const bars = p.trend.map(v => ({
+      style: 'flex:1;border-radius:3px 3px 0 0;background:' + (v === max ? '#c98a80' : '#e3bdb6') + ';height:' + Math.round(v / max * 100) + '%'
+    }));
+
+    const selZero = (p.grid || []).some(row => row.slice(0, (p.sizes || []).length).some(v => v === 0));
+    const rawStatus = this.field(sel, 'status');
+    const stockWarn = rawStatus === '非公開' || rawStatus === '下書き' ? '' : selZero ? '在庫切れあり' : rawStatus === '在庫少' || rawStatus === '在庫切れ間近' ? rawStatus : '';
+    const status = rawStatus === '非公開' || rawStatus === '下書き' ? '非公開' : '公開中';
+    const published = status !== '非公開';
+    const tone = status === '非公開' ? ['#ece6df', '#5f574f'] : status === '公開予約' ? ['#f4efe3', '#6f5b28'] : status === '公開中' ? ['#dfecf3', '#2d5c76'] : ['#f7ebe7', '#94534a'];
+
+    return {
+      cards, matrix, bars, p,
+      galleryPad: this.state.open ? '600px' : '28px',
+      countLabel: cards.length + ' 件を表示中　全 ' + all.length + ' 件',
+      closeDetail: () => this.setState({ open: false }),
+      scrimStyle: 'position:absolute;left:272px;right:0;top:0;bottom:0;background:linear-gradient(180deg,rgba(58,48,42,0) 55%,rgba(58,48,42,.12));z-index:9;pointer-events:none;transition:opacity .34s ease;opacity:' +
+        (this.state.open ? '1' : '0'),
+      sheetStyle: 'position:absolute;left:272px;right:0;bottom:0;height:584px;background:#fffdfa;border-top:1px solid #e3dbd2;border-radius:18px 18px 0 0;box-shadow:0 -14px 40px rgba(120,98,82,.14);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;z-index:10;will-change:transform;transition:transform .42s cubic-bezier(.22,.75,.2,1),opacity .28s ease;transform:translateY(' +
+        (this.state.open ? '0' : '100%') + ');opacity:' + (this.state.open ? '1' : '0') + ';pointer-events:' + (this.state.open ? 'auto' : 'none'),
+      sizeCols: sizes.map(s => ({ label: s, style: 'padding:9px 0' })),
+      headStyle: rowTpl + 'border-bottom:1px solid #ece5dd;font-size:12px;color:#736a62;text-align:center',
+      sizeNote: sizes.length === 1 ? 'フリーサイズのみ' : sizes.join('・') + ' の2展開',
+      query: this.state.query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      sort: this.state.sort,
+      onSort: e => this.setState({ sort: e.target.value }),
+      category: this.state.category,
+      onCategory: e => this.setState({ category: e.target.value }),
+      toggleLow: () => this.setState({ low: !low }),
+      lowStyle: 'height:46px;border-radius:10px;padding:0 20px;font-size:13.5px;display:flex;align-items:center;gap:9px;cursor:pointer;border:1px solid ' +
+        (low ? '#c98a80;background:#c98a80;color:#fffdfa' : '#e0bdb7;background:#faeeeb;color:#a25d50'),
+      heroStyle: 'border-radius:13px;background:url("' + p.photo + '") center/cover;height:420px',
+      subStyle: 'border-radius:11px;background:url("' + p.photo + '") center/cover',
+      noResults: cards.length === 0,
+      stockWarn,
+      hasStockWarn: !!stockWarn,
+      stockWarnStyle: 'background:#f7ebe7;color:#94534a;border-radius:999px;padding:5px 12px;font-size:12px;flex:none',
+      statusStyle: 'background:' + tone[0] + ';color:' + tone[1] + ';border:0;border-radius:999px;padding:7px 0;font-size:12px;width:104px;text-align:center;flex:none;cursor:pointer',
+      togglePublish: () => this.setState({ confirm: true }),
+      confirmOpen: !!this.state.confirm,
+      confirmTitle: published ? 'この商品を非公開にしますか？' : 'この商品を公開しますか？',
+      confirmBody: published ? '「' + p.name + '」は楽天の商品ページから見えなくなります。あとから公開し直せます。' : '「' + p.name + '」を楽天で公開し、購入できる状態にします。',
+      confirmLabel: published ? '非公開にする' : '公開する',
+      confirmCancel: () => this.setState({ confirm: false }),
+      confirmOk: () => { this.setField(sel, 'status', published ? '非公開' : '公開中'); this.setState({ confirm: false }); },
+      publishAction: published ? '非公開にする' : '公開する',
+      price: this.field(sel, 'price'),
+      onPrice: e => this.setField(sel, 'price', e.target.value),
+      stock: this.field(sel, 'stock'),
+      onStock: e => this.setField(sel, 'stock', e.target.value)
+    };
+  }
+}
+</script>
+</body>
+</html>

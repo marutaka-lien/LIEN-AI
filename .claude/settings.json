@@ -3,6 +3,24 @@
     "allow": [
       "Bash(git push:*)",
       "Bash(git remote:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf .)",
+      "Bash(rm -rf ..)",
+      "Bash(rm -rf ../*)",
+      "Bash(rm .env)",
+      "Bash(rm -f .env)",
+      "Bash(rm -rf .env)",
+      "Bash(rm LIENmanager/.env)",
+      "Bash(rm -f LIENmanager/.env)",
+      "Bash(rm -rf LIENmanager/.env)",
+      "Bash(rm -rf BusinessData)",
+      "Bash(rm -rf BusinessData/*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)"
     ]
   }
 }

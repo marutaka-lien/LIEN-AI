@@ -22,6 +22,11 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
   "900": "キャンセル確定",
 };
 
+// 「注文者情報一覧」タブのステータス絞り込みドロップダウン用。
+export const ORDER_STATUS_OPTIONS: { value: string; label: string }[] = Object.entries(
+  ORDER_STATUS_LABELS
+).map(([value, label]) => ({ value, label }));
+
 export function getOrderStatusPresentation(orderStatus: string | null): OrderStatusPresentation {
   if (!orderStatus) {
     return { label: "不明", isProcessingTarget: false, isPendingConfirmation: false };

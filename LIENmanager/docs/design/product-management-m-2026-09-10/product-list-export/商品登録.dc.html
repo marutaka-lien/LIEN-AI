@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f4ef}
+*{box-sizing:border-box}
+input,select,textarea,button{font-family:inherit;color:inherit}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #bd7d74;outline-offset:2px}
+::selection{background:#ead5d0}
+</style>
+</helmet>
+
+<div style="width:1920px;height:1080px;display:grid;grid-template-columns:240px 1fr;font-family:'Noto Sans JP',sans-serif;color:#302d2b;background:#f7f4ef;overflow:hidden">
+
+  <aside style="background:linear-gradient(180deg,#f2ede6,#eae3da);border-right:1px solid #ded6cf;padding:30px 16px;display:flex;flex-direction:column">
+    <div style="font:500 28px 'Noto Serif JP',serif;letter-spacing:.22em;padding:0 14px 28px">LIEN</div>
+    <div style="font-size:11px;letter-spacing:.14em;color:#9a8f87;padding:0 14px 10px">LIEN MANAGER</div>
+    <nav style="display:flex;flex-direction:column;gap:6px">
+      <button style="border:0;background:transparent;text-align:left;padding:13px 14px;border-radius:10px;color:#6f6863;display:flex;gap:12px;align-items:center;font-size:14px;cursor:pointer" style-hover="background:rgba(255,253,249,.6)"><span style="width:20px;text-align:center">⌂</span>今日の運営</button>
+      <button style="border:0;background:transparent;text-align:left;padding:13px 14px;border-radius:10px;color:#6f6863;display:flex;gap:12px;align-items:center;font-size:14px;cursor:pointer" style-hover="background:rgba(255,253,249,.6)"><span style="width:20px;text-align:center">▤</span>発送業務</button>
+      <button style="border:0;background:transparent;text-align:left;padding:13px 14px;border-radius:10px;color:#6f6863;display:flex;gap:12px;align-items:center;font-size:14px;cursor:pointer" style-hover="background:rgba(255,253,249,.6)"><span style="width:20px;text-align:center">♡</span>レビュー</button>
+      <button style="border:0;background:rgba(255,253,249,.9);text-align:left;padding:13px 14px;border-radius:10px;color:#302d2b;display:flex;gap:12px;align-items:center;font-size:14px;font-weight:500;cursor:pointer;box-shadow:inset 3px 0 #bd7d74,0 5px 18px rgba(91,72,58,.06)"><span style="width:20px;text-align:center">◇</span>商品管理</button>
+      <button style="border:0;background:transparent;text-align:left;padding:13px 14px;border-radius:10px;color:#6f6863;display:flex;gap:12px;align-items:center;font-size:14px;cursor:pointer" style-hover="background:rgba(255,253,249,.6)"><span style="width:20px;text-align:center">⚙</span>設定</button>
+    </nav>
+    <div style="margin-top:auto;border-top:1px solid #d6cdc5;padding:20px 14px 0;color:#958a82;font:13px/1.9 'Noto Serif JP',serif">つくる人も<br>着る人も<br>心地よく</div>
+  </aside>
+
+  <div style="min-width:0;min-height:0;display:grid;grid-template-rows:62px auto minmax(0,1fr)">
+
+    <header style="background:rgba(255,253,249,.85);border-bottom:1px solid #ded6cf;display:flex;align-items:center;justify-content:space-between;padding:0 32px">
+      <div style="font-size:13px;color:#847c76">LIENmanager　/　商品管理　/　<span style="color:#302d2b">新商品登録</span></div>
+      <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:#847c76">
+        <span style="display:flex;align-items:center;gap:7px;background:#f4efe8;border:1px solid #e3dad2;border-radius:999px;padding:6px 12px"><span style="width:6px;height:6px;border-radius:50%;background:#7f9887"></span>自動保存済み　10:24</span>
+        <span style="color:#7f9887">● 楽天 最終同期 10:24</span>
+        <span>管理者 ⌄</span>
+      </div>
+    </header>
+
+    <section style="background:#fffdf9;padding:22px 32px 0;border-bottom:1px solid #ded6cf">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+        <div>
+          <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em;margin-bottom:6px">PRODUCT MANAGEMENT</div>
+          <h1 style="font:500 30px 'Noto Serif JP',serif;margin:0">商品管理</h1>
+          <p style="font-size:13px;color:#847c76;margin:8px 0 0">商品を見渡し、登録・更新・公開予約まで一つの場所で</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding-bottom:4px">
+          <span style="font-size:12px;color:#847c76">下書き　5102-AW26</span>
+          <button onClick="{{ saveDraft }}" style="border:1px solid #bd7d74;background:#f7ebe8;color:#8d5b53;border-radius:9px;padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#f2e0db"><span style="font-size:14px">⏸</span>一時保存して中断</button>
+          <button style="border:1px solid #ded6cf;background:#fffdf9;border-radius:9px;padding:10px 16px;font-size:13px;color:#847c76;cursor:pointer" style-hover="border-color:#bd7d74;color:#302d2b">破棄</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:30px;margin-top:20px">
+        <button style="border:0;background:transparent;padding:13px 2px;color:#817872;font-size:14px;cursor:pointer;position:relative">商品一覧</button>
+        <button style="border:0;background:transparent;padding:13px 2px;color:#302d2b;font-size:14px;font-weight:700;cursor:pointer;position:relative">新商品登録<span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#bd7d74"></span></button>
+        <button style="border:0;background:transparent;padding:13px 2px;color:#817872;font-size:14px;cursor:pointer">予約状況</button>
+      </div>
+    </section>
+
+    <div style="min-height:0;overflow:hidden;display:grid;grid-template-columns:300px minmax(0,1fr) 380px;gap:20px;padding:20px 32px 24px">
+
+      <aside style="background:#fffdf9;border:1px solid #ded6cf;border-radius:14px;padding:14px;display:flex;flex-direction:column;min-height:0">
+        <div style="font-size:11px;letter-spacing:.14em;color:#a0958c;padding:6px 8px 10px">STEPS　{{ doneCount }} / 9 完了</div>
+        <div style="height:4px;background:#efe8e0;border-radius:4px;overflow:hidden;margin:0 8px 12px"><div style="height:100%;background:#bd7d74;border-radius:4px;width:{{ progressPct }}"></div></div>
+        <div style="display:flex;flex-direction:column;gap:3px;overflow:auto;min-height:0">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="9">
+            <button onClick="{{ s.onClick }}" style="{{ s.style }}">
+              <span style="{{ s.numStyle }}">{{ s.mark }}</span>
+              <span style="flex:1;text-align:left">{{ s.label }}</span>
+              <span style="{{ s.badgeStyle }}">{{ s.badge }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="margin-top:auto;border-top:1px solid #ece4dc;padding:12px 8px 4px;font-size:11px;line-height:1.7;color:#958a82">未入力の必須項目がある段階には件数を表示します。すべて埋まるまで楽天へは登録できません。</div>
+      </aside>
+
+      <section style="background:#fffdf9;border:1px solid #ded6cf;border-radius:14px;display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;overflow:hidden">
+        <div style="overflow:auto;padding:26px 30px">
+
+          <sc-if value="{{ s1 }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <sc-if value="{{ justSaved }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:14px;background:#eef3ef;border:1px solid #cfdcd3;border-radius:11px;padding:14px 18px;margin-bottom:20px">
+                  <span style="width:22px;height:22px;border-radius:50%;background:#7f9887;color:#fffdf9;display:grid;place-items:center;font-size:12px;flex:none">✓</span>
+                  <div style="font-size:13.5px;color:#4d5f54;line-height:1.7">一時保存しました（{{ savedAt }}）。下の「作業中の一時保存」から、いつでも続きを再開できます。</div>
+                  <button onClick="{{ resumeSaved }}" style="margin-left:auto;border:1px solid #7f9887;background:transparent;color:#4d5f54;border-radius:8px;padding:9px 16px;font-size:12.5px;cursor:pointer;flex:none" style-hover="background:#e4ece7">作業に戻る</button>
+                  <button onClick="{{ dismissSaved }}" style="border:0;background:transparent;color:#8aa093;font-size:15px;cursor:pointer;flex:none">×</button>
+                </div>
+              </sc-if>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 1 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">登録方法を選ぶ</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">似た商品がある場合は複製すると、配送設定やカテゴリーなど共通項目の入力を省けます。</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+                <button style="border:1px solid #bd7d74;background:#f7ebe8;border-radius:12px;padding:20px;text-align:left;cursor:pointer">
+                  <strong style="display:block;margin-bottom:8px;font-size:15px">既存商品を複製</strong>
+                  <span style="font-size:13px;color:#847c76;line-height:1.7">商品を選び、変更する部分だけ書き換えます。所要 約8分。</span>
+                </button>
+                <button style="border:1px solid #ded6cf;background:#faf7f2;border-radius:12px;padding:20px;text-align:left;cursor:pointer" style-hover="border-color:#bd7d74">
+                  <strong style="display:block;margin-bottom:8px;font-size:15px">ゼロから登録</strong>
+                  <span style="font-size:13px;color:#847c76;line-height:1.7">すべての項目を新しく入力します。所要 約25分。</span>
+                </button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;border-top:1px solid #ece4dc;margin-top:24px;padding-top:20px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">複製する商品<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                    <option>綿シフォン ハイネックインナー（1000000115）</option>
+                    <option>アイボリーインナー（5102-IV）</option>
+                    <option>ブラックインナー（5102-BK）</option>
+                  </select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">新しい商品管理番号<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                  <input value="5102-AW26" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                </div>
+              </div>
+              <div style="margin-top:20px;background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:14px 16px;font-size:13px;color:#6f6863;line-height:1.8">複製される項目：配送方法・送料設定・カテゴリー・返品特約・サイズガイド<br>複製されない項目：商品名・価格・在庫・画像・商品説明</div>
+
+              <div style="border-top:1px solid #ece4dc;margin-top:26px;padding-top:22px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
+                  <div>
+                    <h3 style="font:500 18px 'Noto Serif JP',serif;margin:0">作業中の一時保存</h3>
+                    <p style="font-size:12.5px;color:#847c76;margin:6px 0 0">中断した登録作業の続きから再開できます。保存から30日を過ぎたものは自動で削除されます。</p>
+                  </div>
+                  <span style="font-size:12px;color:#847c76">{{ draftCount }} 件</span>
+                </div>
+                <div style="border:1px solid #ded6cf;border-radius:12px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:1.6fr .9fr 1fr .9fr 180px;background:#f5f0ea;border-bottom:1px solid #ded6cf;font-size:11px;color:#847c76">
+                    <div style="padding:11px 16px">商品名 ／ 管理番号</div>
+                    <div style="padding:11px 16px">進捗</div>
+                    <div style="padding:11px 16px">最後の保存</div>
+                    <div style="padding:11px 16px">担当</div>
+                    <div></div>
+                  </div>
+                  <sc-for list="{{ drafts }}" as="d" hint-placeholder-count="3">
+                    <div style="{{ d.rowStyle }}">
+                      <div style="padding:13px 16px;min-width:0">
+                        <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.name }}</div>
+                        <div style="font-size:11px;color:#a0958c;margin-top:4px;letter-spacing:.04em">{{ d.code }}</div>
+                      </div>
+                      <div style="padding:13px 16px;display:flex;flex-direction:column;gap:6px;justify-content:center">
+                        <div style="font-size:12px;color:#6f6863">{{ d.stepLabel }}</div>
+                        <div style="height:3px;background:#efe8e0;border-radius:3px;overflow:hidden"><div style="{{ d.barStyle }}"></div></div>
+                      </div>
+                      <div style="padding:13px 16px;font-size:12.5px;color:#6f6863;display:flex;align-items:center">{{ d.saved }}</div>
+                      <div style="padding:13px 16px;font-size:12.5px;color:#6f6863;display:flex;align-items:center">{{ d.owner }}</div>
+                      <div style="padding:13px 16px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+                        <button onClick="{{ d.onResume }}" style="border:1px solid #bd7d74;background:#f7ebe8;color:#8d5b53;border-radius:8px;padding:8px 15px;font-size:12px;cursor:pointer" style-hover="background:#f2e0db">続きから再開</button>
+                        <button onClick="{{ d.onDelete }}" style="border:1px solid #ded6cf;background:#fffdf9;color:#a0958c;border-radius:8px;width:30px;height:30px;cursor:pointer;flex:none" style-hover="border-color:#bd7d74;color:#a25d50">×</button>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ noDrafts }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:26px;text-align:center;font-size:13px;color:#a0958c;background:#fffdf9">一時保存された作業はありません。</div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 2 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">基本情報</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">楽天の商品ページ上部に表示される情報です。</p>
+              <div style="display:grid;gap:16px;margin-top:20px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76;display:flex;justify-content:space-between"><span>商品名<span style="color:#bd7d74;margin-left:6px">必須</span></span><span>38 / 255</span></label>
+                  <input value="綿シフォン ハイネックインナー 2026AW" style="padding:12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:15px;width:100%">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label style="font-size:12px;color:#847c76">キャッチコピー</label>
+                    <input value="秋も、首元を隠して軽やかに。" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label style="font-size:12px;color:#847c76">ブランド</label>
+                    <input value="LIEN" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label style="font-size:12px;color:#847c76">商品管理番号<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                    <input value="5102-AW26" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#f5f0ea;font-size:14px;width:100%">
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label style="font-size:12px;color:#847c76">品番</label>
+                    <input value="5102" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <label style="font-size:12px;color:#847c76">素材</label>
+                    <input value="綿100%" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">検索キーワード<span style="margin-left:8px;color:#a0958c">スペース区切り・最大10語</span></label>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9">
+                    <span style="background:#f1e8e4;border-radius:999px;padding:6px 12px;font-size:12px">ハイネック</span>
+                    <span style="background:#f1e8e4;border-radius:999px;padding:6px 12px;font-size:12px">インナー</span>
+                    <span style="background:#f1e8e4;border-radius:999px;padding:6px 12px;font-size:12px">綿100%</span>
+                    <span style="background:#f1e8e4;border-radius:999px;padding:6px 12px;font-size:12px">レディース</span>
+                    <span style="color:#a0958c;font-size:12px;padding:6px 4px">＋ キーワードを追加</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 3 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">価格</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">税込価格で入力します。SKUごとの差額は次の段階で設定できます。</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">販売価格（税込）<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                  <input value="2680" style="padding:12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font:500 18px 'Noto Serif JP',serif;width:100%">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">表示用二重価格</label>
+                  <input value="2980" style="padding:12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:16px;width:100%">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">原価（社内管理）</label>
+                  <input value="940" style="padding:12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:16px;width:100%">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px">
+                <div style="background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:14px"><div style="font-size:11px;color:#847c76">粗利率</div><div style="font:500 22px 'Noto Serif JP',serif;margin-top:6px">64.9%</div></div>
+                <div style="background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:14px"><div style="font-size:11px;color:#847c76">1点あたり粗利</div><div style="font:500 22px 'Noto Serif JP',serif;margin-top:6px">¥1,740</div></div>
+                <div style="background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:14px"><div style="font-size:11px;color:#847c76">同型商品の平均価格</div><div style="font:500 22px 'Noto Serif JP',serif;margin-top:6px">¥2,680</div></div>
+              </div>
+              <div style="border-top:1px solid #ece4dc;margin-top:24px;padding-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">ポイント変倍</label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%"><option>設定しない</option><option>5倍（期間指定）</option><option>10倍（期間指定）</option></select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">送料</label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%"><option>送料込み（3,980円以上で送料無料）</option><option>送料別</option></select>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end">
+                <div>
+                  <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 4 / 9</div>
+                  <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">色・サイズ・在庫</h2>
+                  <p style="font-size:13px;color:#847c76;margin:0">1行が1つのSKUです。行を追加して組み合わせを作ります。</p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:#847c76">
+                  <span>合計在庫 <b style="font:500 18px 'Noto Serif JP',serif;color:#302d2b">{{ totalStock }}</b> 点</span>
+                  <span>／</span>
+                  <span>{{ rowCount }} SKU</span>
+                </div>
+              </div>
+              <div style="margin-top:18px;border:1px solid #ded6cf;border-radius:12px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:1.2fr .8fr .8fr 1.4fr .9fr 44px;gap:0;background:#f5f0ea;border-bottom:1px solid #ded6cf;font-size:11px;color:#847c76">
+                  <div style="padding:11px 14px">色</div>
+                  <div style="padding:11px 14px">サイズ</div>
+                  <div style="padding:11px 14px">在庫数</div>
+                  <div style="padding:11px 14px">SKU番号</div>
+                  <div style="padding:11px 14px">価格差</div>
+                  <div></div>
+                </div>
+                <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:1.2fr .8fr .8fr 1.4fr .9fr 44px;align-items:center;border-bottom:1px solid #ece4dc;background:#fffdf9">
+                    <div style="padding:8px 10px"><input value="{{ r.color }}" onChange="{{ r.onColor }}" style="width:100%;padding:9px 10px;border:1px solid #e6ddd5;border-radius:8px;background:#fffdf9;font-size:14px"></div>
+                    <div style="padding:8px 10px"><input value="{{ r.size }}" onChange="{{ r.onSize }}" style="width:100%;padding:9px 10px;border:1px solid #e6ddd5;border-radius:8px;background:#fffdf9;font-size:14px"></div>
+                    <div style="padding:8px 10px"><input value="{{ r.stock }}" onChange="{{ r.onStock }}" style="width:100%;padding:9px 10px;border:1px solid #e6ddd5;border-radius:8px;background:#fffdf9;font-size:14px"></div>
+                    <div style="padding:8px 10px"><input value="{{ r.sku }}" onChange="{{ r.onSku }}" style="width:100%;padding:9px 10px;border:1px solid #e6ddd5;border-radius:8px;background:#fffdf9;font-size:13px;letter-spacing:.04em"></div>
+                    <div style="padding:8px 10px"><input value="{{ r.diff }}" onChange="{{ r.onDiff }}" style="width:100%;padding:9px 10px;border:1px solid #e6ddd5;border-radius:8px;background:#fffdf9;font-size:14px"></div>
+                    <div style="padding:8px 6px"><button onClick="{{ r.onRemove }}" style="border:1px solid #e6ddd5;background:#fffdf9;border-radius:8px;width:30px;height:30px;color:#a0958c;cursor:pointer" style-hover="border-color:#bd7d74;color:#a25d50">×</button></div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;gap:10px;padding:12px 14px;background:#faf7f2">
+                  <button onClick="{{ addRow }}" style="border:1px solid #bd7d74;background:transparent;color:#8d5b53;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer" style-hover="background:#f7ebe8">＋ SKUを追加</button>
+                  <button onClick="{{ duplicateLast }}" style="border:1px solid #ded6cf;background:#fffdf9;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer" style-hover="border-color:#bd7d74">最終行を複製</button>
+                  <span style="margin-left:auto;font-size:12px;color:#958a82;align-self:center">在庫0のSKUは公開時に「売り切れ」と表示されます</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 5 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">商品画像</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">1枚目がメイン画像です。ドラッグで並べ替えできます。推奨 700×700px 以上。</p>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px">
+                <div style="aspect-ratio:1;border-radius:12px;background:linear-gradient(155deg,#efe7de,#e4dbd1);border:1px solid #ded6cf;position:relative;display:grid;place-items:center;color:#a0958c;font-size:12px">画像 1<span style="position:absolute;top:10px;left:10px;background:#bd7d74;color:#fff;border-radius:999px;padding:4px 10px;font-size:10px">メイン</span></div>
+                <div style="aspect-ratio:1;border-radius:12px;background:linear-gradient(155deg,#efe7de,#e4dbd1);border:1px solid #ded6cf;display:grid;place-items:center;color:#a0958c;font-size:12px">画像 2</div>
+                <div style="aspect-ratio:1;border-radius:12px;background:linear-gradient(155deg,#efe7de,#e4dbd1);border:1px solid #ded6cf;display:grid;place-items:center;color:#a0958c;font-size:12px">画像 3</div>
+                <div style="aspect-ratio:1;border-radius:12px;border:1px dashed #cdbfb4;background:#faf7f2;display:grid;place-items:center;text-align:center;color:#a0958c;font-size:12px;line-height:1.8;cursor:pointer">＋<br>ドラッグ＆ドロップ<br>または選択</div>
+              </div>
+              <div style="border-top:1px solid #ece4dc;margin-top:24px;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:13px;color:#847c76">3 / 20 枚　白背景チェック 済み・サイズ基準 済み</div>
+                <button style="border:1px solid #ded6cf;background:#fffdf9;border-radius:9px;padding:10px 16px;font-size:13px;cursor:pointer" style-hover="border-color:#bd7d74">色ごとの画像を割り当てる</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s6 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 6 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">商品説明</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">PC用とスマートフォン用を分けて登録します。</p>
+              <div style="display:grid;gap:16px;margin-top:20px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76;display:flex;justify-content:space-between"><span>スマートフォン用説明文<span style="color:#bd7d74;margin-left:6px">必須</span></span><span>186 / 1,000</span></label>
+                  <textarea rows="5" style="padding:13px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;line-height:1.9;resize:none;width:100%">首元をやさしく覆うハイネック。綿100%の柔らかな肌ざわりで、一枚でも重ね着でも心地よく着られます。透けにくく、日差しの強い季節も安心です。</textarea>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">PC用説明文</label>
+                  <textarea rows="6" style="padding:13px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;line-height:1.9;resize:none;width:100%">【素材】綿100%　【生産国】日本
+やさしい肌ざわりの綿シフォンを使用したハイネックインナー。首元を自然に隠し、一枚でも重ね着でも。</textarea>
+                </div>
+                <div style="background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:14px 16px;font-size:13px;color:#6f6863;line-height:1.8">薬機法・景品表示法に触れる表現は検出されませんでした。禁止タグ（script / iframe）も未使用です。</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s7 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 7 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">配送・カテゴリー</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">複製元から引き継いだ設定です。変更が必要な項目だけ書き換えてください。</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">表示カテゴリー<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%"><option>レディースファッション &gt; トップス &gt; インナー</option><option>レディースファッション &gt; トップス &gt; カットソー</option></select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">配送方法<span style="color:#bd7d74;margin-left:6px">必須</span></label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%"><option>クリックポスト（ポスト投函）</option><option>宅配便（ヤマト運輸）</option></select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">発送目安</label>
+                  <select style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%"><option>1〜2営業日以内に発送</option><option>3〜4営業日以内に発送</option></select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">1点あたり重量</label>
+                  <input value="180g" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                </div>
+              </div>
+              <div style="margin-top:20px;background:#f5f0ea;border:1px solid #e6ddd5;border-radius:10px;padding:16px;display:grid;gap:10px;font-size:13px;color:#6f6863;line-height:1.7">
+                <div style="display:flex;justify-content:space-between"><span>返品特約</span><b style="font-weight:500">お客様都合の返品：商品到着後7日以内</b></div>
+                <div style="display:flex;justify-content:space-between"><span>サイズガイド</span><b style="font-weight:500">LIEN 共通サイズ表（トップス）</b></div>
+                <div style="display:flex;justify-content:space-between"><span>ラッピング</span><b style="font-weight:500">対応可（有料・¥330）</b></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s8 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 8 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">公開日時</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">予約すると、指定時刻に自動で楽天へ反映されます。実行前ならいつでも取り消せます。</p>
+              <div style="display:grid;gap:12px;margin-top:20px">
+                <button onClick="{{ setDraft }}" style="{{ draftStyle }}">
+                  <span style="{{ draftDot }}"></span>
+                  <span><strong style="display:block;font-size:15px;margin-bottom:4px">下書きのまま保存</strong><span style="font-size:13px;color:#847c76">楽天には登録しません。あとから公開できます。</span></span>
+                </button>
+                <button onClick="{{ setNow }}" style="{{ nowStyle }}">
+                  <span style="{{ nowDot }}"></span>
+                  <span><strong style="display:block;font-size:15px;margin-bottom:4px">すぐに公開</strong><span style="font-size:13px;color:#847c76">最終確認のあと、ただちに楽天へ登録します。</span></span>
+                </button>
+                <button onClick="{{ setSchedule }}" style="{{ schedStyle }}">
+                  <span style="{{ schedDot }}"></span>
+                  <span><strong style="display:block;font-size:15px;margin-bottom:4px">日時を決めて公開予約</strong><span style="font-size:13px;color:#847c76">指定した時刻に自動で登録されます。</span></span>
+                </button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:18px;padding-left:4px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">公開日</label>
+                  <input value="2026-09-20" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">時刻</label>
+                  <input value="10:00" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <label style="font-size:12px;color:#847c76">販売終了</label>
+                  <input value="設定しない" style="padding:11px 12px;border:1px solid #ded6cf;border-radius:9px;background:#fffdf9;font-size:14px;width:100%">
+                </div>
+              </div>
+              <div style="margin-top:22px;border:1px solid #e3dad2;border-radius:12px;overflow:hidden">
+                <div style="background:#f5f0ea;padding:11px 16px;font-size:12px;color:#847c76;border-bottom:1px solid #e3dad2">この商品に登録済みの予約</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;background:#fffdf9">
+                  <div style="display:flex;align-items:center;gap:14px;font-size:13px">
+                    <span style="background:#e6efe8;color:#567360;border-radius:999px;padding:5px 11px;font-size:11px">確認済み</span>
+                    <b style="font-weight:500">9/18 09:00</b>
+                    <span style="color:#847c76">説明文とメイン画像を更新</span>
+                  </div>
+                  <div style="display:flex;gap:8px">
+                    <button style="border:1px solid #ded6cf;background:#fffdf9;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer" style-hover="border-color:#bd7d74">内容を見る</button>
+                    <button style="border:1px solid #d9b3ac;background:#fffdf9;color:#a25d50;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer" style-hover="background:#f9efec">予約を取り消す</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s9 }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="color:#bd7d74;font-size:11px;letter-spacing:.16em">STEP 9 / 9</div>
+              <h2 style="font:500 24px 'Noto Serif JP',serif;margin:6px 0 6px">最終確認</h2>
+              <p style="font-size:13px;color:#847c76;margin:0">この内容で楽天へ登録します。複製元からの変更点を色付きで示しています。</p>
+              <div style="margin-top:20px;border:1px solid #ded6cf;border-radius:12px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;background:#f5f0ea;border-bottom:1px solid #ded6cf;font-size:11px;color:#847c76">
+                  <div style="padding:11px 16px">項目</div><div style="padding:11px 16px">複製元（1000000115）</div><div style="padding:11px 16px">今回登録する内容</div>
+                </div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #ece4dc;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">商品名</div><div style="padding:12px 16px;color:#a0958c">綿シフォン ハイネックインナー</div><div style="padding:12px 16px;background:#f9f0ed">綿シフォン ハイネックインナー 2026AW</div></div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #ece4dc;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">販売価格</div><div style="padding:12px 16px;color:#a0958c">¥2,680</div><div style="padding:12px 16px">¥2,680</div></div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #ece4dc;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">SKU / 合計在庫</div><div style="padding:12px 16px;color:#a0958c">9 SKU / 86点</div><div style="padding:12px 16px;background:#f9f0ed">{{ rowCount }} SKU / {{ totalStock }}点</div></div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #ece4dc;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">画像</div><div style="padding:12px 16px;color:#a0958c">6枚</div><div style="padding:12px 16px;background:#f9f0ed">3枚</div></div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #ece4dc;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">カテゴリー・配送</div><div style="padding:12px 16px;color:#a0958c">インナー / クリックポスト</div><div style="padding:12px 16px">インナー / クリックポスト</div></div>
+                <div style="display:grid;grid-template-columns:180px 1fr 1fr;font-size:13px;background:#fffdf9"><div style="padding:12px 16px;color:#847c76">公開</div><div style="padding:12px 16px;color:#a0958c">公開中</div><div style="padding:12px 16px;background:#f9f0ed">{{ publishSummary }}</div></div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:center;margin-top:20px;background:#faf3ea;border:1px solid #e8d9c4;border-radius:10px;padding:15px 17px">
+                <span style="color:#b07846;font-size:16px">！</span>
+                <div style="font-size:13px;color:#6f6863;line-height:1.8">登録すると楽天の商品ページが作成され、指定時刻から購入可能になります。取り消しは公開前まで可能です。</div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+
+        <div style="border-top:1px solid #ece4dc;background:#faf7f2;padding:16px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+          <div style="display:flex;align-items:center;gap:14px;font-size:12px;color:#7f9887">
+            <span style="display:flex;align-items:center;gap:7px"><span style="width:6px;height:6px;border-radius:50%;background:#7f9887"></span>楽天にはまだ送信されません</span>
+            <span style="color:#a0958c">｜ {{ savedLabel }}</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ saveDraft }}" style="border:1px solid #bd7d74;background:transparent;color:#8d5b53;border-radius:9px;padding:11px 20px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#f7ebe8">⏸ 一時保存</button>
+            <button onClick="{{ prev }}" style="border:1px solid #ded6cf;background:#fffdf9;border-radius:9px;padding:11px 20px;font-size:14px;cursor:pointer" style-hover="border-color:#bd7d74">← 戻る</button>
+            <button onClick="{{ next }}" style="border:1px solid #bd7d74;background:#bd7d74;color:#fffdf9;border-radius:9px;padding:11px 24px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:#ac6e66;border-color:#ac6e66">{{ nextLabel }}</button>
+          </div>
+        </div>
+      </section>
+
+      <aside style="display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div style="background:#fffdf9;border:1px solid #ded6cf;border-radius:14px;padding:16px;flex:none">
+          <div style="font-size:11px;letter-spacing:.14em;color:#a0958c;margin-bottom:12px">DRAFT PREVIEW</div>
+          <div style="aspect-ratio:4/3;border-radius:11px;background:linear-gradient(155deg,#efe7de,#e4dbd1);border:1px solid #e6ddd5;display:grid;place-items:center;color:#a0958c;font-size:12px">メイン画像</div>
+          <div style="font-size:11px;letter-spacing:.06em;color:#a0958c;margin-top:13px">5102-AW26</div>
+          <div style="font-size:15px;margin-top:5px;line-height:1.6">綿シフォン ハイネックインナー 2026AW</div>
+          <div style="font:500 20px 'Noto Serif JP',serif;margin-top:7px">¥2,680</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #ece4dc;margin-top:13px;padding-top:12px;gap:8px">
+            <div><div style="font-size:10px;color:#847c76">SKU</div><div style="font-size:14px;margin-top:4px">{{ rowCount }}</div></div>
+            <div><div style="font-size:10px;color:#847c76">在庫</div><div style="font-size:14px;margin-top:4px">{{ totalStock }}</div></div>
+            <div><div style="font-size:10px;color:#847c76">画像</div><div style="font-size:14px;margin-top:4px">3枚</div></div>
+          </div>
+        </div>
+
+        <div style="background:#fffdf9;border:1px solid #ded6cf;border-radius:14px;padding:16px;min-height:0;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
+            <div style="font-size:11px;letter-spacing:.14em;color:#a0958c">未入力の必須項目</div>
+            <span style="background:#f4e7d8;color:#98642f;border-radius:999px;padding:4px 10px;font-size:11px">{{ missingCount }}件</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;overflow:auto;font-size:13px">
+            <div style="display:flex;gap:10px;align-items:center;color:#6f6863"><span style="width:5px;height:5px;border-radius:50%;background:#b07846;flex:none"></span>6 商品説明 ／ スマートフォン用説明文</div>
+            <div style="display:flex;gap:10px;align-items:center;color:#6f6863"><span style="width:5px;height:5px;border-radius:50%;background:#b07846;flex:none"></span>5 商品画像 ／ 4枚目以降の登録</div>
+          </div>
+          <div style="margin-top:auto;border-top:1px solid #ece4dc;padding-top:13px;display:flex;flex-direction:column;gap:9px">
+            <button style="border:1px solid #ded6cf;background:#fffdf9;border-radius:9px;padding:11px;font-size:13px;cursor:pointer;width:100%" style-hover="border-color:#bd7d74">楽天の表示イメージを見る</button>
+            <button onClick="{{ goLast }}" style="border:1px solid #bd7d74;background:transparent;color:#8d5b53;border-radius:9px;padding:11px;font-size:13px;cursor:pointer;width:100%" style-hover="background:#f7ebe8">最終確認へ進む</button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080}}">
+class Component extends DCLogic {
+  state = {
+    step: 1,
+    publish: 'schedule',
+    savedAt: '10:24',
+    justSaved: false,
+    returnStep: 1,
+    resumed: null,
+    drafts: [
+      { id: 'd1', name: '綿シフォン ハイネックインナー 2026AW', code: '5102-AW26', step: 4, saved: '本日 10:24', owner: '田中' },
+      { id: 'd2', name: 'ワイドリブパンツ ブラック', code: '4870-BK', step: 6, saved: '昨日 17:02', owner: '田中' },
+      { id: 'd3', name: 'リネンブラウス 2026SS 先行', code: '6301-SS27', step: 2, saved: '9/8 14:35', owner: '佐藤' }
+    ],
+    rows: [
+      { color: 'アイボリー', size: 'S', stock: '12', sku: '5102-AW26-IV-S', diff: '±0' },
+      { color: 'アイボリー', size: 'M', stock: '18', sku: '5102-AW26-IV-M', diff: '±0' },
+      { color: 'ネイビー', size: 'M', stock: '12', sku: '5102-AW26-NV-M', diff: '±0' },
+      { color: 'マスタード', size: 'L', stock: '6', sku: '5102-AW26-MU-L', diff: '+200' }
+    ]
+  };
+
+  labels = ['登録方法', '基本情報', '価格', '色・サイズ・在庫', '商品画像', '商品説明', '配送・カテゴリー', '公開日時', '最終確認'];
+  missing = { 5: 1, 6: 1 };
+
+  go(n) { this.setState({ step: Math.max(1, Math.min(9, n)) }); }
+
+  setRow(i, key, v) {
+    const rows = this.state.rows.slice();
+    rows[i] = Object.assign({}, rows[i], { [key]: v });
+    this.setState({ rows });
+  }
+
+  radio(active) {
+    return 'display:flex;gap:14px;align-items:flex-start;text-align:left;padding:16px 18px;border-radius:12px;cursor:pointer;border:1px solid ' +
+      (active ? '#bd7d74;background:#f7ebe8' : '#ded6cf;background:#faf7f2');
+  }
+  dot(active) {
+    return 'width:16px;height:16px;border-radius:50%;flex:none;margin-top:3px;border:1px solid ' +
+      (active ? '#bd7d74;box-shadow:inset 0 0 0 3px #fffdf9;background:#bd7d74' : '#cdbfb4;background:#fffdf9');
+  }
+
+  nowLabel() {
+    const d = new Date();
+    return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+
+  renderVals() {
+    const step = this.state.step;
+    const pub = this.state.publish;
+    const rows = this.state.rows;
+    const total = rows.reduce((a, r) => a + (parseInt(r.stock, 10) || 0), 0);
+    const missingCount = Object.values(this.missing).reduce((a, b) => a + b, 0);
+
+    const steps = this.labels.map((label, i) => {
+      const n = i + 1;
+      const active = n === step;
+      const done = n < step && !this.missing[n];
+      const miss = this.missing[n];
+      return {
+        label: n + '　' + label,
+        mark: done ? '✓' : String(n),
+        onClick: () => this.go(n),
+        style: 'display:flex;align-items:center;gap:11px;width:100%;padding:11px 10px;border:0;border-radius:9px;font-size:13.5px;cursor:pointer;text-align:left;' +
+          (active ? 'background:#f7ebe8;color:#302d2b;font-weight:500;box-shadow:inset 2px 0 #bd7d74'
+                  : 'background:transparent;color:' + (done ? '#6f6863' : '#8a827c')),
+        numStyle: 'width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:none;' +
+          (active ? 'background:#bd7d74;color:#fffdf9' : done ? 'background:#e6efe8;color:#567360' : 'background:#f1ebe4;color:#a0958c'),
+        badge: miss ? '未入力 ' + miss : '',
+        badgeStyle: miss ? 'background:#f4e7d8;color:#98642f;border-radius:999px;padding:3px 9px;font-size:10.5px;flex:none' : 'display:none'
+      };
+    });
+
+    const drafts = this.state.drafts.map(d => ({
+      name: d.name,
+      code: d.code,
+      saved: d.saved,
+      owner: d.owner,
+      stepLabel: 'STEP ' + d.step + '　' + this.labels[d.step - 1],
+      barStyle: 'height:100%;border-radius:3px;background:#bd7d74;width:' + Math.round(d.step / 9 * 100) + '%',
+      rowStyle: 'display:grid;grid-template-columns:1.6fr .9fr 1fr .9fr 180px;border-bottom:1px solid #ece4dc;background:' +
+        (this.state.resumed === d.id ? '#f9f3f1' : '#fffdf9'),
+      onResume: () => this.setState({ resumed: d.id, step: d.step }),
+      onDelete: () => this.setState({ drafts: this.state.drafts.filter(x => x.id !== d.id) })
+    }));
+
+    return {
+      drafts,
+      draftCount: drafts.length,
+      noDrafts: drafts.length === 0,
+      savedLabel: '一時保存 ' + this.state.savedAt,
+      savedAt: this.state.savedAt,
+      justSaved: this.state.justSaved,
+      dismissSaved: () => this.setState({ justSaved: false }),
+      resumeSaved: () => this.setState({ justSaved: false, step: this.state.returnStep || 1 }),
+      saveDraft: () => {
+        const t = this.nowLabel();
+        const ds = this.state.drafts.slice();
+        const i = ds.findIndex(d => d.id === 'd1');
+        if (i >= 0) ds[i] = Object.assign({}, ds[i], { step: step, saved: '本日 ' + t });
+        this.setState({ savedAt: t, justSaved: true, resumed: 'd1', returnStep: step, step: 1, drafts: ds });
+      },
+      steps,
+      doneCount: Math.max(0, step - 1),
+      progressPct: Math.round((step - 1) / 8 * 100) + '%',
+      s1: step === 1, s2: step === 2, s3: step === 3, s4: step === 4, s5: step === 5,
+      s6: step === 6, s7: step === 7, s8: step === 8, s9: step === 9,
+      rows: rows.map((r, i) => Object.assign({}, r, {
+        onColor: e => this.setRow(i, 'color', e.target.value),
+        onSize: e => this.setRow(i, 'size', e.target.value),
+        onStock: e => this.setRow(i, 'stock', e.target.value),
+        onSku: e => this.setRow(i, 'sku', e.target.value),
+        onDiff: e => this.setRow(i, 'diff', e.target.value),
+        onRemove: () => this.setState({ rows: rows.filter((_, j) => j !== i) })
+      })),
+      rowCount: rows.length,
+      totalStock: total,
+      missingCount,
+      addRow: () => this.setState({ rows: rows.concat([{ color: '', size: '', stock: '0', sku: '5102-AW26-', diff: '±0' }]) }),
+      duplicateLast: () => this.setState({ rows: rows.concat([Object.assign({}, rows[rows.length - 1] || { color: '', size: '', stock: '0', sku: '', diff: '±0' })]) }),
+      prev: () => this.go(step - 1),
+      next: () => this.go(step + 1),
+      goLast: () => this.go(9),
+      nextLabel: step === 9 ? '楽天へ登録する' : step === 8 ? '最終確認へ →' : '次へ進む →',
+      setDraft: () => this.setState({ publish: 'draft' }),
+      setNow: () => this.setState({ publish: 'now' }),
+      setSchedule: () => this.setState({ publish: 'schedule' }),
+      draftStyle: this.radio(pub === 'draft'), draftDot: this.dot(pub === 'draft'),
+      nowStyle: this.radio(pub === 'now'), nowDot: this.dot(pub === 'now'),
+      schedStyle: this.radio(pub === 'schedule'), schedDot: this.dot(pub === 'schedule'),
+      publishSummary: pub === 'draft' ? '下書き保存（未公開）' : pub === 'now' ? 'すぐに公開' : '2026/09/20 10:00 に公開予約'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -22,6 +22,10 @@ function buildConfig(overrides: Partial<RmsConfig> = {}): RmsConfig {
     searchMaxRecordsPerPage: 200,
     requestIntervalMs: 0,
     requestTimeoutMs: 30000,
+    itemSearchPath: "/es/2.0/items/search",
+    itemSearchHits: 100,
+    itemImageBaseUrl: "https://image.rakuten.co.jp/test-shop/cabinet",
+    inventoryBulkGetPath: "/es/2.0/inventories/bulk-get",
     ...overrides,
   };
 }
@@ -63,6 +67,8 @@ function buildFakeSavedOrder(input: OrderUpsertInput): Order {
     clickPostRegisteredAt: null,
     csvExportedAt: null,
     shippingReportedAt: null,
+    heldAt: null,
+    excludedAt: null,
     rawPayload: input.rawPayload ?? null,
     createdAt: new Date("2026-01-01T00:00:00Z"),
     updatedAt: new Date("2026-01-01T00:00:00Z"),
