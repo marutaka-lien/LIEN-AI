@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "additionalDirectories": [
+      "D:\\LIEN素材"
+    ],
     "allow": [
       "Bash(git push:*)",
       "Bash(git remote:*)"
