@@ -1,69 +1,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 
 import { useRunningJobCount } from "@/features/automation/hooks/useRunningJobCount";
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "ダッシュボード",
-  "/automation": "発送エントリー",
-  "/reviews": "レビュー管理",
-  "/products": "商品管理",
-};
+// ページ名はナビの選択状態で分かるため、ここには出さない（2026-10-24 見出しの整理）。
+// 右上に「稼働中のジョブ」と「現在時刻・日付」だけを置く。
 
-function resolvePageTitle(pathname: string): string {
-  const match = Object.keys(PAGE_TITLES).find(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
-  );
-  return match ? PAGE_TITLES[match] : "";
-}
-
-function useCurrentTime(): string {
+function useJstNow(): { time: string; date: string } {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
+    const timer = setInterval(() => setNow(new Date()), 15_000);
     return () => clearInterval(timer);
   }, []);
 
-  return now.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return {
+    time: new Intl.DateTimeFormat("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Tokyo",
+    }).format(now),
+    date: new Intl.DateTimeFormat("ja-JP", {
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+      timeZone: "Asia/Tokyo",
+    }).format(now),
+  };
 }
 
 export function TopBar() {
-  const pathname = usePathname();
-  const title = resolvePageTitle(pathname);
   const runningJobCount = useRunningJobCount();
-  const time = useCurrentTime();
+  const { time, date } = useJstNow();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-topbar-border bg-topbar px-4 backdrop-blur-xl sm:px-6">
-      <div className="flex items-center gap-3">
-        <div className="flex size-8 items-center justify-center rounded-lg border border-primary-border bg-primary-subtle text-primary md:hidden"><span className="text-xs font-bold">L</span></div>
-        <div><p className="text-[0.62rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">Operations</p><h1 className="text-sm font-semibold tracking-tight">{title}</h1></div>
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex size-9 items-center justify-center rounded-xl bg-[linear-gradient(150deg,oklch(0.64_0.12_24),oklch(0.5_0.11_18))] text-white md:hidden">
+        <span className="text-xs font-bold">L</span>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="glass ml-auto flex h-10 items-center gap-3 rounded-full px-4">
         {runningJobCount > 0 && (
-          <div
-            className="flex items-center gap-2 rounded-full border border-primary-border bg-primary-subtle px-3 py-1"
+          <span
+            className="flex items-center gap-2 border-r border-border-subtle pr-3"
             aria-label={`稼働中のジョブが${runningJobCount}件あります`}
           >
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
             </span>
-            <span className="font-mono text-xs tabular-nums text-primary">
-              稼働中 {runningJobCount}件
-            </span>
-          </div>
+            <span className="text-xs font-medium tabular-nums text-primary">稼働中 {runningJobCount}件</span>
+          </span>
         )}
-
-        <span
-          className="font-mono text-xs tabular-nums text-muted-foreground"
-          suppressHydrationWarning
-        >
-          <span className="hidden sm:inline">JST&nbsp;&nbsp;</span>{time}
+        <span className="text-xs tabular-nums text-text-secondary" suppressHydrationWarning>
+          {date}
+        </span>
+        <span className="text-sm font-semibold tabular-nums" suppressHydrationWarning>
+          {time}
         </span>
       </div>
     </header>

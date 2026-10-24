@@ -55,13 +55,10 @@ export function ShippingActionPanel({
   const n = targetCount;
 
   return (
-    <section className="flex flex-col gap-2.5 rounded-xl border border-primary-border bg-surface p-4">
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold tracking-[0.14em] text-primary">
-          {copy.kicker}
-        </span>
-        <span className="h-px flex-1 bg-border-subtle" aria-hidden />
-      </div>
+    <section className="glass glass-tint-primary flex flex-col gap-2.5 rounded-2xl p-5">
+      <span className="w-fit rounded-full bg-primary-subtle px-2.5 py-0.5 text-[0.68rem] font-semibold text-primary">
+        {copy.kicker}
+      </span>
       <h3 className="text-[15px] font-semibold tracking-tight">{copy.title}</h3>
       <p className="text-[12.5px] text-text-secondary">{copy.desc}</p>
 

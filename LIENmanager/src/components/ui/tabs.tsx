@@ -19,7 +19,7 @@ function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "inline-flex w-fit items-center gap-1 rounded-xl border border-border-subtle bg-surface p-1",
+        "glass inline-flex w-fit items-center gap-1 rounded-2xl p-1",
         className
       )}
       {...props}
@@ -32,8 +32,8 @@ function TabsTab({ className, ...props }: TabsPrimitive.Tab.Props) {
     <TabsPrimitive.Tab
       data-slot="tabs-tab"
       className={cn(
-        "rounded-lg px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors",
-        "data-[selected]:bg-surface-elevated data-[selected]:text-foreground data-[selected]:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        "min-h-9 cursor-pointer rounded-xl px-4 py-1.5 text-sm font-medium text-muted-foreground transition-[background-color,color,box-shadow] duration-300 ease-out",
+        "data-active:bg-white data-active:text-foreground data-active:shadow-[inset_0_1px_0_oklch(1_0_0),0_4px_14px_-6px_oklch(0.235_0.018_262/28%)]",
         "hover:text-foreground",
         className
       )}
